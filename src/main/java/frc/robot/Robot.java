@@ -9,6 +9,7 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
@@ -22,19 +23,22 @@ import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
  */
 public class Robot extends TimedRobot {
 
-  double forward;
-  double turn;
+  private double forward;
+  private double turn;
 
-  double leftOut;
-  double rightOut;
+  private double leftOut;
+  private double rightOut;
 
-  static double lastTime;
+  private double lastTime;
 
-  boolean zero = true;
+  private boolean zero = true;
 
-  boolean liftSwitch = true;
-  public boolean intakeRollSwitch = false;
-  public double elevatorSwitch = 0;
+  private boolean liftSwitch = true;
+  private boolean intakeRollSwitch = false;
+  private double elevatorSwitch = 0;
+
+  private Joystick stick = new Joystick(0);
+  private Joystick jStick = new Joystick(1);
 
   TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1.75, 0.75);
 
@@ -59,31 +63,11 @@ public class Robot extends TimedRobot {
     Constants.time.start();
   }
 
-  public void input() {
-    forward = -Constants.stick.getRawAxis(3) + Constants.stick.getRawAxis(2); // this gets how far forward the forward
-                                                                              // stick is
-    turn = Constants.stick.getRawAxis(4); // this gets out left or right the turn stick is
-
-    rightOut = forward - turn; // This sets the turn distance for arcade drive
-    leftOut = forward + turn;
-
-    if (Constants.jStick.getRawButtonReleased(1)) {
-      intakeRollSwitch = !intakeRollSwitch;
-    }
-
-  }
-
   @Override
   public void teleopPeriodic() {
     input();
 
-    Constants.rightMaster.set(ControlMode.PercentOutput, rightOut);
-    Constants.leftMaster.set(ControlMode.PercentOutput, leftOut);
-
-    Constants.rightSlave.follow(Constants.rightMaster);
-    Constants.leftSlave.follow(Constants.leftMaster);
-
-    if (Constants.stick.getRawButtonReleased(1)) {
+    if (stick.getRawButtonReleased(1)) {
       if (liftSwitch) {
         m_controller.setGoal(90);
         liftSwitch = !liftSwitch;
@@ -109,6 +93,24 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+  }
+
+  public void input() {
+    forward = -stick.getRawAxis(3) + stick.getRawAxis(2); // this gets how far forward the forward
+                                                          // stick is
+    turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
+
+    rightOut = forward - turn; // This sets the turn distance for arcade drive
+    leftOut = forward + turn;
+
+    if (jStick.getRawButtonReleased(1)) {
+      intakeRollSwitch = !intakeRollSwitch;
+    }
+
+    if (jStick.getRawButton(2)) {
+      Limelight.getInstance().update();
+    }
+
   }
 
   public void update() {
