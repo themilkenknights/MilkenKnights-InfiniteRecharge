@@ -12,14 +12,14 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 /**
  * Add your docs here.
  */
-public class FalonFX extends TalonFX {
+public class MkTalonFx extends TalonFX {
     public double distancePerPulse = 0.0;
     public boolean reversed = false;
-    public TalonFX jimmy;
+    public TalonFX m_talon;
 
-    public FalonFX(int deviceNumber) {
+    public MkTalonFx(int deviceNumber) {
         super(deviceNumber);
-        jimmy = new TalonFX(deviceNumber);
+        m_talon = new TalonFX(deviceNumber);
     }
 
     public void reverse(boolean a) {
@@ -31,14 +31,14 @@ public class FalonFX extends TalonFX {
     }
 
     public void reset() {
-        jimmy.setSelectedSensorPosition(0);
+        m_talon.setSelectedSensorPosition(0);
     }
 
     public double getDistance() {
         if (reversed) {
-            return -(distancePerPulse * jimmy.getSelectedSensorPosition());
+            return -(distancePerPulse * m_talon.getSelectedSensorPosition());
         } else {
-            return (distancePerPulse * jimmy.getSelectedSensorPosition());
+            return (distancePerPulse * m_talon.getSelectedSensorPosition());
         }
     }
 

@@ -29,10 +29,10 @@ public class Constants {
     static Timer time = new Timer();
 
     static MkNavX navX = new MkNavX();
-    static FalonFX rightMaster = new FalonFX(0);
-    static FalonFX leftMaster = new FalonFX(1);
-    static FalonFX rightSlave = new FalonFX(2);
-    static FalonFX leftSlave = new FalonFX(3);
+    static MkTalonFx rightMaster = new MkTalonFx(0);
+    static MkTalonFx leftMaster = new MkTalonFx(1);
+    static MkTalonFx rightSlave = new MkTalonFx(2);
+    static MkTalonFx leftSlave = new MkTalonFx(3);
 
     static TalonSRX lifter = new TalonSRX(9);
     static TalonSRX intakeRoller = new TalonSRX(18);
