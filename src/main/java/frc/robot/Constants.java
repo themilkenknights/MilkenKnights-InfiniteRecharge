@@ -7,10 +7,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
-import edu.wpi.first.wpilibj.Timer;
-
 /**
  * Add your docs here.
  */
@@ -22,12 +18,7 @@ public final class Constants {
     public static double kPElevator = 0;
     public static double kDElevator = 0;
 
-    static Timer time = new Timer();
-
     static MkNavX navX = new MkNavX();
-
-    static TalonSRX lifter = new TalonSRX(9);
-    static TalonSRX intakeRoller = new TalonSRX(18);
 
     public static class Drive {
         public static final int rightMasterId = 0;

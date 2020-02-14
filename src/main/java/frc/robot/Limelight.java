@@ -1,3 +1,5 @@
+package frc.robot;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -20,8 +22,6 @@ public class Limelight {
     private final double angle_tol = 0.5;
     private final double max_anglular_vel = 15; // Deg/Sec
     private final double max_anglular_accel = 10; // Deg/Sec^2
-
-    private final Drive m_drive;
 
     private final ProfiledPIDController m_controller = new ProfiledPIDController(kP_turn, 0.0, kD_turn,
             new TrapezoidProfile.Constraints(max_anglular_vel, max_anglular_accel));

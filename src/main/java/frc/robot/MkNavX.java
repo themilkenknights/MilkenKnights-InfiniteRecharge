@@ -9,10 +9,13 @@ package frc.robot;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public class MkNavX extends AHRS {
-    public AHRS navX = new AHRS();
-    public double oldPos = 0;
-    public double yawVelocity = 0;
+    private AHRS navX = new AHRS();
+    private double oldPos = 0;
+    private double yawVelocity = 0;
+    private double lastTime = 0;
 
     public MkNavX() {
         super();
@@ -24,7 +27,7 @@ public class MkNavX extends AHRS {
 
     public double getYawVelocity() {
         if (navX.getYaw() - oldPos != 0) {
-            yawVelocity = (navX.getYaw() - oldPos) / (Constants.time.get() - Robot.lastTime);
+            yawVelocity = (navX.getYaw() - oldPos) / (Timer.getFPGATimestamp() - lastTime);
         } else {
             return 0;
         }
