@@ -8,8 +8,8 @@ public class Lifter {
     private final double kPLift = 0.025;
     private final double kDLift = kPLift * 10;
 
-    private final double maxAnglularVel = 15; // Deg/Sec
-    private final double maxAnglularAccel = 10;
+    private final double maxAnglularVel = 30; // Deg/100ms
+    private final double maxAnglularAccel = 200;
     private TalonSRX mLifter = new TalonSRX(4);
 
     private Lifter() {
@@ -31,6 +31,10 @@ public class Lifter {
 
     public void setLifterState(LifterState state) {
         mLifter.set(ControlMode.MotionMagic, degreesToNativeUnits(state.angle));
+    }
+
+    public void resetEncoder() {
+        mLifter.setSelectedSensorPosition(0);
     }
 
     public double getArmPosition() { // Returns Degrees
