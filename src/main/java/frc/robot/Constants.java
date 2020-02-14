@@ -28,7 +28,7 @@ public class Constants {
 
     static Timer time = new Timer();
 
-    static MKnavX navX = new MKnavX();
+    static MkNavX navX = new MkNavX();
     static FalonFX rightMaster = new FalonFX(0);
     static FalonFX leftMaster = new FalonFX(1);
     static FalonFX rightSlave = new FalonFX(2);
