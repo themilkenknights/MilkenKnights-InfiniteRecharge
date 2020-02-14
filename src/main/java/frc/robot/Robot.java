@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    Constants.rightMaster.setInverted(true);
+
   }
 
   @Override
@@ -96,21 +96,20 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    forward = -stick.getRawAxis(3) + stick.getRawAxis(2); // this gets how far forward the forward
-                                                          // stick is
-    turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
-
-    rightOut = forward - turn; // This sets the turn distance for arcade drive
-    leftOut = forward + turn;
-
     if (jStick.getRawButtonReleased(1)) {
       intakeRollSwitch = !intakeRollSwitch;
     }
 
     if (jStick.getRawButton(2)) {
       Limelight.getInstance().update();
-    }
+    } else {
+      forward = -stick.getRawAxis(3) + stick.getRawAxis(2); // this gets how far forward the forward stick is
+      turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
 
+      rightOut = forward - turn; // This sets the turn distance for arcade drive
+      leftOut = forward + turn;
+      Drive.getInstance().setPercentOutput(leftOut, rightOut);
+    }
   }
 
   public void update() {
