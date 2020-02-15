@@ -1,57 +1,86 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.kauailabs.navx.frc.AHRS;
+import frc.robot.Constants.DRIVE;
+import frc.robot.Constants.CAN;
 
 public class Drive {
+  private TalonFX leftMaster = new TalonFX(CAN.driveLeftMasterId);
+  private TalonFX leftSlave = new TalonFX(CAN.driveLeftSlaveId);
+  private TalonFX rightMaster = new TalonFX(CAN.driveRightMasterId);
+  private TalonFX rightSlave = new TalonFX(CAN.driveRightSlaveId);
+  private AHRS navX = new AHRS();
 
-    private TalonFX rightMaster = new TalonFX(Constants.Drive.rightMasterId);
-    private TalonFX leftMaster = new TalonFX(Constants.Drive.leftMasterId);
-    private TalonFX rightSlave = new TalonFX(Constants.Drive.rightSlaveId);
-    private TalonFX leftSlave = new TalonFX(Constants.Drive.leftSlaveId);
+  private Drive() {
+    leftMaster.configFactoryDefault();
+    leftSlave.configFactoryDefault();
+    rightMaster.configFactoryDefault();
+    rightSlave.configFactoryDefault();
 
-    private Drive() {
-        rightMaster.configFactoryDefault();
-        leftMaster.configFactoryDefault();
-        rightSlave.configFactoryDefault();
-        leftSlave.configFactoryDefault();
+    leftMaster.setInverted(DRIVE.leftMasterInverted);
+    leftSlave.setInverted(DRIVE.leftSlaveInverted);
+    rightMaster.setInverted(DRIVE.rightMasterInverted);
+    rightSlave.setInverted(DRIVE.rightSlaveInverted);
 
-        rightMaster.setInverted(true);
-        leftMaster.setInverted(false);
-        rightSlave.setInverted(true);
-        leftSlave.setInverted(false);
+    leftMaster.setSensorPhase(DRIVE.leftSensorInverted);
+    rightMaster.setSensorPhase(DRIVE.rightSensorInverted);
 
-        rightMaster.setSensorPhase(false);
-        leftMaster.setSensorPhase(false);
+    leftSlave.follow(leftMaster);
+    rightSlave.follow(rightMaster);
 
-        leftSlave.follow(leftMaster);
-        rightSlave.follow(rightMaster);
+    leftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
-        rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-        leftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    leftMaster.setNeutralMode(NeutralMode.Brake);
+    rightMaster.setNeutralMode(NeutralMode.Brake);
+  }
+
+  public void setOutput(DriveSignal signal) {
+    leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
+    rightMaster.set(ControlMode.PercentOutput, signal.getRight());
+  }
+
+  public double getAverageDistance() {
+    return nativeUnitsToInches((rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
+  }
+
+  private double nativeUnitsToInches(double nativeUnits) {
+    return (nativeUnits / 4096.0) * DRIVE.wheelCircumference;
+  }
+
+  public static Drive getInstance() {
+    return InstanceHolder.mInstance;
+  }
+
+  private static class InstanceHolder {
+    private static final Drive mInstance = new Drive();
+  }
+
+  public static class DriveSignal {
+    public static DriveSignal STOP = new DriveSignal(0, 0);
+    protected double mLeftMotor;
+    protected double mRightMotor;
+
+    public DriveSignal(double left, double right) {
+      mLeftMotor = left;
+      mRightMotor = right;
     }
 
-    public void setPercentOutput(double left, double right) {
-        leftMaster.set(ControlMode.PercentOutput, left);
-        rightMaster.set(ControlMode.PercentOutput, right);
+    public double getLeft() {
+      return mLeftMotor;
     }
 
-    public double getDistance() {
-        return nativeUnitsToInches(
-                (rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
+    public double getRight() {
+      return mRightMotor;
     }
 
-    private double nativeUnitsToInches(double nativeUnits) {
-        return (nativeUnits / 4096.0) * Constants.Drive.pi * Constants.Drive.wheelDiameterInches;
+    @Override
+    public String toString() {
+      return "L: " + mLeftMotor + " R: " + mRightMotor;
     }
-
-    public static Drive getInstance() {
-        return InstanceHolder.mInstance;
-    }
-
-    private static class InstanceHolder {
-        private static final Drive mInstance = new Drive();
-    }
-
+  }
 }

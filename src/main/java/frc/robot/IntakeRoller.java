@@ -5,22 +5,22 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 public class IntakeRoller {
 
-    TalonSRX mTalon = new TalonSRX(9);
+  TalonSRX mTalon = new TalonSRX(Constants.CAN.intakeRollerTalonId);
 
-    private IntakeRoller() {
-        mTalon.configFactoryDefault();
-        mTalon.setInverted(false);
-    }
+  private IntakeRoller() {
+    mTalon.configFactoryDefault();
+    mTalon.setInverted(false);
+  }
 
-    public void setIntakeRoller(double percentOut) {
-        mTalon.set(ControlMode.PercentOutput, percentOut);
-    }
+  public void setIntakeRoller(double percentOut) {
+    mTalon.set(ControlMode.PercentOutput, percentOut);
+  }
 
-    public static IntakeRoller getInstance() {
-        return InstanceHolder.mInstance;
-    }
+  public static IntakeRoller getInstance() {
+    return InstanceHolder.mInstance;
+  }
 
-    private static class InstanceHolder {
-        private static final IntakeRoller mInstance = new IntakeRoller();
-    }
+  private static class InstanceHolder {
+    private static final IntakeRoller mInstance = new IntakeRoller();
+  }
 }
