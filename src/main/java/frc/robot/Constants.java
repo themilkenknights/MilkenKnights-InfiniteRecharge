@@ -16,12 +16,20 @@ public final class Constants {
   public static final double PI = 3.14159265359;
 
   public static class CAN {
-    public static final int driveLeftMasterId = 1;
-    public static final int driveLeftSlaveId = 2;
-    public static final int driveRightMasterId = 3;
-    public static final int driveRightSlaveId = 4;
-    public static final int lifterTalonId = 5;
-    public static final int intakeRollerTalonId = 5;
+    public static final int driveLeftMasterId = 8;
+    public static final int driveLeftSlaveId = 7;
+    public static final int driveRightMasterId = 6;
+    public static final int driveRightSlaveId = 5;
+    public static final int lifterTalonId = 3;
+    public static final int intakeRollerTalonId = 1;
+    public static final int RightShootId = 9;
+    public static final int LeftShooterId = 12;
+    public static final int ElevatorId = 4;
+
+    public static final boolean LeftShooterInvered = false;
+    public static final boolean RightShooterInvered = true;
+    public static final boolean elevatorInverted = false;
+    
   }
 
   public static class DRIVE {

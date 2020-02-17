@@ -69,5 +69,20 @@ public class Robot extends TimedRobot {
       leftOut = forward + turn;
       Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
     }
+    //Run Shooter
+    if(jStick.getRawButton(1))
+      Shooter.getInstance().setShooterOutput(.6);
+    else
+      Shooter.getInstance().setShooterOutput(0.00);
+    
+    //Run Elevator
+    if(jStick.getRawButton(6)){
+      Elevator.getInstance().setElevatorOutput(0.75);
+    }
+    else if(jStick.getRawButton(4)){
+      Elevator.getInstance().setElevatorOutput(-0.75);
+    }
+    else
+      Elevator.getInstance().setElevatorOutput(0.00);
   }
 }
