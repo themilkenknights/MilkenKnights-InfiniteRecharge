@@ -22,6 +22,7 @@ public class Limelight {
   private final double angle_tol = 0.5;
   private final double max_anglular_vel = 15; // Deg/Sec
   private final double max_anglular_accel = 10; // Deg/Sec^2
+  private final double kF_turn = 1 / max_anglular_vel;
 
   private final ProfiledPIDController m_controller = new ProfiledPIDController(kP_turn, 0.0, kD_turn,
       new TrapezoidProfile.Constraints(max_anglular_vel, max_anglular_accel));
@@ -42,8 +43,9 @@ public class Limelight {
 
     // Have a deadband where we are close enough
     if (Math.abs(horizantal_angle) > angle_tol) {
-      // Get PID controller output
-      turn_output += m_controller.calculate(horizantal_angle);
+      // Get PID controller output with goal of 0 deg and 0 deg/sec
+      turn_output += m_controller.calculate(horizantal_angle, new TrapezoidProfile.State(0, 0))
+          + m_controller.getSetpoint().velocity * kF_turn;
     }
 
     // Have a deadband where we are close enough

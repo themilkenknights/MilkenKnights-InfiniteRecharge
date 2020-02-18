@@ -37,6 +37,20 @@ public class Drive {
 
     leftMaster.setNeutralMode(NeutralMode.Brake);
     rightMaster.setNeutralMode(NeutralMode.Brake);
+
+    // Not entirely sure if voltage compensation for the slave talons is redundant
+    // but doing it to be safe
+    leftMaster.configVoltageCompSaturation(12.0);
+    leftMaster.enableVoltageCompensation(true);
+
+    leftSlave.configVoltageCompSaturation(12.0);
+    leftSlave.enableVoltageCompensation(true);
+
+    rightMaster.configVoltageCompSaturation(12.0);
+    rightMaster.enableVoltageCompensation(true);
+
+    rightSlave.configVoltageCompSaturation(12.0);
+    rightSlave.enableVoltageCompensation(true);
   }
 
   public void setOutput(DriveSignal signal) {
@@ -45,7 +59,8 @@ public class Drive {
   }
 
   public double getAverageDistance() {
-    return nativeUnitsToInches((rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
+    return nativeUnitsToInches(
+        (rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
   }
 
   private double nativeUnitsToInches(double nativeUnits) {
