@@ -9,7 +9,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import frc.robot.Climber.ClimbState;
 import frc.robot.Lifter.LifterState;
 
 public class Robot extends TimedRobot {
@@ -40,23 +39,14 @@ public class Robot extends TimedRobot {
 
     if (jStick.getRawButtonPressed(5)) {
       Lifter.getInstance().setLifterState(LifterState.POS1);
-    }
-    else if (jStick.getRawButtonPressed(6)) {
+    } else if (jStick.getRawButtonPressed(6)) {
       Lifter.getInstance().setLifterState(LifterState.POS2);
     }
 
     if (jStick.getRawButton(19)) {
       IntakeRoller.getInstance().setIntakeRoller(0.3);
-    }
-    else {
+    } else {
       IntakeRoller.getInstance().setIntakeRoller(0.0);
-    }
-
-    if (jStick.getRawButton(18) && Climber.getInstance().getClimbState() == ClimbState.RETRACTED) {
-      Climber.getInstance().setClimbState(ClimbState.LOWERED);
-    }
-    else if (jStick.getRawButton(18) && Climber.getInstance().getClimbState() == ClimbState.LOWERED) {
-      Climber.getInstance().setClimbState(ClimbState.RETRACTED);
     }
   }
 
@@ -71,8 +61,7 @@ public class Robot extends TimedRobot {
   public void input() {
     if (jStick.getRawButton(2)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
-    }
-    else {
+    } else {
       double forward, turn, rightOut, leftOut;
       forward = Math.pow(-stick.getRawAxis(3) + stick.getRawAxis(2), 3); // this gets how far forward the forward stick is
       turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
@@ -80,17 +69,17 @@ public class Robot extends TimedRobot {
       leftOut = forward + turn;
       Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
     }
-    // Run Shooter
-    if (jStick.getRawButton(1))
+    //Run Shooter
+    if(jStick.getRawButton(1))
       Shooter.getInstance().setShooterOutput(.6);
     else
       Shooter.getInstance().setShooterOutput(0.00);
-
-    // Run Elevator
-    if (jStick.getRawButton(6)) {
+    
+    //Run Elevator
+    if(jStick.getRawButton(6)){
       Elevator.getInstance().setElevatorOutput(0.75);
     }
-    else if (jStick.getRawButton(4)) {
+    else if(jStick.getRawButton(4)){
       Elevator.getInstance().setElevatorOutput(-0.75);
     }
     else
