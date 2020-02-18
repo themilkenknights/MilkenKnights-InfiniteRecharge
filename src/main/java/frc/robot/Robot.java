@@ -52,10 +52,10 @@ public class Robot extends TimedRobot {
       IntakeRoller.getInstance().setIntakeRoller(0.0);
     }
 
-    if (jStick.getRawButton(18) && Climber.getInstance().getClimbState() == ClimbState.RETRACTED) {
+    if (jStick.getRawButton(18) && !Climber.getInstance().climbSolenoid.get()) {
       Climber.getInstance().setClimbState(ClimbState.LOWERED);
     }
-    else if (jStick.getRawButton(18) && Climber.getInstance().getClimbState() == ClimbState.LOWERED) {
+    else if (jStick.getRawButton(18) && Climber.getInstance().climbSolenoid.get()) {
       Climber.getInstance().setClimbState(ClimbState.RETRACTED);
     }
   }

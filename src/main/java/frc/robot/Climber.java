@@ -31,9 +31,6 @@ public class Climber {
         climbSolenoid.set(state.state);
     }
 
-    public ClimbState getClimbState() {
-        return climbState;
-    }
 
     public static Climber getInstance() {
         return InstanceHolder.mInstance;
