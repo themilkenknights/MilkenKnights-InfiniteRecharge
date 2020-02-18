@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import frc.robot.Climber.ClimbState;
 import frc.robot.Lifter.LifterState;
 
 public class Robot extends TimedRobot {
