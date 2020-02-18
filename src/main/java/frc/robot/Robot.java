@@ -63,7 +63,7 @@ public class Robot extends TimedRobot {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
     } else {
       double forward, turn, rightOut, leftOut;
-      forward = Math.pow(-stick.getRawAxis(3) + stick.getRawAxis(2), 3); // this gets how far forward the forward stick is
+      forward = -stick.getRawAxis(3) + stick.getRawAxis(2); // this gets how far forward the forward stick is
       turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
       rightOut = forward - turn; // This sets the turn distance for arcade drive
       leftOut = forward + turn;
@@ -84,8 +84,5 @@ public class Robot extends TimedRobot {
     }
     else
       Elevator.getInstance().setElevatorOutput(0.00);
-
-    if(jStick.getRawButtonPressed(7))
-      Climber.getInstance().toggleClimb();
   }
 }
