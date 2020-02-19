@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import frc.robot.Climber.ClimbState;
 import frc.robot.Lifter.LifterState;
 
 public class Robot extends TimedRobot {
@@ -48,6 +49,14 @@ public class Robot extends TimedRobot {
     } else {
       IntakeRoller.getInstance().setIntakeRoller(0.0);
     }
+
+    if (jStick.getRawButton(18) && !(Climber.getInstance().climbSolenoid.get())) {
+      Climber.getInstance().setClimbState(ClimbState.LOWERED);
+    }
+    else if (jStick.getRawButton(18) && Climber.getInstance().climbSolenoid.get()) {
+      Climber.getInstance().setClimbState(ClimbState.RETRACTED);
+    }
+
   }
 
   @Override
@@ -85,7 +94,5 @@ public class Robot extends TimedRobot {
     else
       Elevator.getInstance().setElevatorOutput(0.00);
 
-    if(jStick.getRawButtonPressed(7))
-      Climber.getInstance().toggleClimb();
   }
 }
