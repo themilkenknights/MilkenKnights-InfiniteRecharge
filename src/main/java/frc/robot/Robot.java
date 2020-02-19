@@ -60,7 +60,7 @@ public class Robot extends TimedRobot {
     }
     //Run Shooter
     if(jStick.getRawButton(1))
-      Shooter.getInstance().setShooterOutput(1);
+      Shooter.getInstance().setShooterOutput(1.0);
     else
       Shooter.getInstance().setShooterOutput(0.00);
     
