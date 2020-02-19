@@ -7,8 +7,6 @@
 
 package frc.robot;
 
-import com.kauailabs.navx.frc.AHRS;
-
 /**
  * Add your docs here.
  */

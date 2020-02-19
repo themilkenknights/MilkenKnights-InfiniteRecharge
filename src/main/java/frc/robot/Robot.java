@@ -37,26 +37,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     input();
-
-    if (jStick.getRawButtonPressed(5)) {
-      Lifter.getInstance().setLifterState(LifterState.POS1);
-    } else if (jStick.getRawButtonPressed(6)) {
-      Lifter.getInstance().setLifterState(LifterState.POS2);
-    }
-
-    if (jStick.getRawButton(19)) {
-      IntakeRoller.getInstance().setIntakeRoller(0.3);
-    } else {
-      IntakeRoller.getInstance().setIntakeRoller(0.0);
-    }
-
-    if (jStick.getRawButton(18) && !(Climber.getInstance().climbSolenoid.get())) {
-      Climber.getInstance().setClimbState(ClimbState.LOWERED);
-    }
-    else if (jStick.getRawButton(18) && Climber.getInstance().climbSolenoid.get()) {
-      Climber.getInstance().setClimbState(ClimbState.RETRACTED);
-    }
-
   }
 
   @Override
@@ -84,7 +64,7 @@ public class Robot extends TimedRobot {
     else
       Shooter.getInstance().setShooterOutput(0.00);
     
-    //Run Elevator
+    //Run Elevator Up and Down
     if(jStick.getRawButton(6)){
       Elevator.getInstance().setElevatorOutput(0.75);
     }
@@ -94,5 +74,24 @@ public class Robot extends TimedRobot {
     else
       Elevator.getInstance().setElevatorOutput(0.00);
 
+    //Set Intake Position
+      if (jStick.getRawButtonPressed(5)) {
+        Lifter.getInstance().setLifterState(LifterState.POS1);
+      } else if (jStick.getRawButtonPressed(6)) {
+        Lifter.getInstance().setLifterState(LifterState.POS2);
+      }
+  //Run Intake Motor
+      if (jStick.getRawButton(7)) {
+        IntakeRoller.getInstance().setIntakeRoller(0.3);
+      } else {
+        IntakeRoller.getInstance().setIntakeRoller(0.0);
+      }
+  //Climb Toggle
+      if (jStick.getRawButton(18) && !(Climber.getInstance().climbSolenoid.get())) {
+        Climber.getInstance().setClimbState(ClimbState.LOWERED);
+      }
+      else if (jStick.getRawButton(18) && Climber.getInstance().climbSolenoid.get()) {
+        Climber.getInstance().setClimbState(ClimbState.RETRACTED);
+      }
   }
 }
