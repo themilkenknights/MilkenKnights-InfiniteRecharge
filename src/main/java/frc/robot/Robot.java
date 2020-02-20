@@ -83,11 +83,11 @@ private Compressor mCompressor = new Compressor(0);
     }
     //Run Shooter
     if(jStick.getRawButton(1))
-      Shooter.getInstance().setShooterOutput(.6);
+      Shooter.getInstance().setShooterOutput(1.0);
     else
       Shooter.getInstance().setShooterOutput(0.00);
     
-    //Run Elevator
+    //Run Elevator Up and Down
     if(jStick.getRawButton(6)){
       Elevator.getInstance().setElevatorOutput(0.75);
     }
@@ -97,5 +97,24 @@ private Compressor mCompressor = new Compressor(0);
     else
       Elevator.getInstance().setElevatorOutput(0.00);
 
+    //Set Intake Position
+      if (jStick.getRawButtonPressed(5)) {
+        Lifter.getInstance().setLifterState(LifterState.POS1);
+      } else if (jStick.getRawButtonPressed(6)) {
+        Lifter.getInstance().setLifterState(LifterState.POS2);
+      }
+  //Run Intake Motor
+      if (jStick.getRawButton(7)) {
+        IntakeRoller.getInstance().setIntakeRoller(0.3);
+      } else {
+        IntakeRoller.getInstance().setIntakeRoller(0.0);
+      }
+  //Climb Toggle
+      if (jStick.getRawButton(18) && !(Climber.getInstance().climbSolenoid.get())) {
+        Climber.getInstance().setClimbState(ClimbState.LOWERED);
+      }
+      else if (jStick.getRawButton(18) && Climber.getInstance().climbSolenoid.get()) {
+        Climber.getInstance().setClimbState(ClimbState.RETRACTED);
+      }
   }
 }
