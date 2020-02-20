@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.Climber.ClimbState;
@@ -16,9 +17,11 @@ public class Robot extends TimedRobot {
 
   private Joystick stick = new Joystick(0);
   private Joystick jStick = new Joystick(1);
+private Compressor mCompressor = new Compressor(0);
 
   @Override
   public void robotInit() {
+    mCompressor.start();
   }
 
   @Override
@@ -44,16 +47,16 @@ public class Robot extends TimedRobot {
       Lifter.getInstance().setLifterState(LifterState.POS2);
     }
 
-    if (jStick.getRawButton(19)) {
-      IntakeRoller.getInstance().setIntakeRoller(0.3);
+    if (jStick.getRawButton(3)) {
+      IntakeRoller.getInstance().setIntakeRoller(1);
     } else {
       IntakeRoller.getInstance().setIntakeRoller(0.0);
     }
 
-    if (jStick.getRawButton(18) && !(Climber.getInstance().climbSolenoid.get())) {
+    if (jStick.getRawButtonPressed(7) && !(Climber.getInstance().climbSolenoid.get())) {
       Climber.getInstance().setClimbState(ClimbState.LOWERED);
     }
-    else if (jStick.getRawButton(18) && Climber.getInstance().climbSolenoid.get()) {
+    else if (jStick.getRawButtonPressed(7) && Climber.getInstance().climbSolenoid.get()) {
       Climber.getInstance().setClimbState(ClimbState.RETRACTED);
     }
 

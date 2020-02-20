@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.Solenoid;
  * Add your docs here.
  */
 public class Climber {
-    public Solenoid climbSolenoid = new Solenoid(Constants.CAN.PCMId, Constants.CAN.ClimbSolenoidId);
+    public Solenoid climbSolenoid = new Solenoid(0);
     private ClimbState climbState = ClimbState.RETRACTED;
 
     public enum ClimbState {
