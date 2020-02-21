@@ -84,13 +84,13 @@ Climber.ToggleClimb();
     
     //Run Elevator Up and Down
     if(jStick.getRawButton(6)){
-      Elevator.getInstance().setElevatorOutput(0.75);
+      Elevator.getInstance().setElevatorOutput(0.75, .25);
     }
     else if(jStick.getRawButton(4)){
-      Elevator.getInstance().setElevatorOutput(-0.75);
+      Elevator.getInstance().setElevatorOutput(-0.75, .25);
     }
     else
-      Elevator.getInstance().setElevatorOutput(0.00);
+      Elevator.getInstance().setElevatorOutput(0.00, 0.00);
 
     //Set Intake Position
       if (jStick.getRawButtonPressed(5)) {
