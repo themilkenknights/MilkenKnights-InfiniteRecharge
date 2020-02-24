@@ -16,7 +16,7 @@ public class Robot extends TimedRobot {
 
   private Joystick stick = new Joystick(0);
   private Joystick jStick = new Joystick(1);
-private Compressor mCompressor = new Compressor(0);
+  private Compressor mCompressor = new Compressor(0);
 
   @Override
   public void robotInit() {
@@ -53,7 +53,10 @@ private Compressor mCompressor = new Compressor(0);
     }
 
     if (jStick.getRawButtonPressed(12)) {
-Climber.ToggleClimb();
+      Climber.ToggleClimb();
+    }
+    if (jStick.getRawButtonPressed(10)) {
+      ElevatorStop.ToggleStopper();
     }
   }
 
@@ -70,39 +73,42 @@ Climber.ToggleClimb();
       Drive.getInstance().setOutput(Limelight.getInstance().update());
     } else {
       double forward, turn, rightOut, leftOut;
-      forward = Math.pow(-stick.getRawAxis(3) + stick.getRawAxis(2), 3); // this gets how far forward the forward stick is
+      forward = Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5); // this gets how far forward the forward stick
+                                                                        // is
       turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
       rightOut = forward - turn; // This sets the turn distance for arcade drive
       leftOut = forward + turn;
       Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
     }
-    //Run Shooter
-    if(jStick.getRawButton(1))
-      Shooter.getInstance().setShooterOutput(1.0);
+    // Run Shooter
+    if (jStick.getRawButton(1))
+      Shooter.getInstance().setShooterOutput(0.250);
     else
       Shooter.getInstance().setShooterOutput(0.00);
-    
-    //Run Elevator Up and Down
-    if(jStick.getRawButton(6)){
-      Elevator.getInstance().setElevatorOutput(0.75, .25);
-    }
-    else if(jStick.getRawButton(4)){
-      Elevator.getInstance().setElevatorOutput(-0.75, .25);
-    }
-    else
+
+    // Run Elevator Up and Down
+    if (jStick.getRawButton(6)) {
+      Elevator.getInstance().setElevatorOutput(0.75, .5);
+    } else if (jStick.getRawButton(4)) {
+      Elevator.getInstance().setElevatorOutput(-0.5, .5);
+    } else if (jStick.getRawButton(9)) {
+      Elevator.getInstance().setElevatorOutput(-0.75, .5);
+
+    } else
       Elevator.getInstance().setElevatorOutput(0.00, 0.00);
 
-    //Set Intake Position
-      if (jStick.getRawButtonPressed(5)) {
-        Lifter.getInstance().setLifterState(LifterState.POS1);
-      } else if (jStick.getRawButtonPressed(6)) {
-        Lifter.getInstance().setLifterState(LifterState.POS2);
-      }
-  //Run Intake Motor
-      if (jStick.getRawButton(7)) {
-        IntakeRoller.getInstance().setIntakeRoller(0.3);
-      } else {
-        IntakeRoller.getInstance().setIntakeRoller(0.0);
-      }
+    // Set Intake Position
+    if (jStick.getRawButtonPressed(5)) {
+      Lifter.getInstance().setLifterState(LifterState.POS1);
+    } else if (jStick.getRawButtonPressed(6)) {
+      Lifter.getInstance().setLifterState(LifterState.POS2);
+    }
+
+    // Run Intake Motor
+    if (jStick.getRawButton(7)) {
+      IntakeRoller.getInstance().setIntakeRoller(0.3);
+    } else {
+      IntakeRoller.getInstance().setIntakeRoller(0.0);
+    }
   }
 }
