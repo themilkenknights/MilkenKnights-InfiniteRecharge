@@ -13,7 +13,7 @@ public class Drive {
   private TalonFX leftSlave = new TalonFX(CAN.driveLeftSlaveId);
   private TalonFX rightMaster = new TalonFX(CAN.driveRightMasterId);
   private TalonFX rightSlave = new TalonFX(CAN.driveRightSlaveId);
-  private AHRS navX = new AHRS();
+  private static AHRS navX = new AHRS();
 
   private Drive() {
     leftMaster.configFactoryDefault();
@@ -45,7 +45,21 @@ public class Drive {
   }
 
   public double getAverageDistance() {
-    return nativeUnitsToInches((rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
+    return nativeUnitsToInches(
+        (rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
+  }
+  
+
+  public double AntiTip() {
+    double roll = navX.getPitch();
+
+    if(roll >= Math.abs(Constants.DRIVE.AngleThresholdDegrees))
+    {
+      double rollAngleRadians = Constants.DRIVE.AngleThresholdDegrees * (Math.PI / 180.0);
+      return Math.sin(rollAngleRadians) * -1;
+    }
+    else
+      return 0.0;
   }
 
   private double nativeUnitsToInches(double nativeUnits) {
