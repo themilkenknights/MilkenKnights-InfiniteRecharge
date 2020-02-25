@@ -15,6 +15,8 @@ public class Drive {
   private TalonFX rightSlave = new TalonFX(CAN.driveRightSlaveId);
   private static AHRS navX = new AHRS();
 
+private static double pitchOffset = 0;
+
   private Drive() {
     leftMaster.configFactoryDefault();
     leftSlave.configFactoryDefault();
@@ -37,11 +39,17 @@ public class Drive {
 
     leftMaster.setNeutralMode(NeutralMode.Brake);
     rightMaster.setNeutralMode(NeutralMode.Brake);
+
+pitchOffset = navX.getPitch();
   }
 
   public void setOutput(DriveSignal signal) {
-    leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
-    rightMaster.set(ControlMode.PercentOutput, signal.getRight());
+    //leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
+   // rightMaster.set(ControlMode.PercentOutput, signal.getRight());
+
+   System.out.println(signal.getLeft());
+   System.out.println(signal.getRight());
+
   }
 
   public double getAverageDistance() {
@@ -50,13 +58,16 @@ public class Drive {
   }
   
 
+  public double getPitch(){
+  return navX.getPitch() - pitchOffset;
+  }
   public double AntiTip() {
-    double roll = navX.getPitch();
+    double pitch = getPitch();
 
-    if(roll >= Math.abs(Constants.DRIVE.AngleThresholdDegrees))
+    if(Math.abs(pitch) >= Math.abs(Constants.DRIVE.AngleThresholdDegrees))
     {
-      double rollAngleRadians = Constants.DRIVE.AngleThresholdDegrees * (Math.PI / 180.0);
-      return Math.sin(rollAngleRadians) * -1;
+      double pitchAngleRadians = pitch * (Math.PI / 180.0);
+      return Math.sin(pitchAngleRadians) * -1 ; //* (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
     }
     else
       return 0.0;
