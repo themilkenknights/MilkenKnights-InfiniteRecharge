@@ -73,7 +73,7 @@ public class Robot extends TimedRobot {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
     } else {
       double forward, turn, rightOut, leftOut;
-      forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets how far forward the forward stick
+      forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5)+ Drive.getInstance().AntiTip()); // this gets how far forward the forward stick
                                                                         // is
       turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
       rightOut = forward - turn; // This sets the turn distance for arcade drive
