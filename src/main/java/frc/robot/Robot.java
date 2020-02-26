@@ -72,14 +72,14 @@ public class Robot extends TimedRobot {
 
     // Run Elevator Up and Down
     if (jStick.getRawButton(6)) {
-      Elevator.getInstance().setElevatorOutput(0.75);
+      Elevator.getInstance().setElevatorOutput(0.75, .5);
     } else if (jStick.getRawButton(4)) {
-      Elevator.getInstance().setElevatorOutput(-0.5);
+      Elevator.getInstance().setElevatorOutput(-0.5, -.3);
     } else if (jStick.getRawButton(9)) {
-      Elevator.getInstance().setElevatorOutput(-0.75);
+      Elevator.getInstance().setElevatorOutput(-0.75, -.5);
 
     } else
-      Elevator.getInstance().setElevatorOutput(0.00);
+      Elevator.getInstance().setElevatorOutput(0.00, 0.00);
 
 
     if (jStick.getRawButton(2)) {

@@ -23,7 +23,7 @@ public final class Constants {
     public static final int RightShootId = 9;
     public static final int LeftShooterId = 12;
     public static final int ElevatorId = 4;
-    public static final int Hopper = 11;
+    public static final int HopperId = 11;
 
 
 
