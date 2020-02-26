@@ -18,8 +18,8 @@ public final class Constants {
     public static final int driveLeftSlaveId = 7;
     public static final int driveRightMasterId = 6;
     public static final int driveRightSlaveId = 5;
-    public static final int lifterTalonId = 3;
-    public static final int intakeRollerTalonId = 1;
+    public static final int lifterTalonId = 2;
+    public static final int intakeRollerTalonId = 3;
     public static final int RightShootId = 9;
     public static final int LeftShooterId = 12;
     public static final int ElevatorId = 4;
@@ -45,7 +45,7 @@ public final class Constants {
     public static final boolean leftSensorInverted = false;
     public static final boolean rightSensorInverted = true;
 
-    public static final double AngleThresholdDegrees = 1.5;
+    public static final double AngleThresholdDegrees = 10;
     public static final double KAngle = 1;
   }
 

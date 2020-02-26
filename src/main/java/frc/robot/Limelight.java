@@ -4,6 +4,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 
 public class Limelight {
@@ -34,6 +35,9 @@ public class Limelight {
     // Get the horizantal and vertical angle we are offset by
     double horizantal_angle = tx.getDouble(0.0);
     double vertical_angle = ty.getDouble(0.0);
+
+    SmartDashboard.putNumber("Horizantal Angle", tx.getDouble(0.0));
+    SmartDashboard.putNumber("Vertical Angle", ty.getDouble(0.0));
 
     // Goal angle - current angle
     double distance_error = desired_vert_angle - vertical_angle;

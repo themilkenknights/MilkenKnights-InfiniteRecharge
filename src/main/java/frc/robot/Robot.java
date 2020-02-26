@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Lifter.LifterState;
 
 public class Robot extends TimedRobot {
@@ -39,7 +40,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     input();
+    Shuffle.getInstance().Update();
 
+    SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
   }
 
   @Override
@@ -51,20 +54,20 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (jStick.getRawButton(2)) {
+    if (jStick.getRawButton(7)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
     } else {
       double forward, turn, rightOut, leftOut;
       forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets how far forward the forward stick
                                                                         // is
-      turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
+      turn = stick.getRawAxis(0); // this gets out left or right the turn stick is
       rightOut = forward - turn; // This sets the turn distance for arcade drive
       leftOut = forward + turn;
       Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
     }
     // Run Shooter
     if (jStick.getRawButton(1))
-      Shooter.getInstance().setShooterOutput(0.250);
+      Shooter.getInstance().setShooterOutput(0.25);
     else
       Shooter.getInstance().setShooterOutput(0.00);
 
@@ -79,28 +82,8 @@ public class Robot extends TimedRobot {
     } else
       Elevator.getInstance().setElevatorOutput(0.00);
 
-    // Set Intake Position
-    if (jStick.getRawButtonPressed(5)) {
-      Lifter.getInstance().setLifterState(LifterState.POS1);
-    } else if (jStick.getRawButtonPressed(6)) {
-      Lifter.getInstance().setLifterState(LifterState.POS2);
-    }
 
-    // Run Intake Motor
-    if (jStick.getRawButton(7)) {
-      IntakeRoller.getInstance().setIntakeRoller(0.3);
-    } else {
-      IntakeRoller.getInstance().setIntakeRoller(0.0);
-    }
-
-    
-    if (jStick.getRawButtonPressed(5)) {
-      Lifter.getInstance().setLifterState(LifterState.POS1);
-    } else if (jStick.getRawButtonPressed(6)) {
-      Lifter.getInstance().setLifterState(LifterState.POS2);
-    }
-
-    if (jStick.getRawButton(3)) {
+    if (jStick.getRawButton(2)) {
       IntakeRoller.getInstance().setIntakeRoller(1);
     } else {
       IntakeRoller.getInstance().setIntakeRoller(0.0);

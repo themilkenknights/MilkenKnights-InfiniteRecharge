@@ -66,10 +66,15 @@ rollOffset = navX.getRoll();
   }
   public double AntiTip() {
     double roll = getRoll();
-    if(Math.abs(roll) >= Math.abs(Constants.DRIVE.AngleThresholdDegrees))
+    if(roll >= Constants.DRIVE.AngleThresholdDegrees)
     {
       double rollAngleRadians = roll * (Math.PI / 180.0);
       return Math.sin(rollAngleRadians) * -2 ; //* (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
+    }
+    else if(roll <= -Constants.DRIVE.AngleThresholdDegrees)
+    {
+      double rollAngleRadians = roll * (Math.PI / 180.0);
+      return Math.sin(rollAngleRadians) * -3 ; //* (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
     }
     else
       return 0.0;
