@@ -40,10 +40,14 @@ private static double rollOffset = 0;
     leftMaster.setNeutralMode(NeutralMode.Brake);
     rightMaster.setNeutralMode(NeutralMode.Brake);
 
+    leftSlave.setNeutralMode(NeutralMode.Brake);
+    rightSlave.setNeutralMode(NeutralMode.Brake);
+
 rollOffset = navX.getRoll();
   }
 
   public void setOutput(DriveSignal signal) {
+    System.out.println(signal.getRight());
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
 
@@ -62,11 +66,10 @@ rollOffset = navX.getRoll();
   }
   public double AntiTip() {
     double roll = getRoll();
-System.out.println(roll);
     if(Math.abs(roll) >= Math.abs(Constants.DRIVE.AngleThresholdDegrees))
     {
       double rollAngleRadians = roll * (Math.PI / 180.0);
-      return Math.sin(rollAngleRadians) * 1 ; //* (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
+      return Math.sin(rollAngleRadians) * -2 ; //* (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
     }
     else
       return 0.0;

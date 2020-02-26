@@ -40,24 +40,6 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     input();
 
-    if (jStick.getRawButtonPressed(5)) {
-      Lifter.getInstance().setLifterState(LifterState.POS1);
-    } else if (jStick.getRawButtonPressed(6)) {
-      Lifter.getInstance().setLifterState(LifterState.POS2);
-    }
-
-    if (jStick.getRawButton(3)) {
-      IntakeRoller.getInstance().setIntakeRoller(1);
-    } else {
-      IntakeRoller.getInstance().setIntakeRoller(0.0);
-    }
-
-    if (jStick.getRawButtonPressed(12)) {
-      Climber.ToggleClimb();
-    }
-    if (jStick.getRawButtonPressed(10)) {
-      ElevatorStop.ToggleStopper();
-    }
   }
 
   @Override
@@ -73,7 +55,7 @@ public class Robot extends TimedRobot {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
     } else {
       double forward, turn, rightOut, leftOut;
-      forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5)+ Drive.getInstance().AntiTip()); // this gets how far forward the forward stick
+      forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets how far forward the forward stick
                                                                         // is
       turn = stick.getRawAxis(4); // this gets out left or right the turn stick is
       rightOut = forward - turn; // This sets the turn distance for arcade drive
@@ -109,6 +91,26 @@ public class Robot extends TimedRobot {
       IntakeRoller.getInstance().setIntakeRoller(0.3);
     } else {
       IntakeRoller.getInstance().setIntakeRoller(0.0);
+    }
+
+    
+    if (jStick.getRawButtonPressed(5)) {
+      Lifter.getInstance().setLifterState(LifterState.POS1);
+    } else if (jStick.getRawButtonPressed(6)) {
+      Lifter.getInstance().setLifterState(LifterState.POS2);
+    }
+
+    if (jStick.getRawButton(3)) {
+      IntakeRoller.getInstance().setIntakeRoller(1);
+    } else {
+      IntakeRoller.getInstance().setIntakeRoller(0.0);
+    }
+
+    if (jStick.getRawButtonPressed(12)) {
+      Climber.ToggleClimb();
+    }
+    if (jStick.getRawButtonPressed(11)) {
+      ElevatorStop.ToggleStopper();
     }
   }
 }
