@@ -21,7 +21,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    mCompressor.start();
+    //mCompressor.start();
   }
 
   @Override
@@ -37,6 +37,7 @@ public class Robot extends TimedRobot {
   {
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
+    mCompressor.stop();
     
   }
 

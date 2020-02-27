@@ -59,7 +59,13 @@ public class Limelight {
     return new Drive.DriveSignal(deadband(forward_output + turn_output), deadband(forward_output - turn_output));
   }
 
+  public double getDistance(double Area)
+  {
+    double a = 84.1728 * Math.pow(Area, -0.6859);
+    double b = Math.pow(2.71828, 2.2799+ -0.0098 * Area);
 
+    return (a+b)/2;
+  }
 
   public double deadband(double a) {
     return Math.abs(a) < max_auto_output ? a : Math.copySign(max_auto_output, a);
