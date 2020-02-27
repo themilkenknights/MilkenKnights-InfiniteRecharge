@@ -59,6 +59,8 @@ public class Limelight {
     return new Drive.DriveSignal(deadband(forward_output + turn_output), deadband(forward_output - turn_output));
   }
 
+
+
   public double deadband(double a) {
     return Math.abs(a) < max_auto_output ? a : Math.copySign(max_auto_output, a);
   }

@@ -17,6 +17,7 @@ public class Robot extends TimedRobot {
   private Joystick stick = new Joystick(0);
   private Joystick jStick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
+  private double HoodPos = 0;
 
   @Override
   public void robotInit() {
@@ -32,7 +33,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopInit() {
+  public void teleopInit() 
+  {
+    Shooter.getInstance().zeroHood();
+    HoodPos = 0;
     
   }
 
@@ -94,5 +98,14 @@ public class Robot extends TimedRobot {
     if (jStick.getRawButtonPressed(11)) {
       ElevatorStop.ToggleStopper();
     }
+    if(jStick.getPOV() == 0)
+    {
+      HoodPos += .1;
+    }
+    else if(jStick.getPOV() == 180)
+    {
+      HoodPos -= .1;
+    }
+    Shooter.getInstance().setHoodPos(HoodPos);
   }
 }

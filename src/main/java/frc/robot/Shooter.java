@@ -8,7 +8,13 @@ public class Shooter {
 
     CANSparkMax mShooterSparkMaxLeft = new CANSparkMax(Constants.CAN.LeftShooterId, MotorType.kBrushless);
     CANSparkMax mShooterSparkMaxRight = new CANSparkMax(Constants.CAN.RightShootId, MotorType.kBrushless);
+    CANSparkMax mHoodSparkMax = new CANSparkMax(Constants.CAN.HoodId, MotorType.kBrushless);
+
     CANEncoder sEncoder = new CANEncoder(mShooterSparkMaxRight);
+    CANEncoder hEncoder = new CANEncoder(mHoodSparkMax);
+
+    private double kp = .1;
+
     private Shooter(){
         mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInvered);
         mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInvered);
@@ -27,6 +33,21 @@ public class Shooter {
 
   public static Shooter getInstance() {
     return InstanceHolder.mInstance;
+  }
+
+  public void zeroHood()
+  {
+    hEncoder.setPosition(0);
+  }
+  
+  public void setHoodPos(double Pos)
+  {
+    mHoodSparkMax.set((Pos - hEncoder.getPosition()) * kp);
+  }
+
+  public double getPos()
+  {
+    return hEncoder.getPosition();
   }
 
   private static class InstanceHolder {

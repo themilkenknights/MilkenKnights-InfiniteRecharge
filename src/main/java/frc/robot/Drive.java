@@ -17,6 +17,7 @@ public class Drive {
 
 private static double rollOffset = 0;
 
+
   private Drive() {
     leftMaster.configFactoryDefault();
     leftSlave.configFactoryDefault();
@@ -47,7 +48,7 @@ rollOffset = navX.getRoll();
   }
 
   public void setOutput(DriveSignal signal) {
-    System.out.println(signal.getRight());
+    //System.out.println(signal.getRight());
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
 
