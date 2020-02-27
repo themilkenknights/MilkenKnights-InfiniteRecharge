@@ -46,7 +46,7 @@ public final class Constants {
     public static final boolean rightSlaveInverted = true;
 
     public static final boolean leftSensorInverted = false;
-    public static final boolean rightSensorInverted = true;
+    public static final boolean rightSensorInverted = false;
 
     public static final double AngleThresholdDegrees = 10;
     public static final double KAngle = 1;
