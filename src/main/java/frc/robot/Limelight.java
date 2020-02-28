@@ -15,15 +15,15 @@ public class Limelight {
 
   private final double max_auto_output = 0.5;
 
-  private final double kP_dist = 0.0; // First tune the turn PD loop
+  private final double kP_dist = 0.01; // First tune the turn PD loop
   private final double dist_tol = 0.5;
-  private final double desired_vert_angle = 10;
+  private final double desiredDistance = 100;
 
-  private final double kP_turn = 0.02;
-  private final double kD_turn = 0; // kP_turn * 10;
+  private final double kP_turn = 0.03;
+  private final double kD_turn = .005; 
   private final double angle_tol = 0.5;
-  private final double max_anglular_vel = 15; // Deg/Sec
-  private final double max_anglular_accel = 10; // Deg/Sec^2
+  private final double max_anglular_vel = 19265.0; // Deg/Sec
+  private final double max_anglular_accel = 151917.25529762334; // Deg/Sec^2
 
   private final ProfiledPIDController m_controller = new ProfiledPIDController(kP_turn, 0.0, kD_turn,
       new TrapezoidProfile.Constraints(max_anglular_vel, max_anglular_accel));
@@ -47,7 +47,7 @@ public class Limelight {
     SmartDashboard.putNumber("Vertical Angle", ty.getDouble(0.0));
  SmartDashboard.putNumber("Target Distance", getDistance(targetArea));
     // Goal angle - current angle
-    double distance_error = desired_vert_angle - vertical_angle;
+    double distance_error = desiredDistance - getDistance(targetArea);
     double forward_output = 0;
     double turn_output = 0;
 
@@ -57,13 +57,13 @@ public class Limelight {
 m_controller.setGoal(0);
       turn_output = m_controller.calculate(-horizantal_angle);
     }
-/*
+
     // Have a deadband where we are close enough
     if (Math.abs(distance_error) > dist_tol) {
       // Just a proportional gain here
       forward_output += kP_dist * distance_error;
     }
-*/
+
     return new Drive.DriveSignal(deadband(forward_output + turn_output), deadband(forward_output - turn_output));
   }
 

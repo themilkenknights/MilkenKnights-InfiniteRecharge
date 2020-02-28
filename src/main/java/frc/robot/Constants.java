@@ -49,7 +49,7 @@ public final class Constants {
     public static final boolean leftSensorInverted = false;
     public static final boolean rightSensorInverted = true;
 
-    public static final double AngleThresholdDegrees = 10;
+    public static final double AngleThresholdDegrees = 15;
     public static final double KAngle = 1;
   }
 
