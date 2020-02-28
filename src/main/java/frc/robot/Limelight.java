@@ -75,10 +75,13 @@ public class Limelight {
      * * Math.pow(0.9900, ta.getDouble(0.0));
      * 
      * return (a+b)/2;
-     */
+     
     double a = Math.pow(.6988 * ta.getDouble(0.0), 2) + (-35.226 * ta.getDouble(0.0)) + 199.3863;
+    */
 
-    return a;
+    double a = Math.pow(Math.E, 5.5111 + -0.2701 * ta.getDouble(0.0));
+
+    return a + 8;
 
   }
 

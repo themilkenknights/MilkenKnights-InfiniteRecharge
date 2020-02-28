@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
     ShooterSpeed = 0;
-    // mCompressor.stop();
+    mCompressor.stop();
 
   }
 
