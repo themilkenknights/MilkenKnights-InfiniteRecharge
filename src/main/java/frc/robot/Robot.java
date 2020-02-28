@@ -21,6 +21,7 @@ public class Robot extends TimedRobot {
   private Joystick jStick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
   private double HoodPos = 0;
+  private double ShooterSpeed = 0;
 
   private double acc = 0;
   private double vel = 0;
@@ -52,6 +53,7 @@ public class Robot extends TimedRobot {
 
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
+    ShooterSpeed = 0;
     //mCompressor.stop();
     
   }
@@ -61,8 +63,8 @@ public class Robot extends TimedRobot {
     input();
     Shuffle.getInstance().Update();
 
-vel =Drive.getInstance().getVelocity();
-acc =Drive.getInstance().getAcceleration();
+    vel = Drive.getInstance().getVelocity();
+    acc = Drive.getInstance().getAcceleration();
 
 
 
@@ -104,10 +106,12 @@ acc =Drive.getInstance().getAcceleration();
       Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
     }
     // Run Shooter
+    /*
     if (jStick.getRawButton(1))
       Shooter.getInstance().setShooterOutput(0.25);
     else
       Shooter.getInstance().setShooterOutput(0.00);
+    */
 
     // Run Elevator Up and Down
     if (jStick.getRawButton(6)) {
@@ -129,10 +133,10 @@ acc =Drive.getInstance().getAcceleration();
     if (jStick.getRawButtonPressed(10)) {
     }
     if (jStick.getPOV() == 0) {
-      HoodPos += .1;
+      HoodPos -= .1;
     }
     else if (jStick.getPOV() == 180) {
-      HoodPos -= .1;
+      HoodPos += .1;
     }
     
     if (jStick.getRawButton(12)) 
@@ -144,7 +148,18 @@ acc =Drive.getInstance().getAcceleration();
       DefenceMode();
     }
 
+    if(jStick.getRawButtonPressed(5))
+    {
+      ShooterSpeed += 0.01;
+    }
+    else if(jStick.getRawButtonPressed(3))
+    {
+      ShooterSpeed -= 0.01;
+    }
+
+    Shooter.getInstance().setShooterOutput(ShooterSpeed);
     Shooter.getInstance().setHoodPos(HoodPos);
+    //System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
     
   }
 

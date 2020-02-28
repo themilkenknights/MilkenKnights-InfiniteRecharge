@@ -45,9 +45,9 @@ public class Limelight {
  
     SmartDashboard.putNumber("Horizantal Angle", tx.getDouble(0.0));
     SmartDashboard.putNumber("Vertical Angle", ty.getDouble(0.0));
- SmartDashboard.putNumber("Target Distance", getDistance(targetArea));
+    SmartDashboard.putNumber("Target Distance", getDistance());
     // Goal angle - current angle
-    double distance_error = desiredDistance - getDistance(targetArea);
+    double distance_error = desiredDistance - getDistance();
     double forward_output = 0;
     double turn_output = 0;
 
@@ -67,12 +67,18 @@ m_controller.setGoal(0);
     return new Drive.DriveSignal(deadband(forward_output + turn_output), deadband(forward_output - turn_output));
   }
 
-  public double getDistance(double Area)
+  public double getDistance()
   {
-    double a = 84.1728 * Math.pow(Area, -0.6859);
-    double b = Math.pow(2.71828, 2.2799+ -0.0098 * Area);
+    /*
+    double a = 98.6797 * Math.pow(ta.getDouble(0.0), -0.7282);
+    double b = 9.4835 * Math.pow(0.9900, ta.getDouble(0.0));
 
     return (a+b)/2;
+    */
+    double a = Math.pow(.6988 * ta.getDouble(0.0), 2) + (-35.226 * ta.getDouble(0.0)) + 199.3863;
+
+    return a;
+
   }
 
   public double deadband(double a) {

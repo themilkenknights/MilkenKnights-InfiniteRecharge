@@ -7,8 +7,8 @@ public class Shuffle
 
     public void Update()
     {
-
         SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
+        SmartDashboard.putNumber("Distance", Limelight.getInstance().getDistance());
     }
     
   public static Shuffle getInstance() {

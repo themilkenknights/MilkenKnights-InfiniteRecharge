@@ -45,7 +45,7 @@ public class Shooter {
     mHoodSparkMax.set((Pos - hEncoder.getPosition()) * kp);
   }
 
-  public double getPos()
+  public double getHoodPos()
   {
     return hEncoder.getPosition();
   }
