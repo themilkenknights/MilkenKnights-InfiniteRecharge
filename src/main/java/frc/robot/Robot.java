@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -25,7 +24,6 @@ public class Robot extends TimedRobot {
 
   private double acc = 0;
   private double vel = 0;
-
 
   public static Timer time = new Timer();
   public static double lastTime;
@@ -54,8 +52,8 @@ public class Robot extends TimedRobot {
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
     ShooterSpeed = 0;
-    //mCompressor.stop();
-    
+    // mCompressor.stop();
+
   }
 
   @Override
@@ -66,11 +64,7 @@ public class Robot extends TimedRobot {
     vel = Drive.getInstance().getVelocity();
     acc = Drive.getInstance().getAcceleration();
 
-
-
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
-
-
 
     if (Math.abs(vel) > highestVel) {
       highestVel = Math.abs(vel);
@@ -95,10 +89,13 @@ public class Robot extends TimedRobot {
   public void input() {
     if (jStick.getRawButton(8)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
-    }
-    else {
+    } else {
       double forward, turn, rightOut, leftOut;
-      forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets how far forward the forward stick
+      forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets
+                                                                                                          // how far
+                                                                                                          // forward the
+                                                                                                          // forward
+                                                                                                          // stick
       // is
       turn = stick.getRawAxis(0); // this gets out left or right the turn stick is
       rightOut = forward - turn; // This sets the turn distance for arcade drive
@@ -107,24 +104,19 @@ public class Robot extends TimedRobot {
     }
     // Run Shooter
     /*
-    if (jStick.getRawButton(1))
-      Shooter.getInstance().setShooterOutput(0.25);
-    else
-      Shooter.getInstance().setShooterOutput(0.00);
-    */
+     * if (jStick.getRawButton(1)) Shooter.getInstance().setShooterOutput(0.25);
+     * else Shooter.getInstance().setShooterOutput(0.00);
+     */
 
     // Run Elevator Up and Down
     if (jStick.getRawButton(6)) {
       Elevator.getInstance().setElevatorOutput(0.75, .5);
-    }
-    else if (jStick.getRawButton(4)) {
+    } else if (jStick.getRawButton(4)) {
       Elevator.getInstance().setElevatorOutput(-0.5, -.3);
-    }
-    else if (jStick.getRawButton(9)) {
+    } else if (jStick.getRawButton(9)) {
       Elevator.getInstance().setElevatorOutput(-0.75, -.5);
 
-    }
-    else
+    } else
       Elevator.getInstance().setElevatorOutput(0.00, 0.00);
 
     if (jStick.getRawButton(2)) {
@@ -134,46 +126,37 @@ public class Robot extends TimedRobot {
     }
     if (jStick.getPOV() == 0) {
       HoodPos -= .1;
-    }
-    else if (jStick.getPOV() == 180) {
+    } else if (jStick.getPOV() == 180) {
       HoodPos += .1;
     }
-    
-    if (jStick.getRawButton(12)) 
-    {
+
+    if (jStick.getRawButton(12)) {
       AttackMode();
-    }
-    else if(jStick.getRawButton(11))
-    {
+    } else if (jStick.getRawButton(11)) {
       DefenceMode();
     }
 
-    if(jStick.getRawButtonPressed(5))
-    {
+    if (jStick.getRawButtonPressed(5)) {
       ShooterSpeed += 0.01;
-    }
-    else if(jStick.getRawButtonPressed(3))
-    {
+    } else if (jStick.getRawButtonPressed(3)) {
       ShooterSpeed -= 0.01;
     }
 
     Shooter.getInstance().setShooterOutput(ShooterSpeed);
     Shooter.getInstance().setHoodPos(HoodPos);
-    //System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
-    
+    // System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood
+    // Pos: " + Shooter.getInstance().getHoodPos());
+
   }
 
-
-  public void AttackMode()
-  {
+  public void AttackMode() {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(true);
     Elevator.getInstance().setElevatorOutput(.25, 0.00);
     ElevatorStop.getInstance().setStopper(true);
   }
 
-  public void DefenceMode()
-  {
+  public void DefenceMode() {
     Intake.getInstance().setIntakeRoller(0.5);
     Intake.getInstance().setIntakeState(false);
     Elevator.getInstance().setElevatorOutput(0.5, 0.50);
@@ -181,18 +164,14 @@ public class Robot extends TimedRobot {
     Shooter.getInstance().setShooterOutput(.80);
   }
 
-  public void Shoot(double TargetRPM, double HoodPos)
-  {
+  public void Shoot(double TargetRPM, double HoodPos) {
     Shooter.getInstance().setShooterOutput(TargetRPM);
     Shooter.getInstance().setHoodPos(HoodPos);
 
-    if(Shooter.getInstance().getShooterRPM() > TargetRPM)
-    {
+    if (Shooter.getInstance().getShooterRPM() > TargetRPM) {
       Elevator.getInstance().setElevatorOutput(.75, .5);
       ElevatorStop.getInstance().setStopper(false);
-    }
-    else
-    {
+    } else {
       Elevator.getInstance().setElevatorOutput(.25, .5);
     }
   }

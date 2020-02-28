@@ -6,28 +6,27 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Shooter {
 
-    CANSparkMax mShooterSparkMaxLeft = new CANSparkMax(Constants.CAN.LeftShooterId, MotorType.kBrushless);
-    CANSparkMax mShooterSparkMaxRight = new CANSparkMax(Constants.CAN.RightShootId, MotorType.kBrushless);
-    CANSparkMax mHoodSparkMax = new CANSparkMax(Constants.CAN.HoodId, MotorType.kBrushless);
+  CANSparkMax mShooterSparkMaxLeft = new CANSparkMax(Constants.CAN.LeftShooterId, MotorType.kBrushless);
+  CANSparkMax mShooterSparkMaxRight = new CANSparkMax(Constants.CAN.RightShootId, MotorType.kBrushless);
+  CANSparkMax mHoodSparkMax = new CANSparkMax(Constants.CAN.HoodId, MotorType.kBrushless);
 
-    CANEncoder sEncoder = new CANEncoder(mShooterSparkMaxRight);
-    CANEncoder hEncoder = new CANEncoder(mHoodSparkMax);
+  CANEncoder sEncoder = new CANEncoder(mShooterSparkMaxRight);
+  CANEncoder hEncoder = new CANEncoder(mHoodSparkMax);
 
-    private double kp = .1;
+  private double kp = .1;
 
-    private Shooter(){
-        mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInvered);
-        mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInvered);
-        sEncoder.setVelocityConversionFactor(2/3);
-    }
-    
+  private Shooter() {
+    mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInvered);
+    mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInvered);
+    sEncoder.setVelocityConversionFactor(2 / 3);
+  }
+
   public void setShooterOutput(double percentOut) {
     mShooterSparkMaxLeft.set(percentOut);
     mShooterSparkMaxRight.set(percentOut);
   }
 
-  public double getShooterRPM()
-  {
+  public double getShooterRPM() {
     return sEncoder.getVelocity();
   }
 
@@ -35,18 +34,15 @@ public class Shooter {
     return InstanceHolder.mInstance;
   }
 
-  public void zeroHood()
-  {
+  public void zeroHood() {
     hEncoder.setPosition(0);
   }
-  
-  public void setHoodPos(double Pos)
-  {
+
+  public void setHoodPos(double Pos) {
     mHoodSparkMax.set((Pos - hEncoder.getPosition()) * kp);
   }
 
-  public double getHoodPos()
-  {
+  public double getHoodPos() {
     return hEncoder.getPosition();
   }
 
