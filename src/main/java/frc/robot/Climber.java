@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Solenoid;
  * Add your docs here.
  */
 public class Climber {
-    public static Solenoid climbSolenoid = new Solenoid(0);
+    public static Solenoid climbSolenoid = new Solenoid(1);
 
 
 

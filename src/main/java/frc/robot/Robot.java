@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -51,8 +52,8 @@ public class Robot extends TimedRobot {
 
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
-    // mCompressor.stop();
-
+    //mCompressor.stop();
+    
   }
 
   @Override
@@ -90,7 +91,7 @@ acc =Drive.getInstance().getAcceleration();
   }
 
   public void input() {
-    if (jStick.getRawButton(7)) {
+    if (jStick.getRawButton(8)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
     }
     else {
@@ -123,17 +124,9 @@ acc =Drive.getInstance().getAcceleration();
       Elevator.getInstance().setElevatorOutput(0.00, 0.00);
 
     if (jStick.getRawButton(2)) {
-      IntakeRoller.getInstance().setIntakeRoller(1);
-    }
-    else {
-      IntakeRoller.getInstance().setIntakeRoller(0.0);
-    }
-
-    if (jStick.getRawButtonPressed(12)) {
       Climber.ToggleClimb();
     }
-    if (jStick.getRawButtonPressed(11)) {
-      ElevatorStop.ToggleStopper();
+    if (jStick.getRawButtonPressed(10)) {
     }
     if (jStick.getPOV() == 0) {
       HoodPos += .1;
@@ -141,6 +134,51 @@ acc =Drive.getInstance().getAcceleration();
     else if (jStick.getPOV() == 180) {
       HoodPos -= .1;
     }
+    
+    if (jStick.getRawButton(12)) 
+    {
+      AttackMode();
+    }
+    else if(jStick.getRawButton(11))
+    {
+      DefenceMode();
+    }
+
     Shooter.getInstance().setHoodPos(HoodPos);
+    
+  }
+
+
+  public void AttackMode()
+  {
+    Intake.getInstance().setIntakeRoller(.75);
+    Intake.getInstance().setIntakeState(true);
+    Elevator.getInstance().setElevatorOutput(.25, 0.00);
+    ElevatorStop.getInstance().setStopper(true);
+  }
+
+  public void DefenceMode()
+  {
+    Intake.getInstance().setIntakeRoller(0.5);
+    Intake.getInstance().setIntakeState(false);
+    Elevator.getInstance().setElevatorOutput(0.5, 0.50);
+    ElevatorStop.getInstance().setStopper(true);
+    Shooter.getInstance().setShooterOutput(.80);
+  }
+
+  public void Shoot(double TargetRPM, double HoodPos)
+  {
+    Shooter.getInstance().setShooterOutput(TargetRPM);
+    Shooter.getInstance().setHoodPos(HoodPos);
+
+    if(Shooter.getInstance().getShooterRPM() > TargetRPM)
+    {
+      Elevator.getInstance().setElevatorOutput(.75, .5);
+      ElevatorStop.getInstance().setStopper(false);
+    }
+    else
+    {
+      Elevator.getInstance().setElevatorOutput(.25, .5);
+    }
   }
 }

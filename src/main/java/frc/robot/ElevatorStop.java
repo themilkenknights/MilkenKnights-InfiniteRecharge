@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 
 
 public class ElevatorStop {
-    public static Solenoid stopperSolenoid = new Solenoid(1);
+    public static Solenoid stopperSolenoid = new Solenoid(2);
 
 
 
@@ -24,6 +24,11 @@ public class ElevatorStop {
             stopperSolenoid.set(false);
         else
             stopperSolenoid.set(true);
+    }
+
+    public void setStopper(boolean state)
+    {
+        stopperSolenoid.set(state);
     }
 
 
