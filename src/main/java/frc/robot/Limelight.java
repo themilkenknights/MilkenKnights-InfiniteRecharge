@@ -24,7 +24,7 @@ public class Limelight {
 
   private final double kP_turn = 0.03;
   private final double kD_turn = .005; 
-  private final double angle_tol = 0.5;
+  private final double angle_tol = 0;
   private final double maxVel = 19265.0; // Deg/Sec
   private final double maxAccel = 151917.25529762334; // Deg/Sec^2
 
@@ -69,6 +69,7 @@ m_controller.setGoal(0);
     if (Math.abs(distance_error) > dist_tol) {
       // Just a proportional gain here
       forward_output = distance_controller.calculate(distance_error);
+      forward_output= 0;
     }
 
     return new Drive.DriveSignal(deadband(forward_output + turn_output), deadband(forward_output - turn_output));

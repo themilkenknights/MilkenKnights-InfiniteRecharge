@@ -22,9 +22,6 @@ public class Robot extends TimedRobot {
   private Compressor mCompressor = new Compressor(0);
   private double HoodPos = 0;
 
-  private double acc = 0;
-  private double vel = 0;
-
 
   public static Timer time = new Timer();
   public static double lastTime;
@@ -60,16 +57,16 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     input();
     Shuffle.getInstance().Update();
-
+/*
 vel =Drive.getInstance().getVelocity();
 acc =Drive.getInstance().getAcceleration();
-
+*/
 
 
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
 
 
-
+/*
     if (Math.abs(vel) > highestVel) {
       highestVel = Math.abs(vel);
       System.out.println("Highest Velocity: " + highestVel);
@@ -79,6 +76,7 @@ acc =Drive.getInstance().getAcceleration();
       highestAcc = Math.abs(acc);
       System.out.println("Highest Acceleration: " + highestAcc);
     }
+*/
 
   }
 
@@ -105,11 +103,12 @@ acc =Drive.getInstance().getAcceleration();
     }
     // Run Shooter
     if (jStick.getRawButton(1))
-      Shooter.getInstance().setShooterOutput(0.25);
+      Shooter.getInstance().setShooterOutput(.69);
     else
       Shooter.getInstance().setShooterOutput(0.00);
 
     // Run Elevator Up and Down
+    /*
     if (jStick.getRawButton(6)) {
       Elevator.getInstance().setElevatorOutput(0.75, .5);
     }
@@ -122,12 +121,13 @@ acc =Drive.getInstance().getAcceleration();
     }
     else
       Elevator.getInstance().setElevatorOutput(0.00, 0.00);
-
-    if (jStick.getRawButton(2)) {
+*/
+/*
+    if (jStick.getRawButtonPressed(10)) {
       Climber.ToggleClimb();
     }
-    if (jStick.getRawButtonPressed(10)) {
-    }
+
+    */
     if (jStick.getPOV() == 0) {
       HoodPos += .1;
     }
@@ -144,8 +144,28 @@ acc =Drive.getInstance().getAcceleration();
       DefenceMode();
     }
 
+if (jStick.getRawButton(4)){
+  Elevator.getInstance().setElevatorOutput(.42,0);
+
+}
+else if (jStick.getRawButton(6)){
+  Elevator.getInstance().setElevatorOutput(-.42,0);
+
+}
+else{
+  Elevator.getInstance().setElevatorOutput(0,0);
+
+}
+if(jStick.getRawButton(7)){
+  ElevatorStop.getInstance().setStopper(true);
+
+}
+
+
     Shooter.getInstance().setHoodPos(HoodPos);
     
+
+
   }
 
 
@@ -153,17 +173,24 @@ acc =Drive.getInstance().getAcceleration();
   {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(true);
-    Elevator.getInstance().setElevatorOutput(.25, 0.00);
-    ElevatorStop.getInstance().setStopper(true);
+    Elevator.getInstance().setElevatorOutput(.25,0);
+    ElevatorStop.getInstance().setStopper(false);
   }
 
   public void DefenceMode()
   {
+    /*
     Intake.getInstance().setIntakeRoller(0.5);
     Intake.getInstance().setIntakeState(false);
     Elevator.getInstance().setElevatorOutput(0.5, 0.50);
     ElevatorStop.getInstance().setStopper(true);
     Shooter.getInstance().setShooterOutput(.80);
+*/
+Intake.getInstance().setIntakeRoller(0);
+Intake.getInstance().setIntakeState(false);
+Elevator.getInstance().setElevatorOutput(0, 0);
+ElevatorStop.getInstance().setStopper(false);
+Shooter.getInstance().setShooterOutput(0);
   }
 
   public void Shoot(double TargetRPM, double HoodPos)
