@@ -14,9 +14,9 @@ public class Drive {
   private TalonFX rightMaster = new TalonFX(CAN.driveRightMasterId);
   private TalonFX rightSlave = new TalonFX(CAN.driveRightSlaveId);
   private static AHRS navX = new AHRS();
+  private double lastVel;
 
-private static double rollOffset = 0;
-
+  private static double rollOffset = 0;
 
   private Drive() {
     leftMaster.configFactoryDefault();
@@ -35,8 +35,8 @@ private static double rollOffset = 0;
     leftSlave.follow(leftMaster);
     rightSlave.follow(rightMaster);
 
-    leftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-    rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    leftMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    rightMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
     leftMaster.setNeutralMode(NeutralMode.Brake);
     rightMaster.setNeutralMode(NeutralMode.Brake);
@@ -44,15 +44,28 @@ private static double rollOffset = 0;
     leftSlave.setNeutralMode(NeutralMode.Brake);
     rightSlave.setNeutralMode(NeutralMode.Brake);
 
-rollOffset = navX.getRoll();
+    rollOffset = navX.getRoll();
+  }
+
+  public double getVelocity() {
+    return rightMaster.getSelectedSensorVelocity();
+
+  }
+
+  public double getAcceleration() {
+    double vel = rightMaster.getSelectedSensorVelocity();
+    double time = Robot.time.get();
+    double acc = (vel - lastVel) / (time - Robot.lastTime);
+    lastVel = vel;
+    Robot.lastTime = time;
+
+    return acc;
   }
 
   public void setOutput(DriveSignal signal) {
-    //System.out.println(signal.getRight());
+    // System.out.println(signal.getRight());
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
-
-
 
   }
 
@@ -60,24 +73,20 @@ rollOffset = navX.getRoll();
     return nativeUnitsToInches(
         (rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
   }
-  
 
-  public double getRoll(){
-  return navX.getRoll() - rollOffset;
+  public double getRoll() {
+    return navX.getRoll() - rollOffset;
   }
+
   public double AntiTip() {
     double roll = getRoll();
-    if(roll >= Constants.DRIVE.AngleThresholdDegrees)
-    {
+    if (roll >= Constants.DRIVE.AngleThresholdDegrees) {
       double rollAngleRadians = roll * (Math.PI / 180.0);
-      return Math.sin(rollAngleRadians) * -2 ; //* (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
-    }
-    else if(roll <= -Constants.DRIVE.AngleThresholdDegrees)
-    {
+      return Math.sin(rollAngleRadians) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
+    } else if (roll <= -Constants.DRIVE.AngleThresholdDegrees) {
       double rollAngleRadians = roll * (Math.PI / 180.0);
-      return Math.sin(rollAngleRadians) * -3 ; //* (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
-    }
-    else
+      return Math.sin(rollAngleRadians) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
+    } else
       return 0.0;
   }
 
