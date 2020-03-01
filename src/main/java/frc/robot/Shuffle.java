@@ -2,15 +2,13 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Shuffle
-{
+public class Shuffle {
 
-    public void Update()
-    {
+  public void Update() {
+    SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
+    SmartDashboard.putNumber("Distance", Limelight.getInstance().getDistance());
+  }
 
-        SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
-    }
-    
   public static Shuffle getInstance() {
     return InstanceHolder.mInstance;
   }

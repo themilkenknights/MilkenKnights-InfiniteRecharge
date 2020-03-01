@@ -13,24 +13,19 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
 
-
 public class ElevatorStop {
     public static Solenoid stopperSolenoid = new Solenoid(2);
 
-
-
-    public static void ToggleStopper(){
-        if(stopperSolenoid.get())
+    public static void ToggleStopper() {
+        if (stopperSolenoid.get())
             stopperSolenoid.set(false);
         else
             stopperSolenoid.set(true);
     }
 
-    public void setStopper(boolean state)
-    {
+    public void setStopper(boolean state) {
         stopperSolenoid.set(state);
     }
-
 
     public static ElevatorStop getInstance() {
         return InstanceHolder.mInstance;
