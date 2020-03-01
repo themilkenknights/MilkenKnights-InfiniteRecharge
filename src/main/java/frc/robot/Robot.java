@@ -18,6 +18,7 @@ public class Robot extends TimedRobot {
   private Joystick jStick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
   private double HoodPos = 0;
+  private double ShooterRPM = 0;
 
   @Override
   public void robotInit() {
@@ -37,7 +38,7 @@ public class Robot extends TimedRobot {
   {
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
-    mCompressor.stop();
+    ShooterRPM = 0;
     
   }
 
@@ -68,13 +69,22 @@ public class Robot extends TimedRobot {
       rightOut = forward - turn; // This sets the turn distance for arcade drive
       leftOut = forward + turn;
       Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
-    }
+    }/*
     // Run Shooter
     if (jStick.getRawButton(1))
       Shooter.getInstance().setShooterOutput(0.25);
     else
       Shooter.getInstance().setShooterOutput(0.00);
+*/
 
+    if(jStick.getRawButtonPressed(5))
+    {
+      ShooterRPM += .05;
+    }
+    else if(jStick.getRawButtonPressed(3))
+    {
+      ShooterRPM -= .05;
+    }
     // Run Elevator Up and Down
     if (jStick.getRawButton(6)) {
       Elevator.getInstance().setElevatorOutput(0.75, .5);
@@ -108,5 +118,7 @@ public class Robot extends TimedRobot {
       HoodPos -= .1;
     }
     Shooter.getInstance().setHoodPos(HoodPos);
+    Shooter.getInstance().setShooterOutput(ShooterRPM);
+    System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
   }
 }

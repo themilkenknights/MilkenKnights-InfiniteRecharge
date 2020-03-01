@@ -19,7 +19,7 @@ public final class Constants {
     public static final int driveRightMasterId = 6;
     public static final int driveRightSlaveId = 5;
     public static final int lifterTalonId = 2;
-    public static final int intakeRollerTalonId = 3;
+    public static final int intakeRollerTalonId = 1;
     public static final int RightShootId = 9;
     public static final int LeftShooterId = 12;
     public static final int ElevatorId = 4;
