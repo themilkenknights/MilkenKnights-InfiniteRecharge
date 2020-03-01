@@ -21,6 +21,8 @@ public class Shooter {
     sEncoder.setVelocityConversionFactor(2 / 3);
   }
 
+
+  
   public void setShooterOutput(double percentOut) {
     mShooterSparkMaxLeft.set(percentOut);
     mShooterSparkMaxRight.set(percentOut);

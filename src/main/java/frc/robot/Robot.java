@@ -23,8 +23,7 @@ public class Robot extends TimedRobot {
   private double ShooterRPM = 0;
   private double ShooterSpeed = 0;
 
-  private double acc = 0;
-  private double vel = 0;
+  private boolean isInAttackMode = false;
 
   public static Timer time = new Timer();
   public static double lastTime;
@@ -53,7 +52,7 @@ public class Robot extends TimedRobot {
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
     ShooterRPM = 0;
-    
+
     ShooterSpeed = 0;
 
   }
@@ -62,26 +61,24 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     input();
     Shuffle.getInstance().Update();
-/*
-vel =Drive.getInstance().getVelocity();
-acc =Drive.getInstance().getAcceleration();
-*/
-
+    /*
+    vel =Drive.getInstance().getVelocity();
+    acc =Drive.getInstance().getAcceleration();
+    */
 
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
 
-
-/*
+    /*
     if (Math.abs(vel) > highestVel) {
       highestVel = Math.abs(vel);
       System.out.println("Highest Velocity: " + highestVel);
     }
-
+    
     if (Math.abs(acc) > highestAcc) {
       highestAcc = Math.abs(acc);
       System.out.println("Highest Acceleration: " + highestAcc);
     }
-*/
+    */
 
   }
 
@@ -94,36 +91,31 @@ acc =Drive.getInstance().getAcceleration();
   }
 
   public void input() {
-    if (jStick.getRawButton(8)) {
+    if (jStick.getRawButton(Constants.INPUT.limeLight)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
-    } else {
+    }
+    else {
       double forward, turn, rightOut, leftOut;
       forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets
-                                                                                                          // how far
-                                                                                                          // forward the
-                                                                                                          // forward
-                                                                                                          // stick
-      // is
+      // how far forward the forward stick is
       turn = stick.getRawAxis(0); // this gets out left or right the turn stick is
       rightOut = forward - turn; // This sets the turn distance for arcade drive
       leftOut = forward + turn;
-      Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
-    }/*
+
+      if (isInAttackMode) {
+        Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut / 2, rightOut / 2));
+      }
+      else {
+        Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
+      }
+    }
+
     // Run Shooter
     if (jStick.getRawButton(1))
       Shooter.getInstance().setShooterOutput(.69);
     else
       Shooter.getInstance().setShooterOutput(0.00);
-*/
 
-    if(jStick.getRawButtonPressed(5))
-    {
-      ShooterRPM += .05;
-    }
-    else if(jStick.getRawButtonPressed(3))
-    {
-      ShooterRPM -= .05;
-    }
     // Run Elevator Up and Down
     /*
     if (jStick.getRawButton(6)) {
@@ -132,32 +124,40 @@ acc =Drive.getInstance().getAcceleration();
       Elevator.getInstance().setElevatorOutput(-0.5, -.3);
     } else if (jStick.getRawButton(9)) {
       Elevator.getInstance().setElevatorOutput(-0.75, -.5);
-
+    
     } else
       Elevator.getInstance().setElevatorOutput(0.00, 0.00);
-*/
-/*
-    if (jStick.getRawButtonPressed(10)) {
-      Climber.ToggleClimb();
+    */
+
+    if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
+      Climber.setClimbState(true);
+    }
+    if (jStick.getRawButtonPressed(Constants.INPUT.climbOff)) {
+      Climber.setClimbState(false);
     }
 
-    */
     if (jStick.getPOV() == 0) {
       HoodPos -= .1;
-    } else if (jStick.getPOV() == 180) {
+    }
+    else if (jStick.getPOV() == 180) {
       HoodPos += .1;
     }
 
-    if (jStick.getRawButton(12)) {
+    if (jStick.getRawButton(Constants.INPUT.attackMode)) {
       AttackMode();
-    } else if (jStick.getRawButton(11)) {
+    }
+    else if (jStick.getRawButton(Constants.INPUT.defenceMode)) {
       DefenceMode();
     }
 
-    if (jStick.getRawButtonPressed(5)) {
-      ShooterSpeed += 0.01;
-    } else if (jStick.getRawButtonPressed(3)) {
-      ShooterSpeed -= 0.01;
+    if (jStick.getRawButtonPressed(Constants.INPUT.elevatorUp)) {
+      Elevator.getInstance().setElevatorOutput(.420, 0);
+      ElevatorStop.getInstance().setStopper(true);
+    }
+
+    if (jStick.getRawButtonPressed(Constants.INPUT.elevatorDown)) {
+      Elevator.getInstance().setElevatorOutput(0, 0);
+      ElevatorStop.getInstance().setStopper(true);
     }
 
     Shooter.getInstance().setShooterOutput(ShooterSpeed);
@@ -170,24 +170,16 @@ acc =Drive.getInstance().getAcceleration();
   public void AttackMode() {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(true);
-    Elevator.getInstance().setElevatorOutput(.25,0);
+    Elevator.getInstance().setElevatorOutput(.420, .420);
     ElevatorStop.getInstance().setStopper(false);
+    isInAttackMode = true;
   }
 
-  public void DefenceMode()
-  {
-    /*
-    Intake.getInstance().setIntakeRoller(0.5);
+  public void DefenceMode() {
+    Intake.getInstance().setIntakeRoller(0);
     Intake.getInstance().setIntakeState(false);
-    Elevator.getInstance().setElevatorOutput(0.5, 0.50);
-    ElevatorStop.getInstance().setStopper(true);
-    Shooter.getInstance().setShooterOutput(.80);
-*/
-Intake.getInstance().setIntakeRoller(0);
-Intake.getInstance().setIntakeState(false);
-Elevator.getInstance().setElevatorOutput(0, 0);
-ElevatorStop.getInstance().setStopper(false);
-Shooter.getInstance().setShooterOutput(0);
+    Elevator.getInstance().setElevatorOutput(0, 0);
+    isInAttackMode = false;
   }
 
   public void Shoot(double TargetRPM, double HoodPos) {
@@ -199,7 +191,8 @@ Shooter.getInstance().setShooterOutput(0);
     if (Shooter.getInstance().getShooterRPM() > TargetRPM) {
       Elevator.getInstance().setElevatorOutput(.75, .5);
       ElevatorStop.getInstance().setStopper(false);
-    } else {
+    }
+    else {
       Elevator.getInstance().setElevatorOutput(.25, .5);
     }
   }

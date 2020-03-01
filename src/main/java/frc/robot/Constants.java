@@ -35,6 +35,19 @@ public final class Constants {
 
   }
 
+  public static class INPUT{
+    public static final int attackMode = 2; 
+    public static final int defenceMode = 12;
+    public static final int climbOn = 7;
+    public static final int climbOff = 8;
+    public static final int elevatorUp = 3;
+    public static final int elevatorDown = 5;
+    public static final int limeLight = 9;
+
+    // public static final int button 1 is shooterControlEnable and forward and back tics for speed management.
+    //hood pov
+  }
+
   public static class DRIVE {
     public static final double wheelDiameterInches = 6; // Inches
     public static final double wheelCircumference = wheelDiameterInches * PI; // Inches
