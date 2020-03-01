@@ -54,7 +54,6 @@ public class Robot extends TimedRobot {
     ShooterRPM = 0;
 
     ShooterSpeed = 0;
-
   }
 
   @Override
@@ -93,8 +92,14 @@ public class Robot extends TimedRobot {
   public void input() {
     if (jStick.getRawButton(Constants.INPUT.limeLight)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
-    }
-    else {
+      //Always Change the RPM of shooter while button is pressed so once we are in range, it is ready
+      double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(Limelight.getInstance().getDistance())).value;
+      Shooter.getInstance().setShooterRPM(RPM);
+      if (Limelight.getInstance().inRange()) {
+        Elevator.getInstance().setElevatorOutput(.420, 0);
+        ElevatorStop.getInstance().setStopper(true);
+      }
+    } else {
       double forward, turn, rightOut, leftOut;
       forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets
       // how far forward the forward stick is
@@ -104,17 +109,17 @@ public class Robot extends TimedRobot {
 
       if (isInAttackMode) {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut / 2, rightOut / 2));
-      }
-      else {
+      } else {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
       }
     }
 
     // Run Shooter
-    if (jStick.getRawButton(1))
+    if (jStick.getRawButton(1)) {
       Shooter.getInstance().setShooterOutput(.69);
-    else
+    } else {
       Shooter.getInstance().setShooterOutput(0.00);
+    }
 
     // Run Elevator Up and Down
     /*
@@ -138,15 +143,13 @@ public class Robot extends TimedRobot {
 
     if (jStick.getPOV() == 0) {
       HoodPos -= .1;
-    }
-    else if (jStick.getPOV() == 180) {
+    } else if (jStick.getPOV() == 180) {
       HoodPos += .1;
     }
 
     if (jStick.getRawButton(Constants.INPUT.attackMode)) {
       AttackMode();
-    }
-    else if (jStick.getRawButton(Constants.INPUT.defenceMode)) {
+    } else if (jStick.getRawButton(Constants.INPUT.defenceMode)) {
       DefenceMode();
     }
 
@@ -191,8 +194,7 @@ public class Robot extends TimedRobot {
     if (Shooter.getInstance().getShooterRPM() > TargetRPM) {
       Elevator.getInstance().setElevatorOutput(.75, .5);
       ElevatorStop.getInstance().setStopper(false);
-    }
-    else {
+    } else {
       Elevator.getInstance().setElevatorOutput(.25, .5);
     }
   }
