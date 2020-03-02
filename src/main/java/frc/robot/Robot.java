@@ -157,7 +157,7 @@ public class Robot extends TimedRobot {
   }
 
   public void DefenceMode() {
-    Intake.getInstance().setIntakeRoller(0.5);
+    Intake.getInstance().setIntakeRoller(0.15);
     Intake.getInstance().setIntakeState(false);
     Elevator.getInstance().setElevatorOutput(0.5, 0.50);
     ElevatorStop.getInstance().setStopper(true);

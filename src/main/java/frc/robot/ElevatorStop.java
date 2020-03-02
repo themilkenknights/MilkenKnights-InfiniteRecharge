@@ -16,6 +16,11 @@ import edu.wpi.first.wpilibj.Solenoid;
 public class ElevatorStop {
     public static Solenoid stopperSolenoid = new Solenoid(2);
 
+    public ElevatorStop()
+    {
+        stopperSolenoid.set(false);
+    }
+
     public static void ToggleStopper() {
         if (stopperSolenoid.get())
             stopperSolenoid.set(false);
