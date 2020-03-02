@@ -32,11 +32,10 @@ public final class Constants {
     public static final boolean LeftShooterInvered = false;
     public static final boolean RightShooterInvered = true;
     public static final boolean elevatorInverted = false;
-
   }
 
-  public static class INPUT{
-    public static final int attackMode = 2; 
+  public static class INPUT {
+    public static final int attackMode = 2;
     public static final int defenceMode = 12;
     public static final int climbOn = 7;
     public static final int climbOff = 8;
@@ -79,5 +78,22 @@ public final class Constants {
     public final static double kD = 1.0;
     public final static double kPElevator = 0;
     public final static double kDElevator = 0;
+  }
+
+  public static class VISION {
+    public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kRPMMap = new InterpolatingTreeMap<>();
+
+    public static double[][] kDistanceRpmValues = {
+        {90.0, 2890.0}, //{Distance(Inches), RPM},
+        {95.0, 2940.0},
+        {100.0, 2990.0},
+        {105.0, 3025.0},
+    };
+
+    static {
+      for (double[] pair : kDistanceRpmValues) {
+        kRPMMap.put(new InterpolatingDouble(pair[0]), new InterpolatingDouble(pair[1]));
+      }
+    }
   }
 }
