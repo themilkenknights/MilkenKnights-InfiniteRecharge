@@ -64,9 +64,9 @@ public class Limelight {
   }
 
   public double getDistance() {
-    double height_camera_to_target = 50.0; // inches
-    double lightlight_pitch = 30.0; // Degrees from horizontal
-    return height_camera_to_target / Math.tan(Math.toRadians(lightlight_pitch + ty.getDouble(0.0)));
+    double height_camera_to_target = (89.75 - 33); //inches
+    double lightlight_pitch = 20.0; //Degrees from horizontal
+    return (height_camera_to_target / Math.tan(Math.toRadians(lightlight_pitch + ty.getDouble(0.0)))) - 17.5;
   }
 
   public double clamp(double a) {

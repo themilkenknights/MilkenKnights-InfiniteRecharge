@@ -24,8 +24,8 @@ public class Shooter {
     mShooterSparkMaxLeft.restoreFactoryDefaults();
     mShooterSparkMaxRight.restoreFactoryDefaults();
 
-    mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInvered);
-    mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInvered);
+    mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInverted);
+    mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInverted);
     sEncoder.setVelocityConversionFactor(2.0 / 3.0); //Integer Divison Is Bad!!
     sEncoder = mShooterSparkMaxLeft.getEncoder();
 
@@ -36,7 +36,7 @@ public class Shooter {
     mShooterPIDController.setP(0.1);
     mShooterPIDController.setI(0);
     mShooterPIDController.setD(1.0);
-    mShooterPIDController.setFF(1.0 / 4000); // 1.0/MAX_RPM
+    mShooterPIDController.setFF(1.0 / 5100); // 1.0/MAX_RPM
     mShooterPIDController.setOutputRange(-1, 1);
   }
 
@@ -46,7 +46,6 @@ public class Shooter {
 
   public void setShooterOutput(double percentOut) {
     mShooterSparkMaxLeft.set(percentOut);
-    mShooterSparkMaxRight.set(percentOut);
   }
 
   public double getShooterRPM() {

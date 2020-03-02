@@ -34,8 +34,8 @@ public final class Constants {
     public static final int PCMId = 11;
     public static final int ClimbSolenoidId = 0;
 
-    public static final boolean LeftShooterInvered = false;
-    public static final boolean RightShooterInvered = true;
+    public static final boolean LeftShooterInverted = false;
+    public static final boolean RightShooterInverted = false;
     public static final boolean elevatorInverted = false;
   }
 
