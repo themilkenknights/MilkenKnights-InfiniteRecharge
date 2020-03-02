@@ -86,9 +86,9 @@ public class Drive {
 
   public double AntiTip() {
     double roll = getRoll();
-    //Simplified Logic Below
+    // Simplified Logic Below
     if (Math.abs(roll) >= Constants.DRIVE.AngleThresholdDegrees) {
-      return Math.sin(Math.toRadians(roll)) * Math.signum(2); // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
+      return Math.sin(Math.toRadians(roll)) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
     } else {
       return 0.0;
     }
