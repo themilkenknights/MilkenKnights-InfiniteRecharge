@@ -9,31 +9,32 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
 
-public class ElevatorStop {
+public class ElevatorStopper {
+
   public static Solenoid stopperSolenoid = new Solenoid(2);
 
-  public ElevatorStop()
-  {
-      stopperSolenoid.set(false);
+  public ElevatorStopper() {
+    stopperSolenoid.set(false);
   }
 
-  public static void ToggleStopper() {
-      if (stopperSolenoid.get())
-          stopperSolenoid.set(false);
-      else
-          stopperSolenoid.set(true);
+  public static ElevatorStopper getInstance() {
+    return InstanceHolder.mInstance;
   }
-  
+
+  public void toggleStopper() {
+    if (stopperSolenoid.get()) {
+      stopperSolenoid.set(false);
+    } else {
+      stopperSolenoid.set(true);
+    }
+  }
 
   public void setStopper(boolean state) {
     stopperSolenoid.set(state);
   }
 
-  public static ElevatorStop getInstance() {
-    return InstanceHolder.mInstance;
-  }
-
   private static class InstanceHolder {
-    private static final ElevatorStop mInstance = new ElevatorStop();
+
+    private static final ElevatorStopper mInstance = new ElevatorStopper();
   }
 }

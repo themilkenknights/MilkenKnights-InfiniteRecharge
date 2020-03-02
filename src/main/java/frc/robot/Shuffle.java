@@ -1,9 +1,12 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shuffle {
+
+  public static Shuffle getInstance() {
+    return InstanceHolder.mInstance;
+  }
 
   public void Update() {
     //AnalogInput pressure = new AnalogInput(0);
@@ -11,11 +14,8 @@ public class Shuffle {
     //SmartDashboard.putNumber("Pressure", ( (pressure.getVoltage()) * 250 / 5.0 - 25.0));
   }
 
-  public static Shuffle getInstance() {
-    return InstanceHolder.mInstance;
-  }
-
   private static class InstanceHolder {
+
     private static final Shuffle mInstance = new Shuffle();
   }
 }
