@@ -20,8 +20,8 @@ public class Intake {
     mTalon.set(ControlMode.PercentOutput, percentOut);
   }
 
-  public void setIntakeState(boolean Pos) {
-    intakeSolenoid.set(Pos);
+  public void setIntakeState(boolean pos) {
+    intakeSolenoid.set(pos);
   }
 
   public static Intake getInstance() {

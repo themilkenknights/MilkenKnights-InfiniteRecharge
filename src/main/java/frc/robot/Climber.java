@@ -18,6 +18,11 @@ public class Climber {
             climbSolenoid.set(false);
         else
             climbSolenoid.set(true);
+
+    }
+    public static void setClimbState(boolean state) {
+            climbSolenoid.set(state);
+
     }
 
     public static Climber getInstance() {
