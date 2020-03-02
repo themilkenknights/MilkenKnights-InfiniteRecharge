@@ -96,7 +96,7 @@ public class Robot extends TimedRobot {
       double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(Limelight.getInstance().getDistance())).value;
       Shooter.getInstance().setShooterRPM(RPM);
       if (Limelight.getInstance().inRange()) {
-        Elevator.getInstance().setElevatorOutput(.420, 0);
+        Elevator.getInstance().setElevatorOutput(.420);
         ElevatorStop.getInstance().setStopper(true);
       }
     } else {
@@ -121,18 +121,7 @@ public class Robot extends TimedRobot {
       Shooter.getInstance().setShooterOutput(0.00);
     }
 
-    // Run Elevator Up and Down
-    /*
-    if (jStick.getRawButton(6)) {
-      Elevator.getInstance().setElevatorOutput(0.75, .5);
-    } else if (jStick.getRawButton(4)) {
-      Elevator.getInstance().setElevatorOutput(-0.5, -.3);
-    } else if (jStick.getRawButton(9)) {
-      Elevator.getInstance().setElevatorOutput(-0.75, -.5);
-    
-    } else
-      Elevator.getInstance().setElevatorOutput(0.00, 0.00);
-    */
+
 
     if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
       Climber.setClimbState(true);
@@ -154,13 +143,15 @@ public class Robot extends TimedRobot {
     }
 
     if (jStick.getRawButtonPressed(Constants.INPUT.elevatorUp)) {
-      Elevator.getInstance().setElevatorOutput(.420, 0);
+      Elevator.getInstance().setElevatorOutput(.420);
       ElevatorStop.getInstance().setStopper(true);
     }
-
-    if (jStick.getRawButtonPressed(Constants.INPUT.elevatorDown)) {
-      Elevator.getInstance().setElevatorOutput(0, 0);
+    else if (jStick.getRawButtonPressed(Constants.INPUT.elevatorDown)) {
+      Elevator.getInstance().setElevatorOutput(-.420);
       ElevatorStop.getInstance().setStopper(true);
+    }
+    else if(!isInAttackMode){
+      Elevator.getInstance().setElevatorOutput(0);
     }
 
     Shooter.getInstance().setShooterOutput(ShooterSpeed);
@@ -173,7 +164,9 @@ public class Robot extends TimedRobot {
   public void AttackMode() {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(true);
-    Elevator.getInstance().setElevatorOutput(.420, .420);
+    Elevator.getInstance().setElevatorOutput(.420);
+    Intake.getInstance().setHopperRoller(.42);
+
     ElevatorStop.getInstance().setStopper(false);
     isInAttackMode = true;
   }
@@ -181,7 +174,7 @@ public class Robot extends TimedRobot {
   public void DefenceMode() {
     Intake.getInstance().setIntakeRoller(0.15);
     Intake.getInstance().setIntakeState(false);
-    Elevator.getInstance().setElevatorOutput(0, 0);
+    Elevator.getInstance().setElevatorOutput(0);
     isInAttackMode = false;
   }
 
@@ -192,10 +185,12 @@ public class Robot extends TimedRobot {
     System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
 
     if (Shooter.getInstance().getShooterRPM() > TargetRPM) {
-      Elevator.getInstance().setElevatorOutput(.75, .5);
+      Elevator.getInstance().setElevatorOutput(.75);
+      Intake.getInstance().setHopperRoller(0.5);
       ElevatorStop.getInstance().setStopper(false);
     } else {
-      Elevator.getInstance().setElevatorOutput(.25, .5);
+      Elevator.getInstance().setElevatorOutput(.25);
+      Intake.getInstance().setHopperRoller(0.5);
     }
   }
 }
