@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Drive.DriveSignal;
 
 public class Robot extends TimedRobot {
 
@@ -54,7 +53,6 @@ public class Robot extends TimedRobot {
     ShooterRPM = 0;
 
     ShooterSpeed = 0;
-
   }
 
   @Override
@@ -93,8 +91,14 @@ public class Robot extends TimedRobot {
   public void input() {
     if (jStick.getRawButton(Constants.INPUT.limeLight)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
-    }
-    else {
+      //Always Change the RPM of shooter while button is pressed so once we are in range, it is ready
+      double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(Limelight.getInstance().getDistance())).value;
+      Shooter.getInstance().setShooterRPM(RPM);
+      if (Limelight.getInstance().inRange()) {
+        Elevator.getInstance().setElevatorOutput(.420);
+        ElevatorStop.getInstance().setStopper(true);
+      }
+    } else {
       double forward, turn, rightOut, leftOut;
       forward = (Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().AntiTip()); // this gets
       // how far forward the forward stick is
@@ -104,30 +108,19 @@ public class Robot extends TimedRobot {
 
       if (isInAttackMode) {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut / 2, rightOut / 2));
-      }
-      else {
+      } else {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
       }
     }
 
     // Run Shooter
-    if (jStick.getRawButton(1))
-      Shooter.getInstance().setShooterOutput(.55);
-    else
-      Shooter.getInstance().setShooterOutput(0.0);
+    if (jStick.getRawButton(1)) {
+      Shooter.getInstance().setShooterOutput(.69);
+    } else {
+      Shooter.getInstance().setShooterOutput(0.00);
+    }
 
-    // Run Elevator Up and Down
-    /*
-    if (jStick.getRawButton(6)) {
-      Elevator.getInstance().setElevatorOutput(0.75, .5);
-    } else if (jStick.getRawButton(4)) {
-      Elevator.getInstance().setElevatorOutput(-0.5, -.3);
-    } else if (jStick.getRawButton(9)) {
-      Elevator.getInstance().setElevatorOutput(-0.75, -.5);
-    
-    } else
-      Elevator.getInstance().setElevatorOutput(0.00, 0.00);
-    */
+
 
     if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
       Climber.setClimbState(true);
@@ -138,28 +131,26 @@ public class Robot extends TimedRobot {
 
     if (jStick.getPOV() == 0) {
       HoodPos -= .1;
-    }
-    else if (jStick.getPOV() == 180) {
+    } else if (jStick.getPOV() == 180) {
       HoodPos += .1;
     }
 
     if (jStick.getRawButton(Constants.INPUT.attackMode)) {
       AttackMode();
-    }
-    else if (jStick.getRawButton(Constants.INPUT.defenceMode)) {
+    } else if (jStick.getRawButton(Constants.INPUT.defenceMode)) {
       DefenceMode();
     }
 
     if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
-      Elevator.getInstance().setElevatorOutput(.420, 0);
+      Elevator.getInstance().setElevatorOutput(.420);
       ElevatorStop.getInstance().setStopper(true);
     }
     else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
-      Elevator.getInstance().setElevatorOutput(-.420, 0);
+      Elevator.getInstance().setElevatorOutput(-.420);
       ElevatorStop.getInstance().setStopper(true);
     }
     else if(!isInAttackMode){
-      Elevator.getInstance().setElevatorOutput(0, 0);
+      Elevator.getInstance().setElevatorOutput(0);
     }
   
 
@@ -172,16 +163,18 @@ public class Robot extends TimedRobot {
   public void AttackMode() {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(true);
-    Elevator.getInstance().setElevatorOutput(.420, .420);
+    Elevator.getInstance().setElevatorOutput(.420);
+    Intake.getInstance().setHopperRoller(.42);
+
     ElevatorStop.getInstance().setStopper(false);
 
     isInAttackMode = true;
   }
 
   public void DefenceMode() {
-    Intake.getInstance().setIntakeRoller(0);
+    Intake.getInstance().setIntakeRoller(0.15);
     Intake.getInstance().setIntakeState(false);
-    Elevator.getInstance().setElevatorOutput(0, 0);
+    Elevator.getInstance().setElevatorOutput(0);
     isInAttackMode = false;
   }
 
@@ -192,11 +185,12 @@ public class Robot extends TimedRobot {
     System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
 
     if (Shooter.getInstance().getShooterRPM() > TargetRPM) {
-      Elevator.getInstance().setElevatorOutput(.75, .5);
+      Elevator.getInstance().setElevatorOutput(.75);
+      Intake.getInstance().setHopperRoller(0.5);
       ElevatorStop.getInstance().setStopper(false);
-    }
-    else {
-      Elevator.getInstance().setElevatorOutput(.25, .5);
+    } else {
+      Elevator.getInstance().setElevatorOutput(.25);
+      Intake.getInstance().setHopperRoller(0.5);
     }
   }
 }

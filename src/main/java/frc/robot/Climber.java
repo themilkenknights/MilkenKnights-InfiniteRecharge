@@ -8,6 +8,18 @@ import edu.wpi.first.wpilibj.Solenoid;
 public class Climber {
     public static Solenoid climbSolenoid = new Solenoid(1);
 
+    public Climber()
+    {
+        climbSolenoid.set(false);
+    }
+
+    public static void ToggleClimb() {
+        if (climbSolenoid.get())
+            climbSolenoid.set(false);
+        else
+            climbSolenoid.set(true);
+
+    }
     public static void setClimbState(boolean state) {
             climbSolenoid.set(state);
 

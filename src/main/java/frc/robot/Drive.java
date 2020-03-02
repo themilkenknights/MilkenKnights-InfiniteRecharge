@@ -24,6 +24,15 @@ public class Drive {
     rightMaster.configFactoryDefault();
     rightSlave.configFactoryDefault();
 
+    leftMaster.configVoltageCompSaturation(12.0);
+    leftMaster.enableVoltageCompensation(true);
+    leftSlave.configVoltageCompSaturation(12.0);
+    leftSlave.enableVoltageCompensation(true);
+    rightMaster.configVoltageCompSaturation(12.0);
+    rightMaster.enableVoltageCompensation(true);
+    rightSlave.configVoltageCompSaturation(12.0);
+    rightSlave.enableVoltageCompensation(true);
+
     leftMaster.setInverted(DRIVE.leftMasterInverted);
     leftSlave.setInverted(DRIVE.leftSlaveInverted);
     rightMaster.setInverted(DRIVE.rightMasterInverted);
@@ -49,7 +58,6 @@ public class Drive {
 
   public double getVelocity() {
     return rightMaster.getSelectedSensorVelocity();
-
   }
 
   public double getAcceleration() {
@@ -63,10 +71,8 @@ public class Drive {
   }
 
   public void setOutput(DriveSignal signal) {
-    // System.out.println(signal.getRight());
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
-
   }
 
   public double getAverageDistance() {
@@ -80,14 +86,12 @@ public class Drive {
 
   public double AntiTip() {
     double roll = getRoll();
-    if (roll >= Constants.DRIVE.AngleThresholdDegrees) {
-      double rollAngleRadians = roll * (Math.PI / 180.0);
-      return Math.sin(rollAngleRadians) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
-    } else if (roll <= -Constants.DRIVE.AngleThresholdDegrees) {
-      double rollAngleRadians = roll * (Math.PI / 180.0);
-      return Math.sin(rollAngleRadians) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
-    } else
+    // Simplified Logic Below
+    if (Math.abs(roll) >= Constants.DRIVE.AngleThresholdDegrees) {
+      return Math.sin(Math.toRadians(roll)) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
+    } else {
       return 0.0;
+    }
   }
 
   private double nativeUnitsToInches(double nativeUnits) {
