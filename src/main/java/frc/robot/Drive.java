@@ -1,22 +1,24 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.kauailabs.navx.frc.AHRS;
-import frc.robot.Constants.DRIVE;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.DRIVE;
 
 public class Drive {
+
+  private AHRS navX = new AHRS();
   private TalonFX leftMaster = new TalonFX(CAN.driveLeftMasterId);
   private TalonFX leftSlave = new TalonFX(CAN.driveLeftSlaveId);
   private TalonFX rightMaster = new TalonFX(CAN.driveRightMasterId);
   private TalonFX rightSlave = new TalonFX(CAN.driveRightSlaveId);
-  private static AHRS navX = new AHRS();
-  private double lastVel;
-
-  private static double rollOffset = 0;
+  private double rollOffset, lastVel, lastTime, magicTarget, magicStraightTarget;
+  private boolean isOnMagicTarget = false;
 
   private Drive() {
     leftMaster.configFactoryDefault();
@@ -53,21 +55,75 @@ public class Drive {
     leftSlave.setNeutralMode(NeutralMode.Brake);
     rightSlave.setNeutralMode(NeutralMode.Brake);
 
-    rollOffset = navX.getRoll();
+    leftMaster.config_kF(0, DRIVE.kF);
+    leftMaster.config_kP(0, DRIVE.kP);
+    leftMaster.config_kI(0, 0);
+    leftMaster.config_kD(0, DRIVE.kD);
+
+    rightMaster.config_kF(0, DRIVE.kF);
+    rightMaster.config_kP(0, DRIVE.kP);
+    rightMaster.config_kI(0, 0);
+    rightMaster.config_kD(0, DRIVE.kD);
+
+    /* Set acceleration and vcruise velocity - see documentation */
+    leftMaster.configMotionCruiseVelocity((int) (0.8 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionAcceleration((int) (0.4 * DRIVE.kMaxNativeVel));
+    leftMaster.configAllowableClosedloopError(0, 50);
+    leftMaster.configNeutralDeadband(0.001);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
+
+    rightMaster.configMotionCruiseVelocity((int) (0.8 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionAcceleration((int) (0.4 * DRIVE.kMaxNativeVel));
+    rightMaster.configAllowableClosedloopError(0, 50);
+    rightMaster.configNeutralDeadband(0.001);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
+
+    /* Zero the sensor once on robot boot up */
+    leftMaster.setSelectedSensorPosition(0);
+    rightMaster.setSelectedSensorPosition(0);
   }
 
-  public double getVelocity() {
-    return rightMaster.getSelectedSensorVelocity();
+  public void setDriveStraight(double dist) {
+    magicStraightTarget = dist;
+    leftMaster.setSelectedSensorPosition(0);
+    rightMaster.setSelectedSensorPosition(0);
   }
 
-  public double getAcceleration() {
-    double vel = rightMaster.getSelectedSensorVelocity();
-    double time = Robot.time.get();
-    double acc = (vel - lastVel) / (time - Robot.lastTime);
-    lastVel = vel;
-    Robot.lastTime = time;
+  public void updateDriveStraight() {
+    leftMaster.set(ControlMode.MotionMagic, InchesToNativeUnits(magicStraightTarget));
+    rightMaster.set(ControlMode.MotionMagic, InchesToNativeUnits(magicStraightTarget));
+  }
 
-    return acc;
+  public boolean isDriveStraightDone() {
+    double err = (nativeUnitsToInches(leftMaster.getSelectedSensorPosition())
+        + nativeUnitsToInches(rightMaster.getSelectedSensorPosition())) / 2.0;
+    return Math.abs(err) < 0.25;
+  }
+
+  public void setMagicTurnInPlace(double deg) {
+    isOnMagicTarget = false;
+    magicTarget = getYaw() + deg;
+  }
+
+  public void magicTurnInPlaceUpdate() {
+    double error_deg = getYaw() - magicTarget;
+    double error_rad = Math.toRadians(error_deg);
+    double delta_v = 22.97 * error_rad / (2 * 0.95);
+    leftMaster.set(ControlMode.MotionMagic, InchesToNativeUnits(-delta_v) + leftMaster.getSelectedSensorPosition());
+    rightMaster.set(ControlMode.MotionMagic, InchesToNativeUnits(delta_v) + rightMaster.getSelectedSensorPosition());
+    if (Math.abs(error_deg) < 0.5
+        && Math.abs(nativeUnitsPer100MstoInchesPerSec(leftMaster.getSelectedSensorVelocity())) < 0.5
+        && Math.abs(nativeUnitsPer100MstoInchesPerSec(rightMaster.getSelectedSensorVelocity())) < 0.5) {
+      isOnMagicTarget = true;
+    }
+  }
+
+  public boolean isMagicOnTarget() {
+    return isOnMagicTarget;
   }
 
   public void setOutput(DriveSignal signal) {
@@ -75,38 +131,69 @@ public class Drive {
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
   }
 
-  public double getAverageDistance() {
-    return nativeUnitsToInches(
-        (rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
+  public double antiTip() {
+    double roll = getRoll();
+    // Simplified Logic Below
+    if (Math.abs(roll) >= Constants.DRIVE.AngleThresholdDegrees) {
+      return Math.sin(Math.toRadians(roll)) * -2;
+    } else {
+      return 0.0;
+    }
+  }
+
+  public double getVelocity() {
+    return rightMaster.getSelectedSensorVelocity();
+  }
+
+  public double getAcceleration() {
+    double curVel = rightMaster.getSelectedSensorVelocity();
+    double curTime = Timer.getFPGATimestamp();
+    double acc = (curVel - lastVel) / (Timer.getFPGATimestamp() - lastTime);
+    lastVel = curVel;
+    lastTime = curTime;
+    return acc;
   }
 
   public double getRoll() {
     return navX.getRoll() - rollOffset;
   }
 
-  public double AntiTip() {
-    double roll = getRoll();
-    // Simplified Logic Below
-    if (Math.abs(roll) >= Constants.DRIVE.AngleThresholdDegrees) {
-      return Math.sin(Math.toRadians(roll)) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
-    } else {
-      return 0.0;
-    }
+  public void resetNavX() {
+    rollOffset = navX.getRoll();
+    navX.zeroYaw();
   }
 
-  private double nativeUnitsToInches(double nativeUnits) {
-    return (nativeUnits / 4096.0) * DRIVE.wheelCircumference;
+  public double getYaw() {
+    return navX.getAngle();
   }
 
   public static Drive getInstance() {
     return InstanceHolder.mInstance;
   }
 
+  private double nativeUnitsToInches(double nativeUnits) {
+    return (nativeUnits / 2048.0) * DRIVE.wheelCircumference;
+  }
+
+  private double InchesToNativeUnits(double inches) {
+    return (inches / DRIVE.wheelCircumference) * 2048.0;
+  }
+
+  private double nativeUnitsPer100MstoInchesPerSec(double vel) {
+    return 10 * nativeUnitsToInches(vel);
+  }
+
+  private double InchesPerSecToUnitsPer100Ms(double vel) {
+    return InchesToNativeUnits(vel) / 10;
+  }
+
   private static class InstanceHolder {
+
     private static final Drive mInstance = new Drive();
   }
 
   public static class DriveSignal {
+
     public static DriveSignal STOP = new DriveSignal(0, 0);
     protected double mLeftMotor;
     protected double mRightMotor;
