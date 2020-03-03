@@ -74,7 +74,7 @@ public final class Constants {
     public static final double KAngle = 1;
 
     public static final double kMaxNativeVel = 1685;
-    public static final double kP = 3.5 * (0.1 * 1023.0) / (700.0);
+    public static final double kP = 7.0 * (0.1 * 1023.0) / (350.0);
     public static final double kD = 3.0 * kP;
     public static final double kF = 1023.0 / DRIVE.kMaxNativeVel;
   }
