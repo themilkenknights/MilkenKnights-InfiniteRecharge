@@ -75,12 +75,6 @@ public class Limelight {
   }
 
   public double getDistance() {
-    /* double a = 98.6797 * Math.pow(ta.getDouble(0.0), -0.7282); double b = 9.4835
-    Math.pow(0.9900, ta.getDouble(0.0));
-    return (a+b)/2;
-    double a = Math.pow(.6988 * ta.getDouble(0.0), 2) + (-35.226 * ta.getDouble(0.0)) + 199.3863;
-    double a = Math.pow(Math.E, 5.5111 + -0.2701 * ta.getDouble(0.0));
-    return a + 8; */
 
     double height_camera_to_target = 50.0; //inches
     double lightlight_pitch = 30.0; //Degrees from horizontal
