@@ -1,22 +1,22 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.kauailabs.navx.frc.AHRS;
-import frc.robot.Constants.DRIVE;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.DRIVE;
 
 public class Drive {
+
+  private AHRS navX = new AHRS();
   private TalonFX leftMaster = new TalonFX(CAN.driveLeftMasterId);
   private TalonFX leftSlave = new TalonFX(CAN.driveLeftSlaveId);
   private TalonFX rightMaster = new TalonFX(CAN.driveRightMasterId);
   private TalonFX rightSlave = new TalonFX(CAN.driveRightSlaveId);
-  private static AHRS navX = new AHRS();
-  private double lastVel;
-
-  private static double rollOffset = 0;
+  private double rollOffset, lastVel, lastTime;
 
   private Drive() {
     leftMaster.configFactoryDefault();
@@ -54,6 +54,11 @@ public class Drive {
     rightSlave.setNeutralMode(NeutralMode.Brake);
 
     rollOffset = navX.getRoll();
+    //TODO: Verify you want this behavior. If you are carrying the robot while it boots up this value will be erroneous
+  }
+
+  public static Drive getInstance() {
+    return InstanceHolder.mInstance;
   }
 
   public double getVelocity() {
@@ -61,12 +66,11 @@ public class Drive {
   }
 
   public double getAcceleration() {
-    double vel = rightMaster.getSelectedSensorVelocity();
-    double time = Robot.time.get();
-    double acc = (vel - lastVel) / (time - Robot.lastTime);
-    lastVel = vel;
-    Robot.lastTime = time;
-
+    double curVel = rightMaster.getSelectedSensorVelocity();
+    double curTime = Timer.getFPGATimestamp();
+    double acc = (curVel - lastVel) / (Timer.getFPGATimestamp() - lastTime);
+    lastVel = curVel;
+    lastTime = curTime;
     return acc;
   }
 
@@ -76,19 +80,18 @@ public class Drive {
   }
 
   public double getAverageDistance() {
-    return nativeUnitsToInches(
-        (rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
+    return nativeUnitsToInches((rightMaster.getSelectedSensorPosition() + leftMaster.getSelectedSensorPosition()) / 2.0);
   }
 
   public double getRoll() {
     return navX.getRoll() - rollOffset;
   }
 
-  public double AntiTip() {
+  public double antiTip() {
     double roll = getRoll();
     // Simplified Logic Below
     if (Math.abs(roll) >= Constants.DRIVE.AngleThresholdDegrees) {
-      return Math.sin(Math.toRadians(roll)) * -2; // * (Constants.DRIVE.KAngle/Constants.DRIVE.AngleThresholdDegrees);
+      return Math.sin(Math.toRadians(roll)) * -2;
     } else {
       return 0.0;
     }
@@ -98,15 +101,13 @@ public class Drive {
     return (nativeUnits / 4096.0) * DRIVE.wheelCircumference;
   }
 
-  public static Drive getInstance() {
-    return InstanceHolder.mInstance;
-  }
-
   private static class InstanceHolder {
+
     private static final Drive mInstance = new Drive();
   }
 
   public static class DriveSignal {
+
     public static DriveSignal STOP = new DriveSignal(0, 0);
     protected double mLeftMotor;
     protected double mRightMotor;

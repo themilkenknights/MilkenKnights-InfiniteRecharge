@@ -5,8 +5,10 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
+import frc.robot.Constants.SHOOTER;
 
 public class Shooter {
+
   private CANSparkMax mShooterSparkMaxLeft = new CANSparkMax(Constants.CAN.LeftShooterId, MotorType.kBrushless);
   private CANSparkMax mShooterSparkMaxRight = new CANSparkMax(Constants.CAN.RightShootId, MotorType.kBrushless);
   private CANSparkMax mHoodSparkMax = new CANSparkMax(Constants.CAN.HoodId, MotorType.kBrushless);
@@ -40,35 +42,45 @@ public class Shooter {
     mShooterPIDController.setOutputRange(-1, 1);
   }
 
-  public void setShooterOutput(double percentOut) {
-    mShooterSparkMaxLeft.set(percentOut);
+  public static Shooter getInstance() {
+    return InstanceHolder.mInstance;
   }
 
-  public void setShooterRPM(double rpm) {
-    mShooterPIDController.setReference(rpm, ControlType.kVelocity);
+  public void setShooterOutput(double percentOut) {
+    mShooterSparkMaxLeft.set(percentOut);
   }
 
   public double getShooterRPM() {
     return sEncoder.getVelocity();
   }
 
-  public static Shooter getInstance() {
-    return InstanceHolder.mInstance;
+  public void setShooterRPM(double rpm) {
+    mShooterPIDController.setReference(rpm, ControlType.kVelocity);
   }
 
   public void zeroHood() {
     hEncoder.setPosition(0);
   }
 
-  public void setHoodPos(double Pos) {
-    mHoodSparkMax.set((Pos - hEncoder.getPosition()) * kp);
-  }
-
   public double getHoodPos() {
     return hEncoder.getPosition();
   }
 
+  public void setHoodPos(double Pos) {
+    mHoodSparkMax.set((Pos - hEncoder.getPosition()) * kp);
+  }
+
+  public void setHoodFromTargetDist(double dist) {
+    if (dist < SHOOTER.maxHoodAdjustDist) {
+      setHoodPos(SHOOTER.maxHoodPos);
+    } else {
+      //TODO: Modify hood based on distance here
+      setHoodPos(dist * 0.5);
+    }
+  }
+
   private static class InstanceHolder {
+
     private static final Shooter mInstance = new Shooter();
   }
 }
