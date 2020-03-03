@@ -16,6 +16,8 @@ import frc.robot.lib.InterpolatingTreeMap;
 public final class Constants {
 
   public static final double PI = 3.14159265359;
+  public static final double kDt = 0.02; // Sec
+  public static final double intakeSpeed = 0.5;
 
   public static class CAN {
 
@@ -49,7 +51,8 @@ public final class Constants {
     public static final int elevatorDown = 5;
     public static final int limeLight = 9;
 
-    // public static final int button 1 is shooterControlEnable and forward and back tics for speed
+    // public static final int button 1 is shooterControlEnable and forward and back
+    // tics for speed
     // management.
     // hood pov
   }
@@ -69,6 +72,11 @@ public final class Constants {
 
     public static final double AngleThresholdDegrees = 15;
     public static final double KAngle = 1;
+
+    public static final double kMaxNativeVel = 1685;
+    public static final double kP = 3.5 * (0.1 * 1023.0) / (700.0);
+    public static final double kD = 3.0 * kP;
+    public static final double kF = 1023.0 / DRIVE.kMaxNativeVel;
   }
 
   public static class LIFTER {
@@ -105,13 +113,14 @@ public final class Constants {
     public static final double kP_turn = 0.03;
     public static final double kD_turn = .005;
     public static final double angle_tol = 0.3;
-    public static final double max_angular_vel = 19265.0; // Deg/Sec @TODO These are definitely way too high. Try something like 1200 Deg/Sec
-    public static final double max_angular_accel = 151917.25529762334; // Deg/Sec^2 Try 2000 Deg/Sec^2
+    public static final double max_angular_vel = 1000; // Deg/Sec @TODO These are definitely way too high. Try something
+                                                       // like 1200 Deg/Sec
+    public static final double max_angular_accel = 2000; // Deg/Sec^2 Try 2000 Deg/Sec^2
 
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kRPMMap = new InterpolatingTreeMap<>();
 
-    public static double[][] kDistanceRpmValues = {{90.0, 2890.0}, // {Distance(Inches), RPM},
-        {95.0, 2940.0}, {100.0, 2990.0}, {105.0, 3025.0},};
+    public static double[][] kDistanceRpmValues = { { 90.0, 2890.0 }, // {Distance(Inches), RPM},
+        { 95.0, 2940.0 }, { 100.0, 2990.0 }, { 105.0, 3025.0 }, };
 
     static {
       for (double[] pair : kDistanceRpmValues) {
@@ -122,13 +131,12 @@ public final class Constants {
 
   public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kPressureMap = new InterpolatingTreeMap<>();
 
-  public static double[][] kDistanceRpmValues = {{5, 120.0}, // {Distance(Inches), RPM},
-      {3.5, 60.0}, {1.0, 10.0}, {0, 0.0},};
+  public static double[][] kDistanceRpmValues = { { 5, 120.0 }, // {Distance(Inches), RPM},
+      { 3.5, 60.0 }, { 1.0, 10.0 }, { 0, 0.0 }, };
 
   static {
     for (double[] pair : kDistanceRpmValues) {
       kPressureMap.put(new InterpolatingDouble(pair[0]), new InterpolatingDouble(pair[1]));
     }
   }
-
 }

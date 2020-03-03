@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.Autonomous;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.PressureSensor;
 
@@ -24,6 +27,7 @@ public class Robot extends TimedRobot {
   private double ShooterRPM = 0;
   private double ShooterSpeed = 0;
   private boolean isInAttackMode = false;
+  private Command m_autonomousCommand;
 
   @Override
   public void robotInit() {
@@ -31,12 +35,19 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void robotPeriodic(){
+  public void robotPeriodic() {
+    CommandScheduler.getInstance().run();
+    Shuffle.getInstance().Update();
+    SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
     SmartDashboard.putNumber("Pressure Sensor Voltage", pressureSensor.getVoltage());
   }
 
   @Override
   public void autonomousInit() {
+    m_autonomousCommand = new Autonomous();
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.schedule();
+    }
   }
 
   @Override
@@ -45,6 +56,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
+    Drive.getInstance().resetNavX();
     Shooter.getInstance().zeroHood();
     HoodPos = 0;
     ShooterRPM = 0;
@@ -54,21 +69,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     input();
-    Shuffle.getInstance().Update();
-    /*
-     * vel =Drive.getInstance().getVelocity(); acc =Drive.getInstance().getAcceleration();
-     */
-
-    SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
-
-    /*
-     * if (Math.abs(vel) > highestVel) { highestVel = Math.abs(vel);
-     * System.out.println("Highest Velocity: " + highestVel); }
-     *
-     * if (Math.abs(acc) > highestAcc) { highestAcc = Math.abs(acc);
-     * System.out.println("Highest Acceleration: " + highestAcc); }
-     */
-
   }
 
   @Override
@@ -82,7 +82,8 @@ public class Robot extends TimedRobot {
   public void input() {
     if (jStick.getRawButton(Constants.INPUT.limeLight)) {
       Drive.getInstance().setOutput(Limelight.getInstance().update());
-      // Always Change the RPM of shooter while button is pressed so once we are in range, it is
+      // Always Change the RPM of shooter while button is pressed so once we are in
+      // range, it is
       // ready
       double curDist = Limelight.getInstance().getDistance();
       double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
@@ -105,7 +106,6 @@ public class Robot extends TimedRobot {
       } else {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
       }
-
     }
 
     // Run Shooter
@@ -145,9 +145,6 @@ public class Robot extends TimedRobot {
     }
 
     Shooter.getInstance().setHoodPos(HoodPos);
-    // System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood
-    // Pos: " + Shooter.getInstance().getHoodPos());
-
   }
 
   public void AttackMode() {
@@ -170,7 +167,8 @@ public class Robot extends TimedRobot {
     Shooter.getInstance().setShooterOutput(TargetRPM);
     Shooter.getInstance().setHoodPos(HoodPos);
     Shooter.getInstance().setShooterOutput(ShooterRPM);
-    System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
+    System.out
+        .println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
 
     if (Shooter.getInstance().getShooterRPM() > TargetRPM) {
       Elevator.getInstance().setElevatorOutput(.75);
