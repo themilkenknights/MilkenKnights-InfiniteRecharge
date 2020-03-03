@@ -22,12 +22,14 @@ public class Shooter {
     mShooterSparkMaxLeft.restoreFactoryDefaults();
     mShooterSparkMaxRight.restoreFactoryDefaults();
 
+    mShooterSparkMaxRight.follow(mShooterSparkMaxLeft, true);
+
     mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInverted);
     mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInverted);
+    
     sEncoder.setVelocityConversionFactor(2.0 / 3.0); //Integer Divison Is Bad!!
     sEncoder = mShooterSparkMaxLeft.getEncoder();
 
-    mShooterSparkMaxRight.follow(mShooterSparkMaxLeft);
 
     mShooterPIDController = mShooterSparkMaxLeft.getPIDController();
 
