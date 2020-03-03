@@ -12,12 +12,14 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.lib.InterpolatingDouble;
+import frc.robot.lib.PressureSensor;
 
 public class Robot extends TimedRobot {
 
   private Joystick stick = new Joystick(0);
   private Joystick jStick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
+  private PressureSensor pressureSensor = new PressureSensor(1);
   private double HoodPos = 0;
   private double ShooterRPM = 0;
   private double ShooterSpeed = 0;
@@ -26,6 +28,11 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     mCompressor.start();
+  }
+
+  @Override
+  public void robotPeriodic(){
+    SmartDashboard.putNumber("Pressure Sensor Voltage", pressureSensor.getVoltage());
   }
 
   @Override

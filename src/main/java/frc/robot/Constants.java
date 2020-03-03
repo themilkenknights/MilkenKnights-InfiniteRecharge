@@ -49,8 +49,9 @@ public final class Constants {
     public static final int elevatorDown = 5;
     public static final int limeLight = 9;
 
-    // public static final int button 1 is shooterControlEnable and forward and back tics for speed management.
-    //hood pov
+    // public static final int button 1 is shooterControlEnable and forward and back tics for speed
+    // management.
+    // hood pov
   }
 
   public static class DRIVE {
@@ -82,35 +83,34 @@ public final class Constants {
 
   public static class SHOOTER {
 
-    public final static double kP = 1.0;
-    public final static double kD = 1.0;
-    public final static double kPElevator = 0;
-    public final static double kDElevator = 0;
-    public final static double maxShooterVel = 0;
-    public final static double maxHoodAdjustDist = 50;
-    public final static double maxHoodPos = 10;
-
+    public static final double kP = 1.0;
+    public static final double kD = 1.0;
+    public static final double kPElevator = 0;
+    public static final double kDElevator = 0;
+    public static final double maxShooterVel = 0;
+    public static final double maxHoodAdjustDist = 50;
+    public static final double maxHoodPos = 10;
   }
 
   public static class VISION {
 
-    public final static double max_auto_output = 0.5;
-    public final static double kP_dist = 0.005;
-    public final static double kD_dist = .0005;
-    public final static double dist_tol = 0.5;
-    public final static double max_dist = 75;
-    public final static double min_dist = 60;
-    public final static double max_linear_vel = 100;
-    public final static double max_linear_accel = 140;
-    public final static double kP_turn = 0.03;
-    public final static double kD_turn = .005;
-    public final static double angle_tol = 0.3;
-    public final static double max_angular_vel = 19265.0; // Deg/Sec @TODO These are definitely way too high. Try something like 1200 Deg/Sec
-    public final static double max_angular_accel = 151917.25529762334; // Deg/Sec^2 Try 2000 Deg/Sec^2
+    public static final double max_auto_output = 0.5;
+    public static final double kP_dist = 0.005;
+    public static final double kD_dist = .0005;
+    public static final double dist_tol = 0.5;
+    public static final double max_dist = 75;
+    public static final double min_dist = 60;
+    public static final double max_linear_vel = 100;
+    public static final double max_linear_accel = 140;
+    public static final double kP_turn = 0.03;
+    public static final double kD_turn = .005;
+    public static final double angle_tol = 0.3;
+    public static final double max_angular_vel = 19265.0; // Deg/Sec @TODO These are definitely way too high. Try something like 1200 Deg/Sec
+    public static final double max_angular_accel = 151917.25529762334; // Deg/Sec^2 Try 2000 Deg/Sec^2
 
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kRPMMap = new InterpolatingTreeMap<>();
 
-    public static double[][] kDistanceRpmValues = {{90.0, 2890.0}, //{Distance(Inches), RPM},
+    public static double[][] kDistanceRpmValues = {{90.0, 2890.0}, // {Distance(Inches), RPM},
         {95.0, 2940.0}, {100.0, 2990.0}, {105.0, 3025.0},};
 
     static {
@@ -119,4 +119,16 @@ public final class Constants {
       }
     }
   }
+
+  public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kPressureMap = new InterpolatingTreeMap<>();
+
+  public static double[][] kDistanceRpmValues = {{5, 120.0}, // {Distance(Inches), RPM},
+      {3.5, 60.0}, {1.0, 10.0}, {0, 0.0},};
+
+  static {
+    for (double[] pair : kDistanceRpmValues) {
+      kPressureMap.put(new InterpolatingDouble(pair[0]), new InterpolatingDouble(pair[1]));
+    }
+  }
+
 }
