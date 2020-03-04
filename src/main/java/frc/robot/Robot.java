@@ -98,7 +98,7 @@ public class Robot extends TimedRobot {
       double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
       Shooter.getInstance().setShooterRPM(RPM);
       Shooter.getInstance().setHoodPos(hoodDist);
-      Elevator.getInstance().setElevatorOutput(0.42);
+      Elevator.getInstance().setElevatorOutput(.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
       //Intake.getInstance().setHopperRoller(0.05);
       SmartDashboard.putNumber("Map RPM", RPM);
       SmartDashboard.putNumber("Map Hood Pos", hoodDist);
@@ -150,14 +150,19 @@ public class Robot extends TimedRobot {
       }
 
       if (jStick.getRawButtonPressed(6)) {
-        ShooterSpeed += 50;
+        ShooterSpeed += .05;
       } else if (jStick.getRawButtonPressed(4)) {
-        ShooterSpeed -= 50;
+        ShooterSpeed -= .05;
       }
 
-   if (jStick.getRawButtonPressed(1)) {
+      if(jStick.getRawButtonPressed(10))
+      {
+        ElevatorStopper.getInstance().toggleStopper();
+      }
+
+      if (jStick.getRawButtonPressed(1)) {
         Shooter.getInstance().setHoodPos(HoodPos);
-        Shooter.getInstance().setShooterRPM(ShooterSpeed);
+        Shooter.getInstance().setShooterOutput(ShooterSpeed);
       } else{
         Shooter.getInstance().setHoodPos(HoodPos);
         Shooter.getInstance().setShooterOutput(ShooterSpeed);

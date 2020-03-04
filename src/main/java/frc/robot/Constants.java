@@ -106,7 +106,7 @@ public final class Constants {
     public static final double kP_dist = 0.0035;
     public static final double kD_dist = 0.0;
     public static final double dist_tol = 0.5;
-    public static final double max_dist = 170;
+    public static final double max_dist = 300;
     public static final double min_dist = 60;
     public static final double max_linear_vel = 100;
     public static final double max_linear_accel = 140;
@@ -116,6 +116,7 @@ public final class Constants {
     public static final double angle_tol = 0.65;
     public static final double max_angular_vel = 400;
     public static final double max_angular_accel = 200; 
+    public static final double elevatorSlope = .002;
 
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kRPMMap = new InterpolatingTreeMap<>();
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kHoodMap = new InterpolatingTreeMap<>();
@@ -126,14 +127,20 @@ public final class Constants {
       { 113.55, 3250.0 },
       { 114.3, 3250.0 },
       { 118.0, 3320.0 },
-      { 125.3, 3425.0 },
+      { 125.3, 3415.0 },
       { 135.3, 3450.0 },
       { 140.3, 3480.0 },
       { 145.3, 3505.0 },
-      { 150.3, 3525 }, };
+      { 150.3, 3525 }, 
+      {252.0, 3800},
+      {173.0 , 3650},
+      {196.3 , 3650},
+      {205 , 3750},
+      {180 , 3650},
+      {200 , 3750},};
 
       public static double[][] kDistanceHoodValues = { 
-        { 88.78, -2.14 }, // {Distance(Inches), RPM},
+        { 88.78, -2.14 }, // {Distance(Inches), Hood},
         { 101.85, -2.26 },
         { 113.55, -2.69 },
         { 114.3, -2.76 },
@@ -142,7 +149,13 @@ public final class Constants {
         { 135.3, -3.15 }, 
         { 140.3, -3.25 },
         { 145.3, -3.25  },
-        { 150.3, -3.25  }, };
+        { 150.3, -3.25  }, 
+        {252.0 , -3.25  },
+        {173 , -3.25},
+        {196 , -3.25},
+        {205 , -3.25},
+        {180 , -3.25},
+        {200 , -3.25},};
 
     static {
       for (double[] pair : kDistanceRpmValues) {

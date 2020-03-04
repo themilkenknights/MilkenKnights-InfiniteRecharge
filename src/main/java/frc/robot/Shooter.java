@@ -37,9 +37,9 @@ public class Shooter {
 
     mShooterPIDController = mShooterSparkMaxLeft.getPIDController();
 
-    mShooterPIDController.setP(0.00225);
+    mShooterPIDController.setP(0.0022);
     mShooterPIDController.setI(0);
-    mShooterPIDController.setD(0.0075);
+    mShooterPIDController.setD(0.008);//0.0075
     mShooterPIDController.setFF(1.0 / 5100); // 1.0/MAX_RPM
     mShooterPIDController.setOutputRange(-1, 1);
   }
