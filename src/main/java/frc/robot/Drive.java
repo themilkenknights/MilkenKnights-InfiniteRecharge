@@ -149,7 +149,7 @@ public class Drive extends SubsystemBase {
 
   public boolean isDriveStraightDone() {
     double err = magicStraightTarget - mPeriodicIO.avg_dist_inches;
-    if (Math.abs(err) < 0.75 && mPeriodicIO.avg_vel_inches_per_sec < 0.1) {
+    if (Math.abs(err) < 0.5 && mPeriodicIO.avg_vel_inches_per_sec < 0.1) {
       leftMaster.set(ControlMode.PercentOutput, 0);
       rightMaster.set(ControlMode.PercentOutput, 0);
       return true;
@@ -169,7 +169,7 @@ public class Drive extends SubsystemBase {
     double delta_v = 22.97 * error_rad / (2 * 0.95);
     leftMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(-delta_v) + mPeriodicIO.left_pos_native);
     rightMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(delta_v) + mPeriodicIO.right_pos_native);
-    if (Math.abs(error_deg) < 4.0 && mPeriodicIO.avg_vel_inches_per_sec < 0.25) {
+    if (Math.abs(error_deg) < 3.0 && mPeriodicIO.avg_vel_inches_per_sec < 0.1) {
       isOnMagicTarget = true;
     }
   }
@@ -256,7 +256,7 @@ public class Drive extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return navX.getYaw();
+    return -navX.getYaw();
   }
 
   public void configCoastMode() {
@@ -271,10 +271,6 @@ public class Drive extends SubsystemBase {
     rightMaster.setNeutralMode(NeutralMode.Coast);
     leftSlave.setNeutralMode(NeutralMode.Coast);
     rightSlave.setNeutralMode(NeutralMode.Coast);
-  }
-
-  public double getRoll() {
-    return navX.getRoll() - rollOffset;
   }
 
   public void zeroSensors() {

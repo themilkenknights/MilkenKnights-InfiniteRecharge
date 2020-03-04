@@ -1,5 +1,6 @@
 package frc.robot.lib;
 
+import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.Constants.DRIVE;
 
 public class MkUtil {
@@ -21,7 +22,7 @@ public class MkUtil {
   }
 
   public static double inchesToMeters(double inches) {
-    return inches * 0.0254;
+    return Units.inchesToMeters(inches);
   }
 
   public static double nativeToMeters(double nativeUnits) {
@@ -33,11 +34,12 @@ public class MkUtil {
   }
 
   public static double metersToInches(double meters) {
-    return meters * 39.3701;
+    return Units.metersToInches(meters);
   }
 
   public static double metersPerSecondToNativeUnitsPer100Ms(double meters) {
     return inchesPerSecToUnitsPer100Ms(metersToInches(meters));
+
   }
 
   public static DriveSignal cheesyDrive(double throttle, double wheel, boolean cubeInputs) {

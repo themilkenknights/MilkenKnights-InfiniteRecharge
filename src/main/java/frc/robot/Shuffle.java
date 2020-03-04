@@ -20,6 +20,7 @@ public class Shuffle {
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
     SmartDashboard.putNumber("Pressure", ((((pressure.getVoltage()) * 250 / 5.0 - 25.0) / 112) * 120));
     SmartDashboard.putNumber("Hood Pos", Shooter.getInstance().getHoodPos());
+    SmartDashboard.putNumber("Hood Setpoint", Shooter.getInstance().getHoodPos());
     Drive.getInstance().updateDashboard();
     Limelight.getInstance().updateDashboard();
   }

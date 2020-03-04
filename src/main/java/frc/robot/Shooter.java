@@ -17,6 +17,7 @@ public class Shooter {
   private CANEncoder hEncoder = new CANEncoder(mHoodSparkMax);
 
   private final CANPIDController mShooterPIDController;
+  private double hoodSetpoint;
 
   private Shooter() {
     mShooterSparkMaxLeft.restoreFactoryDefaults();
@@ -62,8 +63,13 @@ public class Shooter {
     return hEncoder.getPosition();
   }
 
-  public void setHoodPos(double Pos) {
-    mHoodSparkMax.set((Pos - hEncoder.getPosition()) * SHOOTER.kHoodKp);
+  public double getHoodSetpoint() {
+    return hoodSetpoint;
+  }
+
+  public void setHoodPos(double pos) {
+    mHoodSparkMax.set((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp);
+    hoodSetpoint = pos;
   }
 
   private static class InstanceHolder {
