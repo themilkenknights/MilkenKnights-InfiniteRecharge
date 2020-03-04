@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.commands.Autonomous;
 import frc.robot.lib.InterpolatingDouble;
 
@@ -29,7 +30,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private double lastTime = 0;
 
-  public Robot(){
+  public Robot() {
     super(Constants.kDt);
   }
 
@@ -87,6 +88,8 @@ public class Robot extends TimedRobot {
 
   public void input() {
     if (jStick.getRawButton(Constants.INPUT.limeLight)) {
+      Intake.getInstance().setIntakeRoller(0.0);
+      Intake.getInstance().setIntakeState(false);
       Drive.getInstance().setOutput(Limelight.getInstance().update());
       double curDist = Limelight.getInstance().getDistance();
       double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
@@ -98,81 +101,58 @@ public class Robot extends TimedRobot {
       SmartDashboard.putBoolean("In Range", Limelight.getInstance().inRange());
       if (Limelight.getInstance().inRange() && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
         Elevator.getInstance().setElevatorOutput(.420);
-        ElevatorStopper.getInstance().setStopper(true);
+        ElevatorStopper.getInstance().setStopper(StopperState.GO);
       }
-      return;
     } else {
       double forward, turn, rightOut, leftOut;
-      // this gets how far forward the forward stick is
-      //forward = Math.pow(stick.getRawAxis(3) - stick.getRawAxis(2), 5) + Drive.getInstance().antiTip();
-      //turn = Math.abs(stick.getRawAxis(0)) > .05 ? stick.getRawAxis(0) : 0.00; // this gets out left or right the turn stick is
-     // rightOut = forward - turn; // This sets the turn distance for arcade drive
-    //  leftOut = forward + turn;
       double antiTip = Drive.getInstance().antiTip();
-       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3)+ antiTip);
-       turn = (-stick.getRawAxis(0));
+      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + antiTip);
+      turn = (-stick.getRawAxis(0));
       Drive.DriveSignal controlSig = cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
 
       if (isInAttackMode) {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut / 2.0, rightOut / 2.0));
+        AttackMode();
       } else {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut, rightOut));
+        DefenceMode();
+      }
+
+      if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
+        Climber.getInstance().setClimbState(true);
+      } else if (jStick.getRawButtonPressed(Constants.INPUT.climbOff)) {
+        Climber.getInstance().setClimbState(false);
+      }
+
+      if (jStick.getPOV() == 0) {
+        HoodPos -= .05;
+      } else if (jStick.getPOV() == 180) {
+        HoodPos += .05;
+      }
+
+      if (jStick.getRawButtonPressed(6)) {
+        ShooterSpeed += 50;
+      } else if (jStick.getRawButtonPressed(4)) {
+        ShooterSpeed -= 50;
+      }
+
+      if (jStick.getRawButtonPressed(50)) {
+        Shooter.getInstance().setHoodPos(HoodPos);
+        Shooter.getInstance().setShooterRPM(ShooterSpeed);
+      }
+
+      if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
+        Elevator.getInstance().setElevatorOutput(.420);
+        ElevatorStopper.getInstance().setStopper(StopperState.GO);
+      } else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
+        Elevator.getInstance().setElevatorOutput(-.420);
+        ElevatorStopper.getInstance().setStopper(StopperState.GO);
+      } else if (!isInAttackMode) {
+        Elevator.getInstance().setElevatorOutput(0);
       }
     }
-
-    // Run Shooter
-    /*
-    if (jStick.getRawButton(1)) {
-      Shooter.getInstance().setShooterOutput(.5);
-    } else {
-      Shooter.getInstance().setShooterOutput(0.00);
-    }
-    */
-
-    if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
-      Climber.getInstance().setClimbState(true);
-    }
-    if (jStick.getRawButtonPressed(Constants.INPUT.climbOff)) {
-      Climber.getInstance().setClimbState(false);
-    }
-
-    if (jStick.getPOV() == 0) {
-      HoodPos -= .05;
-    } else if (jStick.getPOV() == 180) {
-      HoodPos += .05;
-    }
-    if(jStick.getRawButtonPressed(6))
-      ShooterSpeed += 50;
-    else if(jStick.getRawButtonPressed(4))
-      ShooterSpeed -= 50;
-    
-    Shooter.getInstance().setHoodPos(HoodPos);
-    Shooter.getInstance().setShooterRPM(ShooterSpeed);
-    ElevatorStopper.getInstance().setStopper(false);
-    System.out.println("Target RPM: " + ShooterSpeed + " RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
-
-    if (jStick.getRawButton(Constants.INPUT.attackMode)) {
-      AttackMode();
-    } else if (jStick.getRawButton(Constants.INPUT.defenceMode)) {
-      DefenceMode();
-    }
-
-    if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
-      Elevator.getInstance().setElevatorOutput(.420);
-      ElevatorStopper.getInstance().setStopper(true);
-    } else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
-      Elevator.getInstance().setElevatorOutput(-.420);
-      ElevatorStopper.getInstance().setStopper(true);
-    } else if (!isInAttackMode) {
-      Elevator.getInstance().setElevatorOutput(0);
-    }
-
-    if(jStick.getRawButtonPressed(10)){
-      ElevatorStopper.getInstance().toggleStopper();
-    }
-
   }
 
   public void AttackMode() {
@@ -180,7 +160,7 @@ public class Robot extends TimedRobot {
     Intake.getInstance().setIntakeState(true);
     Elevator.getInstance().setElevatorOutput(0.20);
     Intake.getInstance().setHopperRoller(.42);
-    ElevatorStopper.getInstance().setStopper(false);
+    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
     isInAttackMode = true;
   }
 
@@ -189,23 +169,6 @@ public class Robot extends TimedRobot {
     Intake.getInstance().setIntakeState(false);
     Elevator.getInstance().setElevatorOutput(0);
     isInAttackMode = false;
-  }
-
-  public void shoot(double TargetRPM, double HoodPos) {
-    Shooter.getInstance().setShooterOutput(TargetRPM);
-    Shooter.getInstance().setHoodPos(HoodPos);
-    Shooter.getInstance().setShooterOutput(ShooterRPM);
-    System.out.println("RPM: " + Shooter.getInstance().getShooterRPM() + " Hood Pos: " + Shooter.getInstance().getHoodPos());
-/*
-    if (Shooter.getInstance().getShooterRPM() > TargetRPM) {
-      Elevator.getInstance().setElevatorOutput(.75);
-      Intake.getInstance().setHopperRoller(0.5);
-      ElevatorStopper.getInstance().setStopper(false);
-    } else {
-      Elevator.getInstance().setElevatorOutput(.25);
-      Intake.getInstance().setHopperRoller(0.5);
-    }
-    */
   }
 
   public Drive.DriveSignal cheesyDrive(double throttle, double wheel, boolean cubeInputs) {
@@ -240,7 +203,8 @@ public class Robot extends TimedRobot {
     }
     return new Drive.DriveSignal(leftMotorSpeed, rightMotorSpeed);
   }
-    public double limit(double num) {
+
+  public double limit(double num) {
     if (num > 1.0) {
       return 1.0;
     }

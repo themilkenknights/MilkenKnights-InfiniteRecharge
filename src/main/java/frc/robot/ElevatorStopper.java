@@ -29,12 +29,23 @@ public class ElevatorStopper {
     }
   }
 
-  public void setStopper(boolean state) {
-    stopperSolenoid.set(state);
+  public void setStopper(StopperState state) {
+    stopperSolenoid.set(state.state);
   }
 
   private static class InstanceHolder {
 
     private static final ElevatorStopper mInstance = new ElevatorStopper();
+  }
+
+  public enum StopperState {
+    GO(true), STOP(false);
+
+    public final boolean state;
+
+    StopperState(final boolean state) {
+      this.state = state;
+    }
+
   }
 }
