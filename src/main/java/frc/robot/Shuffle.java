@@ -16,6 +16,10 @@ public class Shuffle {
     SmartDashboard.putNumber("Pressure", ( (((pressure.getVoltage()) * 250 / 5.0 - 25.0)/112) * 120));
     SmartDashboard.putNumber("Rot Vel", Drive.getInstance().getYawVel());
     SmartDashboard.putNumber("Yaw", Drive.getInstance().getYaw());
+    SmartDashboard.putNumber("RPos", Drive.getInstance().getPos());
+    SmartDashboard.putNumber("RVel", Drive.getInstance().getVelocity());
+    SmartDashboard.putNumber("RPosIn", Drive.getInstance().nativeUnitsToInches(Drive.getInstance().getPos()));
+    SmartDashboard.putNumber("Hood Pos", Shooter.getInstance().getHoodPos());
 
   }
 

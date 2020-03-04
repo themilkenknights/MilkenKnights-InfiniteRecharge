@@ -7,6 +7,7 @@ import frc.robot.Elevator;
 import frc.robot.ElevatorStopper;
 import frc.robot.Limelight;
 import frc.robot.Shooter;
+import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.lib.InterpolatingDouble;
 
 public class LimelightShoot extends CommandBase {
@@ -30,7 +31,7 @@ public class LimelightShoot extends CommandBase {
         Shooter.getInstance().setHoodPos(curDist);
         if (Limelight.getInstance().inRange()) {
             Elevator.getInstance().setElevatorOutput(.420);
-            ElevatorStopper.getInstance().setStopper(true);
+            ElevatorStopper.getInstance().setStopper(StopperState.GO);
         }
     }
 

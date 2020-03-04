@@ -22,7 +22,11 @@ public class Limelight {
   private Limelight() {
     m_turn_controller.setTolerance(VISION.angle_tol);
     m_dist_controller.setTolerance(VISION.dist_tol);
-    m_turn_controller.setIntegratorRange(-150.0, 150.0);
+    m_turn_controller.setIntegratorRange(-100.0, 100.0);
+  }
+
+  public void resetInt(){
+    m_turn_controller.reset(tx.getDouble(0.0));
   }
 
   public static Limelight getInstance() {
@@ -30,7 +34,7 @@ public class Limelight {
   }
 
   public boolean inRange() {
-    return /*m_dist_controller.atGoal() &&*/Math.abs(tx.getDouble(0.0)) < Constants.VISION.angle_tol;
+    return getDistance() < VISION.max_dist && Math.abs(tx.getDouble(0.0)) < Constants.VISION.angle_tol;
   }
 
   public Drive.DriveSignal update() {
@@ -43,26 +47,16 @@ public class Limelight {
     SmartDashboard.putNumber("Vertical Angle", vertical_angle);
     SmartDashboard.putNumber("Target Distance", current_dist);
     // Goal angle - current angle
-
-    double forward_output = 0;
     double turn_output = 0;
 
     // Have a deadband where we are close enough
     if (Math.abs(horizontal_angle) > VISION.angle_tol) {
       // Get PID controller output
       TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0,0));
-      turn_output = m_turn_controller.calculate(-horizontal_angle, 0) + ((1.0)/(VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity; 
+      turn_output = clampS(m_turn_controller.calculate(-horizontal_angle, 0) + ((1.0)/(VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity); 
     }
 
-    // Have a deadband where we are close enough
-
-    /*if (current_dist > VISION.max_dist) {
-      forward_output = m_dist_controller.calculate(current_dist, VISION.max_dist);
-    } else if (getDistance() < VISION.min_dist) {
-      forward_output = m_dist_controller.calculate(current_dist, VISION.min_dist);
-    }*/
-
-    return new Drive.DriveSignal(clamp(forward_output + turn_output), clamp(forward_output - turn_output));
+    return new Drive.DriveSignal(clamp(turn_output), clamp(-turn_output));
   }
 
   public double getDistance() {
@@ -73,6 +67,10 @@ public class Limelight {
 
   public double clamp(double a) {
     return Math.abs(a) < VISION.max_auto_output ? a : Math.copySign(VISION.max_auto_output, a);
+  }
+
+  public double clampS(double a) {
+    return Math.abs(a) < 0.11 ? a : Math.copySign(0.11, a);
   }
 
   private static class InstanceHolder {

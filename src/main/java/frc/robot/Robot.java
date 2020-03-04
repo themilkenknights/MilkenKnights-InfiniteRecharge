@@ -29,6 +29,8 @@ public class Robot extends TimedRobot {
   private boolean isInAttackMode = false;
   private Command m_autonomousCommand;
   private double lastTime = 0;
+  private Timer shootTimer = new Timer();
+  private boolean shootOn = false;
 
   public Robot() {
     super(Constants.kDt);
@@ -96,12 +98,19 @@ public class Robot extends TimedRobot {
       double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
       Shooter.getInstance().setShooterRPM(RPM);
       Shooter.getInstance().setHoodPos(hoodDist);
+      Elevator.getInstance().setElevatorOutput(0.42);
+      //Intake.getInstance().setHopperRoller(0.05);
       SmartDashboard.putNumber("Map RPM", RPM);
       SmartDashboard.putNumber("Map Hood Pos", hoodDist);
       SmartDashboard.putBoolean("In Range", Limelight.getInstance().inRange());
-      if (Limelight.getInstance().inRange() && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
-        Elevator.getInstance().setElevatorOutput(.420);
+      if (Limelight.getInstance().inRange() && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30) {
         ElevatorStopper.getInstance().setStopper(StopperState.GO);
+        shootTimer.start();
+        shootOn = true;
+      } else if(shootTimer.hasElapsed(0.25) || shootOn == false) {
+        shootTimer.reset();
+        shootOn = false;
+        ElevatorStopper.getInstance().setStopper(StopperState.STOP);
       }
     } else {
       double forward, turn, rightOut, leftOut;
@@ -111,6 +120,14 @@ public class Robot extends TimedRobot {
       Drive.DriveSignal controlSig = cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
+
+      Limelight.getInstance().resetInt();
+
+      if (jStick.getRawButtonPressed(Constants.INPUT.attackMode)) {
+        isInAttackMode = true;
+      } else if (jStick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
+        isInAttackMode = false;
+      }
 
       if (isInAttackMode) {
         Drive.getInstance().setOutput(new Drive.DriveSignal(leftOut / 2.0, rightOut / 2.0));
@@ -138,9 +155,12 @@ public class Robot extends TimedRobot {
         ShooterSpeed -= 50;
       }
 
-      if (jStick.getRawButtonPressed(50)) {
+   if (jStick.getRawButtonPressed(1)) {
         Shooter.getInstance().setHoodPos(HoodPos);
         Shooter.getInstance().setShooterRPM(ShooterSpeed);
+      } else{
+        Shooter.getInstance().setHoodPos(HoodPos);
+        Shooter.getInstance().setShooterOutput(ShooterSpeed);
       }
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
