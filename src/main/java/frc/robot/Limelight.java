@@ -20,35 +20,37 @@ public class Limelight {
   private final NetworkTableEntry ty = table.getEntry("ty");
   private final Timer shootTimer = new Timer();
   private boolean shootOn = false;
+  private double distance, visionYaw, visionPitch;
 
   private Limelight() {
     m_turn_controller.setTolerance(VISION.angle_tol);
     m_turn_controller.setIntegratorRange(-100.0, 100.0);
   }
 
-  public static Limelight getInstance() {
-    return InstanceHolder.mInstance;
+  public void updateSensors() {
+    visionYaw = tx.getDouble(0.0);
+    visionPitch = ty.getDouble(0.0);
+    distance = getDistance(visionPitch);
   }
 
   public void resetInt() {
-    m_turn_controller.reset(tx.getDouble(0.0));
+    m_turn_controller.reset(visionYaw);
   }
 
   public boolean inRange() {
-    return Math.abs(tx.getDouble(0.0)) < Constants.VISION.angle_tol;
+    return Math.abs(visionYaw) < Constants.VISION.angle_tol;
   }
 
   public void autoAimShoot() {
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
-    Drive.getInstance().setOutput(Limelight.getInstance().update());
-    double curDist = Limelight.getInstance().getDistance();
+    Drive.getInstance().setOutput(update());
+    double curDist = getDistance();
     double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     Shooter.getInstance().setShooterRPM(RPM);
     Shooter.getInstance().setHoodPos(hoodDist);
     Elevator.getInstance().setElevatorOutput(.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
-    //Intake.getInstance().setHopperRoller(0.05);
     SmartDashboard.putNumber("Map RPM", RPM);
     SmartDashboard.putNumber("Map Hood Pos", hoodDist);
     boolean isInRange = Limelight.getInstance().inRange();
@@ -67,12 +69,7 @@ public class Limelight {
   public DriveSignal update() {
     // Get the horizontal and vertical angle we are offset by
     double horizontal_angle = tx.getDouble(0.0);
-    double vertical_angle = ty.getDouble(0.0);
-    double current_dist = getDistance();
 
-    SmartDashboard.putNumber("Horizontal Angle", horizontal_angle);
-    SmartDashboard.putNumber("Vertical Angle", vertical_angle);
-    SmartDashboard.putNumber("Target Distance", current_dist);
     // Goal angle - current angle
     double turn_output = 0;
 
@@ -87,7 +84,7 @@ public class Limelight {
   }
 
   public double getDistance() {
-    return getDistance(ty.getDouble(0.0));
+    return distance;
   }
 
   public double getDistance(double ty) {
@@ -98,6 +95,16 @@ public class Limelight {
 
   public double clamp(double a) {
     return Math.abs(a) < VISION.max_auto_output ? a : Math.copySign(VISION.max_auto_output, a);
+  }
+
+  public void updateDashboard() {
+    SmartDashboard.putNumber("Horizontal Angle", visionYaw);
+    SmartDashboard.putNumber("Vertical Angle", visionPitch);
+    SmartDashboard.putNumber("Target Distance", distance);
+  }
+
+  public static Limelight getInstance() {
+    return InstanceHolder.mInstance;
   }
 
   private static class InstanceHolder {

@@ -33,8 +33,10 @@ public class Intake {
   }
 
   public void setIntakeState(IntakeState pos) {
-    intakeSolenoid.set(pos.state);
-    mState = pos;
+    if (pos != mState) {
+      intakeSolenoid.set(pos.state);
+      mState = pos;
+    }
   }
 
   public enum IntakeState {

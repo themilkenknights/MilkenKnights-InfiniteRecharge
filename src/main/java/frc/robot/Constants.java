@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.InterpolatingTreeMap;
 
@@ -53,7 +54,7 @@ public final class Constants {
 
   public static class DRIVE {
 
-    public static final double kWheelDiameterInches = 6;
+    public static final double kWheelDiameterInches = 5.9575;
     public static final double kWheelCircumference = kWheelDiameterInches * kPi;
 
     public static final boolean kLeftMasterInverted = false;
@@ -66,10 +67,27 @@ public final class Constants {
 
     public static final double kAntiTipThreshold = 10;
 
-    public static final double kMaxNativeVel = 20000;
+    public static final double kMaxNativeVel = 1685;
     public static final double kDriveKp = 7.0 * (0.1 * 1023.0) / (1400.0);
     public static final double kDriveKD = 3.0 * kDriveKp;
     public static final double kDriveKf = 1023.0 / DRIVE.kMaxNativeVel;
+
+    public static final double kTrackwidthMeters = 0.69;
+    public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
+
+    public static final double ksVolts = 0.22;
+    public static final double kvVoltSecondsPerMeter = 1.98;
+    public static final double kaVoltSecondsSquaredPerMeter = 0.2;
+
+    // Example value only - as above, this must be tuned for your drive!
+    public static final double kPDriveVel = 8.5;
+
+    public static final double kMaxSpeedMetersPerSecond = 2.54;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 2.54;
+
+    // Reasonable baseline values for a RAMSETE follower in units of meters and seconds
+    public static final double kRamseteB = 2;
+    public static final double kRamseteZeta = 0.7;
   }
 
   public static class LIFTER {

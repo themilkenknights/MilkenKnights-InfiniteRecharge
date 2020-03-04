@@ -18,10 +18,10 @@ public class Shuffle {
     SmartDashboard.putNumber("Loop Dt", (time - lastTime) * 1e3);
     lastTime = time;
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
-    SmartDashboard.putNumber("Distance", Limelight.getInstance().getDistance());
     SmartDashboard.putNumber("Pressure", ((((pressure.getVoltage()) * 250 / 5.0 - 25.0) / 112) * 120));
-    SmartDashboard.putNumber("NavX Yaw", Drive.getInstance().getYaw());
     SmartDashboard.putNumber("Hood Pos", Shooter.getInstance().getHoodPos());
+    Drive.getInstance().updateDashboard();
+    Limelight.getInstance().updateDashboard();
   }
 
   private static class InstanceHolder {

@@ -4,10 +4,12 @@ import edu.wpi.first.wpilibj.Solenoid;
 
 public class Climber {
 
-  public static Solenoid climbSolenoid = new Solenoid(1);
+  private final Solenoid climbSolenoid = new Solenoid(1);
+  private ClimbState mState;
 
   public Climber() {
     climbSolenoid.set(false);
+    mState = ClimbState.RETRACT;
   }
 
   public static Climber getInstance() {
@@ -23,7 +25,10 @@ public class Climber {
   }
 
   public void setClimbState(ClimbState state) {
-    climbSolenoid.set(state.state);
+    if (mState != state) {
+      climbSolenoid.set(state.state);
+      mState = state;
+    }
   }
 
   public enum ClimbState {

@@ -10,15 +10,12 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
 import frc.robot.commands.Autonomous;
-import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
@@ -28,9 +25,8 @@ public class Robot extends TimedRobot {
   private Joystick jStick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
   private double hoodPos, shooterRPM, shooterSpeed;
-  private boolean isInAttackMode = false;
+  private boolean isInAttackMode, updateDashboard;
   private Command m_autonomousCommand;
-
 
   public Robot() {
     super(Constants.kDt);
@@ -40,18 +36,24 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     mCompressor.start();
     Shooter.getInstance().zeroHood();
+    Drive.getInstance().zeroSensors();
+    m_autonomousCommand = new Autonomous();
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    Shuffle.getInstance().update();
+    if (updateDashboard) {
+      Shuffle.getInstance().update();
+      updateDashboard = false;
+    } else {
+      updateDashboard = true;
+    }
   }
 
   @Override
   public void autonomousInit() {
     Drive.getInstance().configBrakeMode();
-    m_autonomousCommand = new Autonomous();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -59,6 +61,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
+    updateSensors();
   }
 
   @Override
@@ -67,12 +70,13 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     Drive.getInstance().configBrakeMode();
-    Drive.getInstance().resetNavX();
+    Drive.getInstance().zeroSensors();
     hoodPos = shooterRPM = shooterSpeed = 0;
   }
 
   @Override
   public void teleopPeriodic() {
+    updateSensors();
     input();
   }
 
@@ -84,13 +88,19 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
   }
 
+  @Override
   public void disabledInit() {
     Drive.getInstance().configCoastMode();
   }
 
+  @Override
+  public void disabledPeriodic() {
+    updateSensors();
+  }
+
   public void input() {
     if (jStick.getRawButton(Constants.INPUT.limeLight)) {
-     Limelight.getInstance().autoAimShoot();
+      Limelight.getInstance().autoAimShoot();
     } else {
       //Resets Turn Controller Integrator
       Limelight.getInstance().resetInt();
@@ -174,4 +184,8 @@ public class Robot extends TimedRobot {
     isInAttackMode = false;
   }
 
+  public void updateSensors() {
+    Drive.getInstance().updateSensors();
+    Limelight.getInstance().updateSensors();
+  }
 }

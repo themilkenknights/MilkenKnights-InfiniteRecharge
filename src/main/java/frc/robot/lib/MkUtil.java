@@ -4,20 +4,40 @@ import frc.robot.Constants.DRIVE;
 
 public class MkUtil {
 
-  public static double nativeToIn(double nativeUnits) {
+  public static double nativeToInches(double nativeUnits) {
     return (nativeUnits / 2048.0) * DRIVE.kWheelCircumference;
   }
 
-  public static int inToNative(double inches) {
-    return (int) ((inches / DRIVE.kWheelCircumference) * 2048.0);
+  public static double inchesToNative(double in) {
+    return (in / DRIVE.kWheelCircumference) * 2048.0;
   }
 
-  public static double nativeToInPer100Ms(double vel) {
-    return 10 * nativeToIn(vel);
+  public static double nativePer100MstoInchesPerSec(double vel) {
+    return 10 * nativeToInches(vel);
   }
 
-  public static int InToNativePer100Ms(double vel) {
-    return inToNative(vel) / 10;
+  public static double inchesPerSecToUnitsPer100Ms(double vel) {
+    return inchesToNative(vel) / 10;
+  }
+
+  public static double inchesToMeters(double inches) {
+    return inches * 0.0254;
+  }
+
+  public static double nativeToMeters(double nativeUnits) {
+    return inchesToMeters(nativeToInches(nativeUnits));
+  }
+
+  public static double nativePer100MsToMetersPerSec(double nativeUnits) {
+    return inchesToMeters(nativePer100MstoInchesPerSec(nativeUnits));
+  }
+
+  public static double metersToInches(double meters) {
+    return meters * 39.3701;
+  }
+
+  public static double metersPerSecondToNativeUnitsPer100Ms(double meters) {
+    return inchesPerSecToUnitsPer100Ms(metersToInches(meters));
   }
 
   public static DriveSignal cheesyDrive(double throttle, double wheel, boolean cubeInputs) {
