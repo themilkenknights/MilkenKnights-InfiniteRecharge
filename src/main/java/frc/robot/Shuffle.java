@@ -4,16 +4,19 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shuffle {
+  AnalogInput pressure = new AnalogInput(0);
 
   public static Shuffle getInstance() {
     return InstanceHolder.mInstance;
   }
 
   public void Update() {
-    AnalogInput pressure = new AnalogInput(0);
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
     SmartDashboard.putNumber("Distance", Limelight.getInstance().getDistance());
-    SmartDashboard.putNumber("Pressure", ( (pressure.getVoltage()) * 250 / 5.0 - 25.0));
+    SmartDashboard.putNumber("Pressure", ( (((pressure.getVoltage()) * 250 / 5.0 - 25.0)/112) * 120));
+    SmartDashboard.putNumber("Rot Vel", Drive.getInstance().getYawVel());
+    SmartDashboard.putNumber("Yaw", Drive.getInstance().getYaw());
+
   }
 
   private static class InstanceHolder {

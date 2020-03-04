@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DRIVE;
 
@@ -133,6 +134,8 @@ public class Drive {
 
   public double antiTip() {
     double roll = getRoll();
+   SmartDashboard.putNumber("Roll", roll);
+   SmartDashboard.putNumber("Anti-Tip",Math.sin(Math.toRadians(roll)) * -2);
     // Simplified Logic Below
     if (Math.abs(roll) >= Constants.DRIVE.AngleThresholdDegrees) {
       return Math.sin(Math.toRadians(roll)) * -2;
@@ -165,6 +168,10 @@ public class Drive {
 
   public double getYaw() {
     return navX.getAngle();
+  }
+
+  public double getYawVel(){
+    return navX.getRate();
   }
 
   public static Drive getInstance() {

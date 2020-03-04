@@ -28,16 +28,18 @@ public class Shooter {
 
     mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInverted);
     mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInverted);
-    
+    mShooterSparkMaxLeft.enableVoltageCompensation(12.0);
+    mShooterSparkMaxRight.enableVoltageCompensation(12.0);
+
     sEncoder.setVelocityConversionFactor(2.0 / 3.0); //Integer Divison Is Bad!!
     sEncoder = mShooterSparkMaxLeft.getEncoder();
 
 
     mShooterPIDController = mShooterSparkMaxLeft.getPIDController();
 
-    mShooterPIDController.setP(0.1);
+    mShooterPIDController.setP(0.00225);
     mShooterPIDController.setI(0);
-    mShooterPIDController.setD(1.0);
+    mShooterPIDController.setD(0.0075);
     mShooterPIDController.setFF(1.0 / 5100); // 1.0/MAX_RPM
     mShooterPIDController.setOutputRange(-1, 1);
   }

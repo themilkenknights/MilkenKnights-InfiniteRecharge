@@ -9,9 +9,9 @@ import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 import frc.robot.Constants.VISION;
 
 public class Limelight {
-
-  ProfiledPIDController m_turn_controller = new ProfiledPIDController(VISION.kP_turn, 0.0, VISION.kD_turn,
-      new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel));
+  TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel);
+  ProfiledPIDController m_turn_controller = new ProfiledPIDController(VISION.kP_turn, VISION.kI_turn, VISION.kD_turn,
+      constraints);
   ProfiledPIDController m_dist_controller = new ProfiledPIDController(VISION.kP_dist, 0.0, VISION.kD_dist,
       new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel));
   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
@@ -22,6 +22,7 @@ public class Limelight {
   private Limelight() {
     m_turn_controller.setTolerance(VISION.angle_tol);
     m_dist_controller.setTolerance(VISION.dist_tol);
+    m_turn_controller.setIntegratorRange(-150.0, 150.0);
   }
 
   public static Limelight getInstance() {
@@ -29,7 +30,7 @@ public class Limelight {
   }
 
   public boolean inRange() {
-    return m_dist_controller.atGoal() && m_turn_controller.atGoal();
+    return /*m_dist_controller.atGoal() &&*/Math.abs(tx.getDouble(0.0)) < Constants.VISION.angle_tol;
   }
 
   public Drive.DriveSignal update() {
@@ -49,24 +50,25 @@ public class Limelight {
     // Have a deadband where we are close enough
     if (Math.abs(horizontal_angle) > VISION.angle_tol) {
       // Get PID controller output
-      turn_output = m_turn_controller.calculate(-horizontal_angle, 0);
+      TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0,0));
+      turn_output = m_turn_controller.calculate(-horizontal_angle, 0) + ((1.0)/(VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity; 
     }
 
     // Have a deadband where we are close enough
 
-    if (current_dist > VISION.max_dist) {
+    /*if (current_dist > VISION.max_dist) {
       forward_output = m_dist_controller.calculate(current_dist, VISION.max_dist);
     } else if (getDistance() < VISION.min_dist) {
       forward_output = m_dist_controller.calculate(current_dist, VISION.min_dist);
-    }
+    }*/
 
     return new Drive.DriveSignal(clamp(forward_output + turn_output), clamp(forward_output - turn_output));
   }
 
   public double getDistance() {
     double height_camera_to_target = (89.75 - 33); //inches
-    double lightlight_pitch = 20.0; //Degrees from horizontal
-    return (height_camera_to_target / Math.tan(Math.toRadians(lightlight_pitch + ty.getDouble(0.0)))) - 17.5;
+    double lightlight_pitch = 17.7; //Degrees from horizontal
+    return (height_camera_to_target / Math.tan(Math.toRadians(lightlight_pitch + ty.getDouble(0.0))));
   }
 
   public double clamp(double a) {
