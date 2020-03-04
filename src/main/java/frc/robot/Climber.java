@@ -2,9 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
 
-/**
- * Add your docs here.
- */
 public class Climber {
 
   public static Solenoid climbSolenoid = new Solenoid(1);
@@ -25,13 +22,22 @@ public class Climber {
     }
   }
 
-  public void setClimbState(boolean state) {
-    climbSolenoid.set(state);
+  public void setClimbState(ClimbState state) {
+    climbSolenoid.set(state.state);
+  }
+
+  public enum ClimbState {
+    CLIMB(true), RETRACT(false);
+
+    public final boolean state;
+
+    ClimbState(final boolean state) {
+      this.state = state;
+    }
   }
 
   private static class InstanceHolder {
 
     private static final Climber mInstance = new Climber();
   }
-
 }

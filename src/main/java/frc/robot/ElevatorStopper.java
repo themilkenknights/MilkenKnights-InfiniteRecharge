@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 
 public class ElevatorStopper {
 
-  public static Solenoid stopperSolenoid = new Solenoid(2);
+  private final Solenoid stopperSolenoid = new Solenoid(2);
 
   public ElevatorStopper() {
     stopperSolenoid.set(false);
@@ -33,11 +33,6 @@ public class ElevatorStopper {
     stopperSolenoid.set(state.state);
   }
 
-  private static class InstanceHolder {
-
-    private static final ElevatorStopper mInstance = new ElevatorStopper();
-  }
-
   public enum StopperState {
     GO(true), STOP(false);
 
@@ -46,6 +41,10 @@ public class ElevatorStopper {
     StopperState(final boolean state) {
       this.state = state;
     }
+  }
 
+  private static class InstanceHolder {
+
+    private static final ElevatorStopper mInstance = new ElevatorStopper();
   }
 }

@@ -6,14 +6,14 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 public class Elevator {
 
-  TalonSRX eTalon = new TalonSRX(Constants.CAN.ElevatorId);
+  TalonSRX eTalon = new TalonSRX(Constants.CAN.kElevatorId);
 
   private Elevator() {
     eTalon.configFactoryDefault();
     eTalon.configVoltageCompSaturation(12.0);
     eTalon.enableVoltageCompensation(true);
     eTalon.setNeutralMode(NeutralMode.Brake);
-    eTalon.setInverted(Constants.CAN.elevatorInverted);
+    eTalon.setInverted(Constants.CAN.kElevatorInverted);
   }
 
   public static Elevator getInstance() {

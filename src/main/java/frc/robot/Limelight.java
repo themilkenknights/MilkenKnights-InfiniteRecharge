@@ -3,41 +3,68 @@ package frc.robot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 import frc.robot.Constants.VISION;
+import frc.robot.lib.InterpolatingDouble;
+import frc.robot.lib.MkUtil.DriveSignal;
 
 public class Limelight {
-  TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel);
-  ProfiledPIDController m_turn_controller = new ProfiledPIDController(VISION.kP_turn, VISION.kI_turn, VISION.kD_turn,
-      constraints);
-  ProfiledPIDController m_dist_controller = new ProfiledPIDController(VISION.kP_dist, 0.0, VISION.kD_dist,
-      new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel));
-  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-  NetworkTableEntry tx = table.getEntry("tx");
-  NetworkTableEntry ty = table.getEntry("ty");
-  NetworkTableEntry ta = table.getEntry("ta");
+
+  private final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel);
+  private final ProfiledPIDController m_turn_controller = new ProfiledPIDController(VISION.kP_turn, VISION.kI_turn, VISION.kD_turn, constraints);
+  private final NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  private final NetworkTableEntry tx = table.getEntry("tx");
+  private final NetworkTableEntry ty = table.getEntry("ty");
+  private final Timer shootTimer = new Timer();
+  private boolean shootOn = false;
 
   private Limelight() {
     m_turn_controller.setTolerance(VISION.angle_tol);
-    m_dist_controller.setTolerance(VISION.dist_tol);
     m_turn_controller.setIntegratorRange(-100.0, 100.0);
-  }
-
-  public void resetInt(){
-    m_turn_controller.reset(tx.getDouble(0.0));
   }
 
   public static Limelight getInstance() {
     return InstanceHolder.mInstance;
   }
 
-  public boolean inRange() {
-    return getDistance() < VISION.max_dist && Math.abs(tx.getDouble(0.0)) < Constants.VISION.angle_tol;
+  public void resetInt() {
+    m_turn_controller.reset(tx.getDouble(0.0));
   }
 
-  public Drive.DriveSignal update() {
+  public boolean inRange() {
+    return Math.abs(tx.getDouble(0.0)) < Constants.VISION.angle_tol;
+  }
+
+  public void autoAimShoot() {
+    Intake.getInstance().setIntakeRoller(0.0);
+    Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
+    Drive.getInstance().setOutput(Limelight.getInstance().update());
+    double curDist = Limelight.getInstance().getDistance();
+    double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+    double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+    Shooter.getInstance().setShooterRPM(RPM);
+    Shooter.getInstance().setHoodPos(hoodDist);
+    Elevator.getInstance().setElevatorOutput(.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
+    //Intake.getInstance().setHopperRoller(0.05);
+    SmartDashboard.putNumber("Map RPM", RPM);
+    SmartDashboard.putNumber("Map Hood Pos", hoodDist);
+    boolean isInRange = Limelight.getInstance().inRange();
+    SmartDashboard.putBoolean("In Range", isInRange);
+    if (isInRange && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30) {
+      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+      shootTimer.start();
+      shootOn = true;
+    } else if (shootTimer.hasElapsed(0.25) || !shootOn) {
+      shootTimer.reset();
+      shootOn = false;
+      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+    }
+  }
+
+  public DriveSignal update() {
     // Get the horizontal and vertical angle we are offset by
     double horizontal_angle = tx.getDouble(0.0);
     double vertical_angle = ty.getDouble(0.0);
@@ -52,25 +79,25 @@ public class Limelight {
     // Have a deadband where we are close enough
     if (Math.abs(horizontal_angle) > VISION.angle_tol) {
       // Get PID controller output
-      TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0,0));
-      turn_output = clampS(m_turn_controller.calculate(-horizontal_angle, 0) + ((1.0)/(VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity); 
+      TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0, 0));
+      turn_output = clamp(m_turn_controller.calculate(-horizontal_angle, 0) + ((1.0) / (VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity);
     }
 
-    return new Drive.DriveSignal(clamp(turn_output), clamp(-turn_output));
+    return new DriveSignal(turn_output, -turn_output);
   }
 
   public double getDistance() {
+    return getDistance(ty.getDouble(0.0));
+  }
+
+  public double getDistance(double ty) {
     double height_camera_to_target = (89.75 - 33); //inches
     double lightlight_pitch = 17.7; //Degrees from horizontal
-    return (height_camera_to_target / Math.tan(Math.toRadians(lightlight_pitch + ty.getDouble(0.0))));
+    return (height_camera_to_target / Math.tan(Math.toRadians(lightlight_pitch + ty)));
   }
 
   public double clamp(double a) {
     return Math.abs(a) < VISION.max_auto_output ? a : Math.copySign(VISION.max_auto_output, a);
-  }
-
-  public double clampS(double a) {
-    return Math.abs(a) < 0.11 ? a : Math.copySign(0.11, a);
   }
 
   private static class InstanceHolder {
