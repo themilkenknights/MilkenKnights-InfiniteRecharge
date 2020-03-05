@@ -191,8 +191,12 @@ public class Robot extends TimedRobot {
         mElevator.setElevatorOutput(0);
       }
 
-      if (stick.getRawButtonPressed(5)) {
+      if (stick.getRawButtonPressed(5)) { //Change this
         mLimelight.toggleLED();
+      }
+
+      if (stick.getRawButtonPressed(6)) { //Change this
+        mShooter.zeroHood();
       }
     }
   }

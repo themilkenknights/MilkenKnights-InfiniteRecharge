@@ -71,11 +71,9 @@ public class Drive {
     rightMaster.config_IntegralZone(0, 100);
     rightMaster.configMaxIntegralAccumulator(0, 50);
 
-
-
     /* Set acceleration and vcruise velocity - see documentation */
-    leftMaster.configMotionCruiseVelocity((int) (0.25 * DRIVE.kMaxNativeVel));
-    leftMaster.configMotionAcceleration((int) (0.13 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
+    leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     leftMaster.configAllowableClosedloopError(0, 1);
     leftMaster.configNeutralDeadband(0.0001);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
@@ -87,8 +85,8 @@ public class Drive {
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     leftMaster.configVelocityMeasurementWindow(7);
 
-    rightMaster.configMotionCruiseVelocity((int) (0.25 * DRIVE.kMaxNativeVel));
-    rightMaster.configMotionAcceleration((int) (0.13 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
+    rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configAllowableClosedloopError(0, 1);
     rightMaster.configNeutralDeadband(0.0001);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
@@ -133,13 +131,12 @@ public class Drive {
   }
 
   public void setDriveStraight(double dist) {
-    leftMaster.configMotionCruiseVelocity((int) (0.75 * DRIVE.kMaxNativeVel));
-    leftMaster.configMotionAcceleration((int) (0.5 * DRIVE.kMaxNativeVel));
-    rightMaster.configMotionCruiseVelocity((int) (0.75 * DRIVE.kMaxNativeVel));
-    rightMaster.configMotionAcceleration((int) (0.50 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
+    leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
+    rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
+    rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     magicStraightTarget = dist;
-    leftMaster.setSelectedSensorPosition(0);
-    rightMaster.setSelectedSensorPosition(0);
+    zeroSensors();
   }
 
   public void updateDriveStraight() {
@@ -155,10 +152,10 @@ public class Drive {
   }
 
   public void setMagicTurnInPlace(double deg) {
-    leftMaster.configMotionCruiseVelocity((int) (0.3 * DRIVE.kMaxNativeVel));
-    leftMaster.configMotionAcceleration((int) (0.175 * DRIVE.kMaxNativeVel));
-    rightMaster.configMotionCruiseVelocity((int) (0.3 * DRIVE.kMaxNativeVel));
-    rightMaster.configMotionAcceleration((int) (0.175 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicTurnInPlaceVel);
+    leftMaster.configMotionAcceleration(DRIVE.kMotionMagicTurnInPlaceAccel);
+    rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicTurnInPlaceVel);
+    rightMaster.configMotionAcceleration(DRIVE.kMotionMagicTurnInPlaceAccel);
     magicTarget = navX.getAngle() + deg;
   }
 

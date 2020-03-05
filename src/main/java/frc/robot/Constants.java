@@ -62,6 +62,13 @@ public final class Constants {
     public static final double kDriveKi = 0;
     public static final double kDriveKD = 3.0 * kDriveKp;
     public static final double kDriveKf = 1023.0 / DRIVE.kMaxNativeVel;
+
+    public static final int kMotionMagicStraightVel = (int) (0.65 * DRIVE.kMaxNativeVel); //Increase to drive straight faster, decrease to slow
+    public static final int kMotionMagicStraightAccel = (int) (0.4 * DRIVE.kMaxNativeVel); //Increase to drive straight faster, decrease to slow
+
+    public static final int kMotionMagicTurnInPlaceVel = (int) (0.35 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
+    public static final int kMotionMagicTurnInPlaceAccel = (int) (0.15 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
+
   }
 
   public static class LIFTER {
@@ -90,6 +97,7 @@ public final class Constants {
     public static final double kI_turn = 0.0;
     public static final double kD_turn = 0.00325;
     public static final double angle_tol = 2.5;
+    public static final double angle_do_nothing_tol = 0.1;
     public static final double max_angular_vel = 300;
     public static final double max_angular_accel = 120;
     public static final double elevatorSlope = .002;

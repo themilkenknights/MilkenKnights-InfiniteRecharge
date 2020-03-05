@@ -68,10 +68,8 @@ public class Limelight {
 
   public void update() {
     double horizontal_angle = tx.getDouble(0.0);
-    // Drive.getInstance().magicTurnInPlaceUpdate(visionYaw);
     double turn_output = 0;
-    // Have a deadband where we are close enough
-    if (Math.abs(horizontal_angle) > VISION.angle_tol) {
+    if (Math.abs(horizontal_angle) > VISION.angle_do_nothing_tol) {
       // Get PID controller output
       TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0, 0));
       double turn_controllout_out = m_turn_controller.calculate(-horizontal_angle, 0);
