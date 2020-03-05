@@ -74,14 +74,13 @@ public class Robot extends TimedRobot {
     Drive.getInstance().zeroSensors();
     Drive.getInstance().configBrakeMode();
     Drive.getInstance().resetOdometry();
-   /* switch(positionChooser.getSelected()){
-      case CENTER:
+    switch(positionChooser.getSelected()){
+      case LEFT:
       m_autonomousCommand = new TrenchAuto();
         break;
       default:
        break;
-    }*/
-    m_autonomousCommand = new TrenchAuto();
+    }
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
