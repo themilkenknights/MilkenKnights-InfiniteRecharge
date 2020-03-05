@@ -31,6 +31,7 @@ public class Robot extends TimedRobot {
   private double lastTime = 0;
   private Timer shootTimer = new Timer();
   private boolean shootOn = false;
+  private double limeOffset = 0;
 
   public Robot() {
     super(Constants.kDt);
@@ -89,7 +90,7 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (jStick.getRawButton(Constants.INPUT.limeLight)) {
+    if (jStick.getRawButton(Constants.INPUT.limeLight) && !jStick.getRawButton(Constants.INPUT.limeAdjust)) {
       Intake.getInstance().setIntakeRoller(0.0);
       Intake.getInstance().setIntakeState(false);
       Drive.getInstance().setOutput(Limelight.getInstance().update());
@@ -97,7 +98,7 @@ public class Robot extends TimedRobot {
       double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
       double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
       Shooter.getInstance().setShooterRPM(RPM);
-      Shooter.getInstance().setHoodPos(hoodDist);
+      Shooter.getInstance().setHoodPos(hoodDist + limeOffset);
       Elevator.getInstance().setElevatorOutput(.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
       //Intake.getInstance().setHopperRoller(0.05);
       SmartDashboard.putNumber("Map RPM", RPM);
@@ -112,7 +113,16 @@ public class Robot extends TimedRobot {
         shootOn = false;
         ElevatorStopper.getInstance().setStopper(StopperState.STOP);
       }
-    } else {
+    }
+    else if(jStick.getRawButton(Constants.INPUT.limeAdjust)){
+      if (jStick.getPOV() == 0) {
+        limeOffset -= .01;
+      } else if (jStick.getPOV() == 180) {
+        limeOffset += .01;
+      }
+      SmartDashboard.putNumber("Limelight Offset", limeOffset);
+    } 
+    else {
       double forward, turn, rightOut, leftOut;
       double antiTip = Drive.getInstance().antiTip();
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + antiTip);
@@ -183,7 +193,7 @@ public class Robot extends TimedRobot {
   public void AttackMode() {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(true);
-    Elevator.getInstance().setElevatorOutput(0.20);
+    Elevator.getInstance().setElevatorOutput(0.35);
     Intake.getInstance().setHopperRoller(.42);
     ElevatorStopper.getInstance().setStopper(StopperState.STOP);
     isInAttackMode = true;

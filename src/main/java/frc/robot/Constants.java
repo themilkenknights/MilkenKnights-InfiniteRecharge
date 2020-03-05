@@ -50,6 +50,7 @@ public final class Constants {
     public static final int elevatorUp = 3;
     public static final int elevatorDown = 5;
     public static final int limeLight = 9;
+    public static final int limeAdjust = 11;
 
     // public static final int button 1 is shooterControlEnable and forward and back
     // tics for speed
