@@ -222,6 +222,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
     Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
@@ -231,6 +232,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
+    mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
