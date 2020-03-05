@@ -77,9 +77,9 @@ public class Drive {
     leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     leftMaster.configClosedLoopPeakOutput(0, 1.0);
     rightMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
-    leftMaster.configMotionSCurveStrength(6);
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
-    leftMaster.configVelocityMeasurementWindow(7);
+    leftMaster.configVelocityMeasurementWindow(16);
+    leftMaster.configMotionSCurveStrength(6);
 
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
@@ -90,9 +90,9 @@ public class Drive {
     rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     rightMaster.configClosedLoopPeakOutput(0, 1.0);
     leftMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
-    rightMaster.configMotionSCurveStrength(6);
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
-    rightMaster.configVelocityMeasurementWindow(7);
+    rightMaster.configVelocityMeasurementWindow(16);
+    rightMaster.configMotionSCurveStrength(6);
 
     zeroSensors();
   }
