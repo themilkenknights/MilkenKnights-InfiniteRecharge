@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Climber.ClimbState;
@@ -57,7 +59,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    Drive.getInstance().zeroSensors();
     Drive.getInstance().configBrakeMode();
+    Drive.getInstance().resetOdometry();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -94,23 +98,21 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    Drive.getInstance().configCoastMode();
+   Drive.getInstance().configCoastMode();
   }
 
   @Override
   public void disabledPeriodic() {
     updateSensors();
-  }
+  } 
 
   public void input() {
     if (jStick.getRawButton(Constants.INPUT.limeLight)) {
       Limelight.getInstance().autoAimShoot(limeOffset);
-    } else {
-      //Resets Turn Controller Integrator
-      Limelight.getInstance().resetInt();
+    } else {    
 
       double forward, turn, rightOut, leftOut;
-      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) /*+ Drive.getInstance().antiTip()*/);
+      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + Drive.getInstance().antiTip());
       turn = (-stick.getRawAxis(0));
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
@@ -168,6 +170,10 @@ public class Robot extends TimedRobot {
         ElevatorStopper.getInstance().setStopper(StopperState.GO);
       } else if (!isInAttackMode) {
         Elevator.getInstance().setElevatorOutput(0);
+      }
+
+      if(stick.getRawButtonPressed(5)){
+        Limelight.getInstance().toggleLED();
       }
     }
   }

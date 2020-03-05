@@ -18,6 +18,7 @@ public class Limelight {
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
   private final NetworkTableEntry tx = table.getEntry("tx");
   private final NetworkTableEntry ty = table.getEntry("ty");
+  private final NetworkTableEntry led = table.getEntry("ledMode");
   private final Timer shootTimer = new Timer();
   private boolean shootOn = false;
   private double distance, visionYaw, visionPitch;
@@ -33,9 +34,6 @@ public class Limelight {
     distance = getDistance(visionPitch);
   }
 
-  public void resetInt() {
-    m_turn_controller.reset(visionYaw);
-  }
 
   public boolean inRange() {
     return Math.abs(visionYaw) < Constants.VISION.angle_tol;
@@ -49,11 +47,12 @@ public class Limelight {
     double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     Shooter.getInstance().setShooterRPM(RPM);
-    Shooter.getInstance().setHoodPos(hoodDist+ limelightOffset);
+    Shooter.getInstance().setHoodPos(hoodDist);
     Elevator.getInstance().setElevatorOutput(.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
     SmartDashboard.putNumber("Map RPM", RPM);
     SmartDashboard.putNumber("Map Hood Pos", hoodDist);
-    boolean isInRange = Limelight.getInstance().inRange();
+    SmartDashboard.putNumber("Elevator",.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
+    boolean isInRange = inRange();
     SmartDashboard.putBoolean("In Range", isInRange);
     if (isInRange && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
@@ -69,21 +68,29 @@ public class Limelight {
   public void update() {
 
 
-
-    Drive.getInstance().magicTurnInPlaceUpdate(visionYaw);
-
+double horizontal_angle = tx.getDouble(0.0);
+   // Drive.getInstance().magicTurnInPlaceUpdate(visionYaw);
+double turn_output = 0;
     // Have a deadband where we are close enough
-   /*if (Math.abs(horizontal_angle) > VISION.angle_tol) {
+   if (Math.abs(horizontal_angle) > VISION.angle_tol) {
       // Get PID controller output
       TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0, 0));
       turn_output = clamp(m_turn_controller.calculate(-horizontal_angle, 0) + ((1.0) / (VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity);
-    }*/
+    }
 
-   // return new DriveSignal(turn_output, -turn_output);
+  Drive.getInstance().setOutput(new DriveSignal(turn_output, -turn_output));
   }
 
   public double getDistance() {
     return distance;
+  }
+
+  public void toggleLED(){
+      if(led.getDouble(0.0) == 1){
+        table.getEntry("ledMode").setValue(3);
+      } else{
+        table.getEntry("ledMode").setValue(1);
+      }
   }
 
   public double getDistance(double ty) {

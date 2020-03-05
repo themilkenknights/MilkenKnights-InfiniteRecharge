@@ -24,7 +24,7 @@ public class Autonomous extends SequentialCommandGroup {
    */
   public Autonomous() {
 
-  /*  // Create a voltage constraint to ensure we don't accelerate too fast
+    // Create a voltage constraint to ensure we don't accelerate too fast
     var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
             new SimpleMotorFeedforward(DRIVE.ksVolts,
@@ -48,11 +48,11 @@ public class Autonomous extends SequentialCommandGroup {
         new Pose2d(0, 0, new Rotation2d(0)),
         // Pass through these two interior waypoints, making an 's' curve path
         List.of(
-            new Translation2d(1, 1),
-            new Translation2d(2, -1)
+           /* new Translation2d(1, 1),
+            new Translation2d(2, -1)*/
         ),
         // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(1.5, 0, new Rotation2d(Units.degreesToRadians(30))),
+        new Pose2d(1.5, 0, new Rotation2d(Units.degreesToRadians(0))),
         // Pass config
         config1
     );
@@ -119,15 +119,17 @@ public class Autonomous extends SequentialCommandGroup {
         // RamseteCommand passes volts to the callback
         Drive.getInstance()::setVoltage,
         Drive.getInstance()
-    ); */
+    ); 
 
     addCommands(
-       // deadline(ramseteCommand, new IntakeBalls()),
-        deadline(new DriveStraight(70.0), new IntakeBalls()),
+        //ramseteCommand
+        new TurnInPlace(90.0)
+     /*   deadline(ramseteCommand, new IntakeBalls()),*/
+  /*      deadline(new DriveStraight(70.0), new IntakeBalls()),
         deadline(new TurnInPlace(-90.0), new IntakeBalls()),
         deadline(new DriveStraight(10), new IntakeBalls()),
         deadline(new TurnInPlace(-90.0), new IntakeBalls()),
-        new DriveStraight(65.5), new TurnInPlace(-40.0)
+        new DriveStraight(65.5), new TurnInPlace(-40.0)*/
         /*new LimelightShoot(),*/
     );
   }
