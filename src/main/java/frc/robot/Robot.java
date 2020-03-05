@@ -11,8 +11,6 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -23,7 +21,10 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
-import frc.robot.commands.TrenchAuto;
+import frc.robot.commands.CenterAuto;
+import frc.robot.commands.DriveStraight;
+import frc.robot.commands.LeftTrenchAuto;
+import frc.robot.commands.RightAuto;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
@@ -32,16 +33,20 @@ public class Robot extends TimedRobot {
   private Joystick stick = new Joystick(0);
   private Joystick jStick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
-  private double hoodPos, shooterRPM, shooterSpeed;
+
+  private double hoodPos, shooterSpeed, limeOffset;
   private boolean isInAttackMode, updateDashboard;
-  private Command m_autonomousCommand;
-  private Timer shootTimer = new Timer();
-  private boolean shootOn = false;
-  private double limeOffset = 0;
-  private static SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
-  private static ShuffleboardTab mTab = Shuffleboard.getTab("General");
-  private static ComplexWidget positionChooserTab = mTab.add("Position", positionChooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
   private Timer brakeTimer = new Timer();
+
+  private Command m_autonomousCommand;
+  private SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
+  private ShuffleboardTab mTab = Shuffleboard.getTab("Match");
+  private ComplexWidget positionChooserTab = mTab.add("Auto Chooser", positionChooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
+
+  private Drive mDrive = Drive.getInstance();
+  private Shooter mShooter = Shooter.getInstance();
+  private Elevator mElevator = Elevator.getInstance();
+  private Limelight mLimelight = Limelight.getInstance();
 
   public Robot() {
     super(Constants.kDt);
@@ -50,17 +55,18 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     mCompressor.start();
-    Shooter.getInstance().zeroHood();
+    mShooter.zeroHood();
     positionChooser.addOption("Center", AutoPosition.CENTER);
     positionChooser.addOption("Nothing", AutoPosition.NOTHING);
-    positionChooser.setDefaultOption("Left", AutoPosition.LEFT);
+    positionChooser.setDefaultOption("Left Trench", AutoPosition.LEFT);
     positionChooser.addOption("Right", AutoPosition.RIGHT);
+    positionChooser.addOption("Drive Straight", AutoPosition.DRIVE_STRAIGHT);
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    Shuffle.getInstance().updateT();
+    Shuffle.getInstance().updateDeltaTime();
     if (updateDashboard) {
       Shuffle.getInstance().update();
       updateDashboard = false;
@@ -71,15 +77,24 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    Drive.getInstance().zeroSensors();
-    Drive.getInstance().configBrakeMode();
-    Drive.getInstance().resetOdometry();
-    switch(positionChooser.getSelected()){
+    mDrive.zeroSensors();
+    mDrive.configBrakeMode();
+    switch (positionChooser.getSelected()) {
       case LEFT:
-      m_autonomousCommand = new TrenchAuto();
+        m_autonomousCommand = new LeftTrenchAuto();
         break;
-      default:
-       break;
+      case CENTER:
+        m_autonomousCommand = new CenterAuto();
+        break;
+      case RIGHT:
+        m_autonomousCommand = new RightAuto();
+        break;
+      case DRIVE_STRAIGHT:
+        m_autonomousCommand = new DriveStraight(60);
+        break;
+      case NOTHING:
+        //This may break things. Test this.
+        break;
     }
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -96,9 +111,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    Drive.getInstance().configBrakeMode();
-    Drive.getInstance().zeroSensors();
-    hoodPos = shooterRPM = shooterSpeed = 0;
+    mDrive.configBrakeMode();
+    mDrive.zeroSensors();
+    hoodPos = shooterSpeed = 0;
   }
 
   @Override
@@ -107,35 +122,12 @@ public class Robot extends TimedRobot {
     input();
   }
 
-  @Override
-  public void testInit() {
-  }
-
-  @Override
-  public void testPeriodic() {
-  }
-
-  @Override
-  public void disabledInit() {
-    brakeTimer.reset();
-    brakeTimer.start();
-  }
-
-  @Override
-  public void disabledPeriodic() {
-    updateSensors();
-    if(brakeTimer.hasElapsed(1.5)){
-      Drive.getInstance().configCoastMode();
-    }
-  } 
-
   public void input() {
     if (jStick.getRawButton(Constants.INPUT.limeLight)) {
-      Limelight.getInstance().autoAimShoot(limeOffset);
-    } else {    
-
+      mLimelight.autoAimShoot(limeOffset);
+    } else {
       double forward, turn, rightOut, leftOut;
-      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + Drive.getInstance().antiTip());
+      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = (-stick.getRawAxis(0));
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
@@ -148,10 +140,10 @@ public class Robot extends TimedRobot {
       }
 
       if (isInAttackMode) {
-        Drive.getInstance().setOutput(new DriveSignal(leftOut / 2.7, rightOut / 2.7));
+        mDrive.setOutput(new DriveSignal(leftOut / 2.7, rightOut / 2.7));
         AttackMode();
       } else {
-        Drive.getInstance().setOutput(new DriveSignal(leftOut, rightOut));
+        mDrive.setOutput(new DriveSignal(leftOut, rightOut));
         DefenceMode();
       }
 
@@ -161,10 +153,14 @@ public class Robot extends TimedRobot {
         Climber.getInstance().setClimbState(ClimbState.RETRACT);
       }
 
-      if (jStick.getPOV() == 0) {
-        hoodPos -= .05;
-      } else if (jStick.getPOV() == 180) {
-        hoodPos += .05;
+      boolean isOperatorJoystickConnected = jStick.getRawAxis(3) != 0.0;
+
+      if (isOperatorJoystickConnected) {
+        if (jStick.getPOV() == 0) {
+          hoodPos -= .05;
+        } else if (jStick.getPOV() == 180) {
+          hoodPos += .05;
+        }
       }
 
       if (jStick.getRawButtonPressed(6)) {
@@ -178,25 +174,25 @@ public class Robot extends TimedRobot {
       }
 
       if (jStick.getRawButtonPressed(1)) {
-        Shooter.getInstance().setHoodPos(hoodPos);
-        Shooter.getInstance().setShooterOutput(shooterSpeed);
+        mShooter.setHoodPos(hoodPos);
+        mShooter.setShooterOutput(shooterSpeed);
       } else {
-      //  Shooter.getInstance().setHoodPos(hoodPos);
-        Shooter.getInstance().setShooterOutput(shooterSpeed);
+        mShooter.setHoodPos(hoodPos);
+        mShooter.setShooterOutput(shooterSpeed);
       }
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
-        Elevator.getInstance().setElevatorOutput(.420);
+        mElevator.setElevatorOutput(.420);
         ElevatorStopper.getInstance().setStopper(StopperState.GO);
       } else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
-        Elevator.getInstance().setElevatorOutput(-.420);
+        mElevator.setElevatorOutput(-.420);
         ElevatorStopper.getInstance().setStopper(StopperState.GO);
       } else if (!isInAttackMode) {
-        Elevator.getInstance().setElevatorOutput(0);
+        mElevator.setElevatorOutput(0);
       }
 
-      if(stick.getRawButtonPressed(5)){
-        Limelight.getInstance().toggleLED();
+      if (stick.getRawButtonPressed(5)) {
+        mLimelight.toggleLED();
       }
     }
   }
@@ -204,25 +200,48 @@ public class Robot extends TimedRobot {
   public void AttackMode() {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(IntakeState.INTAKE);
-    Elevator.getInstance().setElevatorOutput(0.35);
+    mElevator.setElevatorOutput(0.35);
     Intake.getInstance().setHopperRoller(.42);
     ElevatorStopper.getInstance().setStopper(StopperState.STOP);
-    isInAttackMode = true;
   }
 
   public void DefenceMode() {
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(IntakeState.STOW);
-    Elevator.getInstance().setElevatorOutput(0);
-    isInAttackMode = false;
+    mElevator.setElevatorOutput(0);
   }
 
   public void updateSensors() {
-    Drive.getInstance().updateSensors();
-    Limelight.getInstance().updateSensors();
+    mDrive.updateSensors();
+    mLimelight.updateSensors();
+  }
+
+  @Override
+  public void disabledInit() {
+    brakeTimer.reset();
+    brakeTimer.start();
+    Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
+    Intake.getInstance().setIntakeState(IntakeState.STOW);
+    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
+  }
+
+  @Override
+  public void disabledPeriodic() {
+    updateSensors();
+    if (brakeTimer.hasElapsed(1.5)) {
+      mDrive.configCoastMode();
+    }
+  }
+
+  @Override
+  public void testInit() {
+  }
+
+  @Override
+  public void testPeriodic() {
   }
 
   public enum AutoPosition {
-    LEFT, NOTHING, RIGHT, CENTER
+    LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
   }
 }

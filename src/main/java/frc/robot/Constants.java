@@ -1,19 +1,9 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2018-2019 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 package frc.robot;
 
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.InterpolatingTreeMap;
 
-/**
- * Add your docs here.
- */
 public final class Constants {
 
   public static final double kPi = 3.14159265359;
@@ -52,10 +42,7 @@ public final class Constants {
     public static final int limeLight = 9;
     public static final int limeAdjust = 11;
 
-    // public static final int button 1 is shooterControlEnable and forward and back
-    // tics for speed
-    // management.
-    // hood pov
+    // public static final int button 1 is shooterControlEnable and forward and back tics for speed management. hood pov
   }
 
   public static class DRIVE {
@@ -75,20 +62,6 @@ public final class Constants {
     public static final double kDriveKi = 0;
     public static final double kDriveKD = 3.0 * kDriveKp;
     public static final double kDriveKf = 1023.0 / DRIVE.kMaxNativeVel;
-
-    public static final double kTrackwidthMeters = 0.69;
-    public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
-
-    public static final double ksVolts = 0.266;
-    public static final double kvVoltSecondsPerMeter = 2.47;
-    public static final double kaVoltSecondsSquaredPerMeter = 0.148;
-
-    // Example value only - as above, this must be tuned for your drive!
-    public static final double kPDriveVel = 5.88;
-
-    public static final double kMaxSpeedMetersPerSecond = 2.54;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 2.54;
-
   }
 
   public static class LIFTER {
@@ -100,15 +73,14 @@ public final class Constants {
   public static class SHOOTER {
 
     public static final double kFlywheelMaxVel = 5100.0;
-    public static final double kFlywheelKp = 0.0025;
+    public static final double kFlywheelKp = 0.0022;
     public static final double kFlywheelKi = 0.0;
-    public static final double kFlywheelKd = 0.007;
+    public static final double kFlywheelKd = 0.008;
     public static final double kFlywheelKf = 1.0 / kFlywheelMaxVel;
 
-    public static final double kHoodKp = 0.075;
-
-    public static final double kMaxHoodAdjustDist = 50;
-    public static final double kMaxHoodPos = 10;
+    public static final double kHoodKp = 0.08;
+    public static final double kMaxHoodPos = -3.3;
+    public static final double kMaxHoodOutput = 0.4;
   }
 
   public static class VISION {
@@ -126,22 +98,6 @@ public final class Constants {
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kHoodMap = new InterpolatingTreeMap<>();
 
     public static double[][] kDistanceRpmValues = {
-       /* {88.78, 2950.0}, // {Distance(Inches), RPM},
-        {101.85, 3000.0},
-        {113.55, 3250.0},
-        {114.3, 3250.0},
-        {118.0, 3320.0},
-        {125.3, 3415.0},
-        {135.3, 3450.0},
-        {140.3, 3480.0},
-        {145.3, 3505.0},
-        {150.3, 3525.0},
-        {173.0, 3565.0},
-        {180.0, 3585.0},
-        {196.3, 3600.0},
-        {200.0, 3750.0},
-        {205.0, 3750.0},
-        {252.0, 3800.0}};*/
         {88.78, 2950.0}, // {Distance(Inches), RPM},
         {101.85, 3100.0},
         {106.9, 3180.0},
@@ -162,28 +118,10 @@ public final class Constants {
         {252.0, 3800.0}};
 
     public static double[][] kDistanceHoodValues = {
-     /* // {88.78, -2.14}, // {Distance(Inches), Hood},
-       {88.78, -2.52},
-       // {101.85, -2.26},
-       {101.85, -2.75},
-        {113.55, -2.85},
-        {114.3, -2.76},
-        {120.3, -2.9},
-        {125.3, -3.0},
-        {135.3, -3.15},
-        {140.3, -3.25},
-        {145.3, -3.25},
-        {150.3, -3.25},
-        {252.0, -3.25},
-        {173, -3.25},
-        {196, -3.25},
-        {205, -3.25},
-        {180, -3.25},
-        {200, -3.25}};*/
-         // {Distance(Inches), Hood},
-       {88.78, -2.52},
-       {101.85, -2.75},
-       {106.85, -3.00},
+        // {Distance(Inches), Hood},
+        {88.78, -2.52},
+        {101.85, -2.75},
+        {106.85, -3.00},
         {113.55, -3.05},
         {114.3, -3.1},
         {120.3, -3.15},
@@ -206,5 +144,19 @@ public final class Constants {
         kHoodMap.put(new InterpolatingDouble(pair[0]), new InterpolatingDouble(pair[1]));
       }
     }
+  }
+
+  public static class PATHING {
+    public static final double kTrackwidthMeters = 0.69;
+    public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
+
+    public static final double ksVolts = 0.266;
+    public static final double kvVoltSecondsPerMeter = 2.47;
+    public static final double kaVoltSecondsSquaredPerMeter = 0.148;
+
+    // Example value only - as above, this must be tuned for your drive!
+    public static final double kPDriveVel = 5.88;
+    public static final double kMaxSpeedMetersPerSecond = 2.54;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 2.54;
   }
 }

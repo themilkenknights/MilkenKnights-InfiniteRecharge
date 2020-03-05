@@ -1,17 +1,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Elevator;
-import frc.robot.ElevatorStopper;
-import frc.robot.ElevatorStopper.StopperState;
-import frc.robot.Intake;
 import frc.robot.Shooter;
-import frc.robot.Intake.IntakeState;
 
 public class SpinUp extends CommandBase {
 
-  public SpinUp() {
+  private double rpm;
 
+  public SpinUp(double rpm) {
+    this.rpm = rpm;
   }
 
   // Called just before this Command runs the first time
@@ -22,7 +19,7 @@ public class SpinUp extends CommandBase {
 
   @Override
   public void execute() {
-   Shooter.getInstance().setShooterRPM(3600);
+    Shooter.getInstance().setShooterRPM(rpm);
   }
 
   // Make this return true when this Command no longer needs to run execute()

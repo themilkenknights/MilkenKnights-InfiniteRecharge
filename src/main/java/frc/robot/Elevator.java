@@ -6,7 +6,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 public class Elevator {
 
-  TalonSRX eTalon = new TalonSRX(Constants.CAN.kElevatorId);
+  private final TalonSRX eTalon = new TalonSRX(Constants.CAN.kElevatorId);
+  private double elevatorSetpoint;
 
   private Elevator() {
     eTalon.configFactoryDefault();
@@ -22,6 +23,11 @@ public class Elevator {
 
   public void setElevatorOutput(double ePercentOut) {
     eTalon.set(ControlMode.PercentOutput, ePercentOut);
+    elevatorSetpoint = ePercentOut;
+  }
+
+  public double getElevatorSetpoint() {
+    return elevatorSetpoint;
   }
 
   private static class InstanceHolder {

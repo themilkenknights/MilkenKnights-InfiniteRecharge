@@ -1,13 +1,12 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Drive;
 
 public class TurnInPlace extends CommandBase {
   private double angle;
-  private Timer mTimer = new Timer();
 
+  //Currently Negative Turns Left (Front of robot is intake)
   public TurnInPlace(double angle) {
     this.angle = angle;
   }
@@ -15,7 +14,6 @@ public class TurnInPlace extends CommandBase {
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
-    mTimer.start();
     Drive.getInstance().setMagicTurnInPlace(angle);
   }
 
@@ -27,7 +25,7 @@ public class TurnInPlace extends CommandBase {
   // Make this return true when this Command no longer needs to run execute()
   @Override
   public boolean isFinished() {
-    return Drive.getInstance().isMagicOnTarget() || mTimer.hasElapsed(1.75);
+    return Drive.getInstance().isMagicTurnInPlaceDone();
   }
 
   // Called once after isFinished returns true

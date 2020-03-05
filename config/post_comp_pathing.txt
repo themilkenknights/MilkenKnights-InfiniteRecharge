@@ -1,0 +1,66 @@
+public void setVoltage(double left, double right) {
+    leftMaster.set(ControlMode.PercentOutput, (1.0 / 12.0) * left);
+    rightMaster.set(ControlMode.PercentOutput, (1.0 / 12.0) * right);
+  }
+
+  public void setVelocityMetersPerSec(double leftVel, double rightVel) {
+    leftMaster.set(ControlMode.Velocity, MkUtil.metersPerSecondToNativeUnitsPer100Ms(leftVel));
+    rightMaster.set(ControlMode.Velocity, MkUtil.metersPerSecondToNativeUnitsPer100Ms(rightVel));
+  }
+
+  /**
+   * Returns the currently-estimated pose of the robot.
+   *
+   * @return The pose.
+   */
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
+  }
+
+  /**
+   * Returns the current wheel speeds of the robot.
+   *
+   * @return The current wheel speeds.
+   */
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(mPeriodicIO.left_vel_meters_per_sec, mPeriodicIO.right_vel_meters_per_sec);
+  }
+
+  /**
+   * Resets the odometry to the specified pose.
+   *
+   * @param pose The pose to which to set the odometry.
+   */
+  public void resetOdometry() {
+    m_odometry.resetPosition(new Pose2d(0, 0, Rotation2d.fromDegrees(getHeading())), Rotation2d.fromDegrees(getHeading()));
+  }
+
+    /**
+     * Returns the heading of the robot.
+     *
+     * @return the robot's heading in degrees, from -180 to 180
+     */
+    public double getHeading() {
+      return -navX.getYaw();
+    }
+
+
+
+    SmartDashboard.putNumber("Pose X Inches", MkUtil.metersToInches(getPose().getTranslation().getX()));
+      SmartDashboard.putNumber("Pose Y Inches", MkUtil.metersToInches(getPose().getTranslation().getY()));
+      SmartDashboard.putNumber("Pose Theta Degrees", getPose().getRotation().getDegrees());
+      SmartDashboard.putNumber("NavX Yaw Normalized", mPeriodicIO.yaw_normalized);
+
+          SmartDashboard.putNumber("Left Pos Meters", mPeriodicIO.left_pos_meters);
+          SmartDashboard.putNumber("Right Pos Meters", mPeriodicIO.right_pos_meters);
+          SmartDashboard.putNumber("Left Vel Meters/Sec", mPeriodicIO.left_vel_meters_per_sec);
+          SmartDashboard.putNumber("Right Vel Meters/Sec", mPeriodicIO.right_vel_meters_per_sec);
+
+
+
+        private final DifferentialDriveOdometry m_odometry;
+
+    m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+
+    m_odometry.update(Rotation2d.fromDegrees(mPeriodicIO.yaw_normalized), mPeriodicIO.left_pos_meters, mPeriodicIO.right_pos_meters);
+  mPeriodicIO.yaw_normalized = getHeading();

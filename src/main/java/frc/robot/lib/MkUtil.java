@@ -39,7 +39,6 @@ public class MkUtil {
 
   public static double metersPerSecondToNativeUnitsPer100Ms(double meters) {
     return inchesPerSecToUnitsPer100Ms(metersToInches(meters));
-
   }
 
   public static DriveSignal cheesyDrive(double throttle, double wheel, boolean cubeInputs) {
@@ -87,6 +86,10 @@ public class MkUtil {
 
   private static double handleDeadband(double val, double deadband) {
     return (Math.abs(val) > Math.abs(deadband)) ? val : 0.0;
+  }
+
+  public static double clamp(double a, double max) {
+    return Math.abs(a) < max ? a : Math.copySign(max, a);
   }
 
   public static class DriveSignal {

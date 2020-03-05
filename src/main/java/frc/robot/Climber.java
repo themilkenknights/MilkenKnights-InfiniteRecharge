@@ -17,10 +17,10 @@ public class Climber {
   }
 
   public void toggleClimb() {
-    if (climbSolenoid.get()) {
-      climbSolenoid.set(false);
+    if (mState == ClimbState.RETRACT) {
+      setClimbState(ClimbState.CLIMB);
     } else {
-      climbSolenoid.set(true);
+      setClimbState(ClimbState.RETRACT);
     }
   }
 
