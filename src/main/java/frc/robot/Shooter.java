@@ -4,6 +4,9 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import com.revrobotics.ControlType;
 import frc.robot.Constants.SHOOTER;
 
@@ -69,7 +72,8 @@ public class Shooter {
   }
 
   public void setHoodPos(double Pos) {
-    mHoodSparkMax.set((Pos - hEncoder.getPosition()) * kp);
+    SmartDashboard.putNumber("desired hood pos", Pos);
+    mHoodSparkMax.set(Math.abs((Pos - hEncoder.getPosition()) * kp) > 0.4 ? 0.4 : (Pos - hEncoder.getPosition()) * kp);
   }
 
   public void setHoodFromTargetDist(double dist) {

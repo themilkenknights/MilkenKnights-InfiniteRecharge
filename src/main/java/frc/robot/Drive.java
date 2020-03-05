@@ -19,7 +19,7 @@ import frc.robot.Constants.DRIVE;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
-public class Drive extends SubsystemBase{
+public class Drive {
 
   private final AHRS navX = new AHRS();
   private final TalonFX leftMaster = new TalonFX(CAN.kDriveLeftMasterId);
@@ -29,8 +29,6 @@ public class Drive extends SubsystemBase{
   private double rollOffset, magicTarget, magicStraightTarget;
   private final DifferentialDriveOdometry m_odometry;
   private PeriodicIO mPeriodicIO;
-  private double integ = 0;
-  private double lastTime = 0;
 
   private Drive() {
     mPeriodicIO = new PeriodicIO();
@@ -82,8 +80,8 @@ public class Drive extends SubsystemBase{
 
 
     /* Set acceleration and vcruise velocity - see documentation */
-    leftMaster.configMotionCruiseVelocity((int) (0.3 * DRIVE.kMaxNativeVel));
-    leftMaster.configMotionAcceleration((int) (0.15 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionCruiseVelocity((int) (0.25 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionAcceleration((int) (0.13 * DRIVE.kMaxNativeVel));
     leftMaster.configAllowableClosedloopError(0, 1);
     leftMaster.configNeutralDeadband(0.0001);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
@@ -91,12 +89,12 @@ public class Drive extends SubsystemBase{
     leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     leftMaster.configClosedLoopPeakOutput(0, 1.0);
     rightMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
-    leftMaster.configMotionSCurveStrength(5);
+    leftMaster.configMotionSCurveStrength(6);
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     leftMaster.configVelocityMeasurementWindow(7);
 
-    rightMaster.configMotionCruiseVelocity((int) (0.3 * DRIVE.kMaxNativeVel));
-    rightMaster.configMotionAcceleration((int) (0.15 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionCruiseVelocity((int) (0.25 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionAcceleration((int) (0.13 * DRIVE.kMaxNativeVel));
     rightMaster.configAllowableClosedloopError(0, 1);
     rightMaster.configNeutralDeadband(0.0001);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
@@ -104,7 +102,7 @@ public class Drive extends SubsystemBase{
     rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     rightMaster.configClosedLoopPeakOutput(0, 1.0);
     leftMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
-    rightMaster.configMotionSCurveStrength(5);
+    rightMaster.configMotionSCurveStrength(6);
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     rightMaster.configVelocityMeasurementWindow(7);
 
@@ -141,6 +139,10 @@ public class Drive extends SubsystemBase{
   }
 
   public void setDriveStraight(double dist) {
+    leftMaster.configMotionCruiseVelocity((int) (0.75 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionAcceleration((int) (0.5 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionCruiseVelocity((int) (0.75 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionAcceleration((int) (0.50 * DRIVE.kMaxNativeVel));
     magicStraightTarget = dist;
     leftMaster.setSelectedSensorPosition(0);
     rightMaster.setSelectedSensorPosition(0);
@@ -162,6 +164,10 @@ public class Drive extends SubsystemBase{
   }
 
   public void setMagicTurnInPlace(double deg) {
+    leftMaster.configMotionCruiseVelocity((int) (0.3 * DRIVE.kMaxNativeVel));
+    leftMaster.configMotionAcceleration((int) (0.175 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionCruiseVelocity((int) (0.3 * DRIVE.kMaxNativeVel));
+    rightMaster.configMotionAcceleration((int) (0.175 * DRIVE.kMaxNativeVel));
     magicTarget = navX.getAngle() + deg;
   }
 
@@ -169,9 +175,6 @@ public class Drive extends SubsystemBase{
     double error_deg = mPeriodicIO.yaw_continouous - magicTarget;
     double error_rad = Math.toRadians(error_deg);//22.97
     double delta_v = 22.97 * error_rad / (2 * 0.95);
-    double time = Timer.getFPGATimestamp();
-
-    lastTime = time;
     leftMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(-delta_v) + leftMaster.getSelectedSensorPosition());
     rightMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(delta_v) + rightMaster.getSelectedSensorPosition());
     SmartDashboard.putNumber("Delta V Turn In Place", delta_v);
@@ -286,6 +289,10 @@ public class Drive extends SubsystemBase{
     navX.zeroYaw();
     leftMaster.setSelectedSensorPosition(0);
     rightMaster.setSelectedSensorPosition(0);
+  }
+
+  public double getAvgVel(){
+    return mPeriodicIO.avg_vel_inches_per_sec;
   }
 
   public double getYaw() {

@@ -105,7 +105,7 @@ public final class Constants {
     public static final double kFlywheelKd = 0.007;
     public static final double kFlywheelKf = 1.0 / kFlywheelMaxVel;
 
-    public static final double kHoodKp = 0.1;
+    public static final double kHoodKp = 0.075;
 
     public static final double kMaxHoodAdjustDist = 50;
     public static final double kMaxHoodPos = 10;
@@ -117,7 +117,7 @@ public final class Constants {
     public static final double kP_turn = 0.0121;
     public static final double kI_turn = 0.0;
     public static final double kD_turn = 0.00325;
-    public static final double angle_tol = 1.5;
+    public static final double angle_tol = 2.5;
     public static final double max_angular_vel = 300;
     public static final double max_angular_accel = 120;
     public static final double elevatorSlope = .002;
@@ -144,20 +144,21 @@ public final class Constants {
         {252.0, 3800.0}};*/
         {88.78, 2950.0}, // {Distance(Inches), RPM},
         {101.85, 3100.0},
-        {106.9, 3210.0},
-        {113.55, 3330.0},
+        {106.9, 3180.0},
+        {111.55, 3200.0},
         {114.3, 3250.0},
         {118.0, 3320.0},
-        {125.3, 3415.0},
-        {135.3, 3450.0},
+        {125.3, 3370.0},
+        {135.3, 3425.0},
         {140.3, 3480.0},
         {145.3, 3505.0},
         {150.3, 3525.0},
         {173.0, 3565.0},
         {180.0, 3585.0},
         {196.3, 3600.0},
-        {200.0, 3750.0},
-        {205.0, 3750.0},
+        {200.0, 3650.0},
+        {205.0, 3700.0},
+        {220.0, 3725.0},
         {252.0, 3800.0}};
 
     public static double[][] kDistanceHoodValues = {
@@ -182,15 +183,15 @@ public final class Constants {
          // {Distance(Inches), Hood},
        {88.78, -2.52},
        {101.85, -2.75},
-        {113.55, -2.85},
-        {114.3, -2.76},
-        {120.3, -2.9},
-        {125.3, -3.0},
-        {135.3, -3.15},
+       {106.85, -3.00},
+        {113.55, -3.05},
+        {114.3, -3.1},
+        {120.3, -3.15},
+        {125.3, -3.25},
+        {135.3, -3.25},
         {140.3, -3.25},
         {145.3, -3.25},
         {150.3, -3.25},
-        {252.0, -3.25},
         {173, -3.25},
         {196, -3.25},
         {205, -3.25},

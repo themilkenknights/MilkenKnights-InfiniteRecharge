@@ -1,33 +1,34 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Drive;
+import frc.robot.Elevator;
+import frc.robot.ElevatorStopper;
+import frc.robot.ElevatorStopper.StopperState;
+import frc.robot.Intake;
+import frc.robot.Shooter;
+import frc.robot.Intake.IntakeState;
 
-public class TurnInPlace extends CommandBase {
-  private double angle;
-  private Timer mTimer = new Timer();
+public class SpinUp extends CommandBase {
 
-  public TurnInPlace(double angle) {
-    this.angle = angle;
+  public SpinUp() {
+
   }
 
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
-    mTimer.start();
-    Drive.getInstance().setMagicTurnInPlace(angle);
+
   }
 
   @Override
   public void execute() {
-    Drive.getInstance().magicTurnInPlaceUpdate();
+   Shooter.getInstance().setShooterRPM(3600);
   }
 
   // Make this return true when this Command no longer needs to run execute()
   @Override
   public boolean isFinished() {
-    return Drive.getInstance().isMagicOnTarget() || mTimer.hasElapsed(1.75);
+    return true;
   }
 
   // Called once after isFinished returns true

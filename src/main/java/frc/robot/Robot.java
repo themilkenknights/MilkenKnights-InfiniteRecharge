@@ -13,12 +13,17 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
-import frc.robot.commands.Autonomous;
+import frc.robot.commands.TrenchAuto;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
@@ -33,6 +38,10 @@ public class Robot extends TimedRobot {
   private Timer shootTimer = new Timer();
   private boolean shootOn = false;
   private double limeOffset = 0;
+  private static SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
+  private static ShuffleboardTab mTab = Shuffleboard.getTab("General");
+  private static ComplexWidget positionChooserTab = mTab.add("Position", positionChooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
+  private Timer brakeTimer = new Timer();
 
   public Robot() {
     super(Constants.kDt);
@@ -42,7 +51,10 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     mCompressor.start();
     Shooter.getInstance().zeroHood();
-    m_autonomousCommand = new Autonomous();
+    positionChooser.addOption("Center", AutoPosition.CENTER);
+    positionChooser.addOption("Nothing", AutoPosition.NOTHING);
+    positionChooser.setDefaultOption("Left", AutoPosition.LEFT);
+    positionChooser.addOption("Right", AutoPosition.RIGHT);
   }
 
   @Override
@@ -62,6 +74,14 @@ public class Robot extends TimedRobot {
     Drive.getInstance().zeroSensors();
     Drive.getInstance().configBrakeMode();
     Drive.getInstance().resetOdometry();
+   /* switch(positionChooser.getSelected()){
+      case CENTER:
+      m_autonomousCommand = new TrenchAuto();
+        break;
+      default:
+       break;
+    }*/
+    m_autonomousCommand = new TrenchAuto();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -98,12 +118,16 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-   Drive.getInstance().configCoastMode();
+    brakeTimer.reset();
+    brakeTimer.start();
   }
 
   @Override
   public void disabledPeriodic() {
     updateSensors();
+    if(brakeTimer.hasElapsed(1.5)){
+      Drive.getInstance().configCoastMode();
+    }
   } 
 
   public void input() {
@@ -125,7 +149,7 @@ public class Robot extends TimedRobot {
       }
 
       if (isInAttackMode) {
-        Drive.getInstance().setOutput(new DriveSignal(leftOut / 2.0, rightOut / 2.0));
+        Drive.getInstance().setOutput(new DriveSignal(leftOut / 2.7, rightOut / 2.7));
         AttackMode();
       } else {
         Drive.getInstance().setOutput(new DriveSignal(leftOut, rightOut));
@@ -158,7 +182,7 @@ public class Robot extends TimedRobot {
         Shooter.getInstance().setHoodPos(hoodPos);
         Shooter.getInstance().setShooterOutput(shooterSpeed);
       } else {
-        Shooter.getInstance().setHoodPos(hoodPos);
+      //  Shooter.getInstance().setHoodPos(hoodPos);
         Shooter.getInstance().setShooterOutput(shooterSpeed);
       }
 
@@ -197,5 +221,9 @@ public class Robot extends TimedRobot {
   public void updateSensors() {
     Drive.getInstance().updateSensors();
     Limelight.getInstance().updateSensors();
+  }
+
+  public enum AutoPosition {
+    LEFT, NOTHING, RIGHT, CENTER
   }
 }
