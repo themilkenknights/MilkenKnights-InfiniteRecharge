@@ -41,7 +41,7 @@ public class Limelight {
     return Math.abs(visionYaw) < Constants.VISION.angle_tol;
   }
 
-  public void autoAimShoot() {
+  public void autoAimShoot(double limelightOffset) {
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
     Drive.getInstance().setOutput(update());
@@ -49,7 +49,7 @@ public class Limelight {
     double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     Shooter.getInstance().setShooterRPM(RPM);
-    Shooter.getInstance().setHoodPos(hoodDist);
+    Shooter.getInstance().setHoodPos(hoodDist+ limelightOffset);
     Elevator.getInstance().setElevatorOutput(.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
     SmartDashboard.putNumber("Map RPM", RPM);
     SmartDashboard.putNumber("Map Hood Pos", hoodDist);
