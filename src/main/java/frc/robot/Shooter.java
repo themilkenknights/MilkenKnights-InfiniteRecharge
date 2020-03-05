@@ -25,6 +25,9 @@ public class Shooter {
     mShooterSparkMaxLeft.restoreFactoryDefaults();
     mShooterSparkMaxRight.restoreFactoryDefaults();
 
+    mShooterSparkMaxLeft.setIdleMode(CANSparkMax.IdleMode.kCoast);
+    mShooterSparkMaxRight.setIdleMode(CANSparkMax.IdleMode.kCoast);
+
     mShooterSparkMaxRight.follow(mShooterSparkMaxLeft, true);
 
     mShooterSparkMaxLeft.setInverted(Constants.CAN.kLeftShooterInverted);
@@ -42,6 +45,8 @@ public class Shooter {
     mShooterPIDController.setD(SHOOTER.kFlywheelKd);
     mShooterPIDController.setFF(SHOOTER.kFlywheelKf);
     mShooterPIDController.setOutputRange(-1, 1);
+
+    mHoodSparkMax.setIdleMode(CANSparkMax.IdleMode.kBrake);
   }
 
   public static Shooter getInstance() {

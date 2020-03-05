@@ -61,15 +61,11 @@ public class Drive {
     leftMaster.config_kP(0, DRIVE.kDriveKp);
     leftMaster.config_kI(0, DRIVE.kDriveKi);
     leftMaster.config_kD(0, DRIVE.kDriveKD);
-    leftMaster.config_IntegralZone(0, 100);
-    leftMaster.configMaxIntegralAccumulator(0, 50);
 
     rightMaster.config_kF(0, DRIVE.kDriveKf);
     rightMaster.config_kP(0, DRIVE.kDriveKp);
     rightMaster.config_kI(0, DRIVE.kDriveKi);
     rightMaster.config_kD(0, DRIVE.kDriveKD);
-    rightMaster.config_IntegralZone(0, 100);
-    rightMaster.configMaxIntegralAccumulator(0, 50);
 
     /* Set acceleration and vcruise velocity - see documentation */
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);

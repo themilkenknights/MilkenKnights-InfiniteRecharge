@@ -16,7 +16,10 @@ public class Intake {
   private Intake() {
     mTalon.configFactoryDefault();
     mTalon.setInverted(false);
+    mTalon.configVoltageCompSaturation(12.0);
+    mTalon.enableVoltageCompensation(true);
     hopperSparkMax.restoreFactoryDefaults();
+    hopperSparkMax.setIdleMode(CANSparkMax.IdleMode.kBrake);
     intakeSolenoid.set(false);
   }
 
