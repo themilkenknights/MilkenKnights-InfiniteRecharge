@@ -43,5 +43,4 @@ public class InterpolatingDouble implements Interpolable<InterpolatingDouble>, I
       return 0;
     }
   }
-
 }

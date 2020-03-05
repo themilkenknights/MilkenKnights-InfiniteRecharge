@@ -1,26 +1,28 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shuffle {
-  AnalogInput pressure = new AnalogInput(0);
+
+  private final AnalogInput pressure = new AnalogInput(0);
+  private double lastTime = Timer.getFPGATimestamp();
 
   public static Shuffle getInstance() {
     return InstanceHolder.mInstance;
   }
 
-  public void Update() {
+  public void update() {
+    double time = Timer.getFPGATimestamp();
+    SmartDashboard.putNumber("Loop Dt", (time - lastTime) * 1e3);
+    lastTime = time;
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
-    SmartDashboard.putNumber("Distance", Limelight.getInstance().getDistance());
-    SmartDashboard.putNumber("Pressure", ( (((pressure.getVoltage()) * 250 / 5.0 - 25.0)/112) * 120));
-    SmartDashboard.putNumber("Rot Vel", Drive.getInstance().getYawVel());
-    SmartDashboard.putNumber("Yaw", Drive.getInstance().getYaw());
-    SmartDashboard.putNumber("RPos", Drive.getInstance().getPos());
-    SmartDashboard.putNumber("RVel", Drive.getInstance().getVelocity());
-    SmartDashboard.putNumber("RPosIn", Drive.getInstance().nativeUnitsToInches(Drive.getInstance().getPos()));
+    SmartDashboard.putNumber("Pressure", ((((pressure.getVoltage()) * 250 / 5.0 - 25.0) / 112) * 120));
     SmartDashboard.putNumber("Hood Pos", Shooter.getInstance().getHoodPos());
-
+    SmartDashboard.putNumber("Hood Setpoint", Shooter.getInstance().getHoodPos());
+    Drive.getInstance().updateDashboard();
+    Limelight.getInstance().updateDashboard();
   }
 
   private static class InstanceHolder {

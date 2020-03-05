@@ -9,39 +9,34 @@ import frc.robot.Constants.SHOOTER;
 
 public class Shooter {
 
-  private CANSparkMax mShooterSparkMaxLeft = new CANSparkMax(Constants.CAN.LeftShooterId, MotorType.kBrushless);
-  private CANSparkMax mShooterSparkMaxRight = new CANSparkMax(Constants.CAN.RightShootId, MotorType.kBrushless);
-  private CANSparkMax mHoodSparkMax = new CANSparkMax(Constants.CAN.HoodId, MotorType.kBrushless);
+  private final CANSparkMax mShooterSparkMaxLeft = new CANSparkMax(Constants.CAN.kLeftShooterId, MotorType.kBrushless);
+  private final CANSparkMax mShooterSparkMaxRight = new CANSparkMax(Constants.CAN.RightShootId, MotorType.kBrushless);
+  private final CANSparkMax mHoodSparkMax = new CANSparkMax(Constants.CAN.kHoodId, MotorType.kBrushless);
 
-  private CANEncoder sEncoder = new CANEncoder(mShooterSparkMaxRight);
+  private CANEncoder sEncoder = new CANEncoder(mShooterSparkMaxLeft);
   private CANEncoder hEncoder = new CANEncoder(mHoodSparkMax);
 
-  private CANPIDController mShooterPIDController;
-
-  private double kp = .1;
+  private final CANPIDController mShooterPIDController;
+  private double hoodSetpoint;
 
   private Shooter() {
     mShooterSparkMaxLeft.restoreFactoryDefaults();
     mShooterSparkMaxRight.restoreFactoryDefaults();
 
     mShooterSparkMaxRight.follow(mShooterSparkMaxLeft, true);
-
-    mShooterSparkMaxLeft.setInverted(Constants.CAN.LeftShooterInverted);
-    mShooterSparkMaxRight.setInverted(Constants.CAN.RightShooterInverted);
+    mShooterSparkMaxLeft.setInverted(Constants.CAN.kLeftShooterInverted);
+    mShooterSparkMaxRight.setInverted(Constants.CAN.kRightShooterInverted);
     mShooterSparkMaxLeft.enableVoltageCompensation(12.0);
     mShooterSparkMaxRight.enableVoltageCompensation(12.0);
 
-    sEncoder.setVelocityConversionFactor(2.0 / 3.0); //Integer Divison Is Bad!!
+    sEncoder.setVelocityConversionFactor(2.0 / 3.0);
     sEncoder = mShooterSparkMaxLeft.getEncoder();
 
-
     mShooterPIDController = mShooterSparkMaxLeft.getPIDController();
-
-    mShooterPIDController.setP(0.0022);
-    mShooterPIDController.setI(0);
-    mShooterPIDController.setD(0.008);//0.0075
-    mShooterPIDController.setFF(1.0 / 5100); // 1.0/MAX_RPM
-    mShooterPIDController.setOutputRange(-1, 1);
+    mShooterPIDController.setP(SHOOTER.kFlywheelKp);
+    mShooterPIDController.setI(SHOOTER.kFlywheelKi);
+    mShooterPIDController.setD(SHOOTER.kFlywheelKd);
+    mShooterPIDController.setFF(SHOOTER.kFlywheelKf);
   }
 
   public static Shooter getInstance() {
@@ -68,17 +63,13 @@ public class Shooter {
     return hEncoder.getPosition();
   }
 
-  public void setHoodPos(double Pos) {
-    mHoodSparkMax.set((Pos - hEncoder.getPosition()) * kp);
+  public double getHoodSetpoint() {
+    return hoodSetpoint;
   }
 
-  public void setHoodFromTargetDist(double dist) {
-    if (dist < SHOOTER.maxHoodAdjustDist) {
-      setHoodPos(SHOOTER.maxHoodPos);
-    } else {
-      //TODO: Modify hood based on distance here
-      setHoodPos(dist * 0.5);
-    }
+  public void setHoodPos(double pos) {
+    mHoodSparkMax.set((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp);
+    hoodSetpoint = pos;
   }
 
   private static class InstanceHolder {
