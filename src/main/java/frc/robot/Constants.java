@@ -68,10 +68,7 @@ public final class Constants {
     public static final boolean kRightMasterInverted = true;
     public static final boolean kRightSlaveInverted = true;
 
-    public static final boolean kLeftSensorInverted = false;
-    public static final boolean kRightSensorInverted = false;
-
-    public static final double kAntiTipThreshold = 10;
+    public static final double kAntiTipThreshold = 15;
 
     public static final double kMaxNativeVel = 1685;
     public static final double kDriveKp = 7.0 * (0.1 * 1023.0) / (1400.0);

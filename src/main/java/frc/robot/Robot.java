@@ -40,13 +40,13 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     mCompressor.start();
     Shooter.getInstance().zeroHood();
-    Drive.getInstance().zeroSensors();
     m_autonomousCommand = new Autonomous();
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    Shuffle.getInstance().updateT();
     if (updateDashboard) {
       Shuffle.getInstance().update();
       updateDashboard = false;
@@ -110,7 +110,7 @@ public class Robot extends TimedRobot {
       Limelight.getInstance().resetInt();
 
       double forward, turn, rightOut, leftOut;
-      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + Drive.getInstance().antiTip());
+      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) /*+ Drive.getInstance().antiTip()*/);
       turn = (-stick.getRawAxis(0));
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();

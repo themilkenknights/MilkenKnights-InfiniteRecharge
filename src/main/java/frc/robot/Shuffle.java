@@ -13,10 +13,13 @@ public class Shuffle {
     return InstanceHolder.mInstance;
   }
 
-  public void update() {
+  public void updateT(){
     double time = Timer.getFPGATimestamp();
     SmartDashboard.putNumber("Loop Dt", (time - lastTime) * 1e3);
     lastTime = time;
+  }
+
+  public void update() {
     SmartDashboard.putNumber("Shooter RPM", Shooter.getInstance().getShooterRPM());
     SmartDashboard.putNumber("Pressure", ((((pressure.getVoltage()) * 250 / 5.0 - 25.0) / 112) * 120));
     SmartDashboard.putNumber("Hood Pos", Shooter.getInstance().getHoodPos());

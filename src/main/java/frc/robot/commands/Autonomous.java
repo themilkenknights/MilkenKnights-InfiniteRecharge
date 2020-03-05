@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
@@ -23,7 +24,7 @@ public class Autonomous extends SequentialCommandGroup {
    */
   public Autonomous() {
 
-    // Create a voltage constraint to ensure we don't accelerate too fast
+  /*  // Create a voltage constraint to ensure we don't accelerate too fast
     var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
             new SimpleMotorFeedforward(DRIVE.ksVolts,
@@ -47,8 +48,8 @@ public class Autonomous extends SequentialCommandGroup {
         new Pose2d(0, 0, new Rotation2d(0)),
         // Pass through these two interior waypoints, making an 's' curve path
         List.of(
-            /*new Translation2d(1, 1),
-            new Translation2d(2, -1)*/
+            new Translation2d(1, 1),
+            new Translation2d(2, -1)
         ),
         // End 3 meters straight ahead of where we started, facing forward
         new Pose2d(1.5, 0, new Rotation2d(Units.degreesToRadians(30))),
@@ -71,8 +72,8 @@ public class Autonomous extends SequentialCommandGroup {
         new Pose2d(1.5, 0, new Rotation2d(Units.degreesToRadians(30))),
         // Pass through these two interior waypoints, making an 's' curve path
         List.of(
-            /*new Translation2d(1, 1),
-            new Translation2d(2, -1)*/
+            new Translation2d(1, 1),
+            new Translation2d(2, -1)
         ),
         // End 3 meters straight ahead of where we started, facing forward
         new Pose2d(1.5, 4, new Rotation2d(Units.degreesToRadians(170))),
@@ -95,8 +96,8 @@ public class Autonomous extends SequentialCommandGroup {
         new Pose2d(1.5, 0, new Rotation2d(Units.degreesToRadians(30))),
         // Pass through these two interior waypoints, making an 's' curve path
         List.of(
-            /*new Translation2d(1, 1),
-            new Translation2d(2, -1)*/
+            new Translation2d(1, 1),
+            new Translation2d(2, -1)
         ),
         // End 3 meters straight ahead of where we started, facing forward
         new Pose2d(1.5, 0, new Rotation2d(0)),
@@ -118,10 +119,10 @@ public class Autonomous extends SequentialCommandGroup {
         // RamseteCommand passes volts to the callback
         Drive.getInstance()::setVoltage,
         Drive.getInstance()
-    );
+    ); */
 
     addCommands(
-        deadline(ramseteCommand, new IntakeBalls()),
+       // deadline(ramseteCommand, new IntakeBalls()),
         deadline(new DriveStraight(70.0), new IntakeBalls()),
         deadline(new TurnInPlace(-90.0), new IntakeBalls()),
         deadline(new DriveStraight(10), new IntakeBalls()),

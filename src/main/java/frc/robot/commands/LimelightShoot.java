@@ -17,7 +17,7 @@ public class LimelightShoot extends CommandBase {
 
   @Override
   public void execute() {
-    Limelight.getInstance().autoAimShoot();
+    Limelight.getInstance().autoAimShoot(0);
   }
 
   // Make this return true when this Command no longer needs to run execute()

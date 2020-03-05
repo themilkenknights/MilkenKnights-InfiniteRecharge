@@ -44,7 +44,7 @@ public class Limelight {
   public void autoAimShoot(double limelightOffset) {
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
-    Drive.getInstance().setOutput(update());
+    update();
     double curDist = getDistance();
     double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
@@ -66,21 +66,20 @@ public class Limelight {
     }
   }
 
-  public DriveSignal update() {
-    // Get the horizontal and vertical angle we are offset by
-    double horizontal_angle = tx.getDouble(0.0);
+  public void update() {
 
-    // Goal angle - current angle
-    double turn_output = 0;
+
+
+    Drive.getInstance().magicTurnInPlaceUpdate(visionYaw);
 
     // Have a deadband where we are close enough
-    if (Math.abs(horizontal_angle) > VISION.angle_tol) {
+   /*if (Math.abs(horizontal_angle) > VISION.angle_tol) {
       // Get PID controller output
       TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0, 0));
       turn_output = clamp(m_turn_controller.calculate(-horizontal_angle, 0) + ((1.0) / (VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity);
-    }
+    }*/
 
-    return new DriveSignal(turn_output, -turn_output);
+   // return new DriveSignal(turn_output, -turn_output);
   }
 
   public double getDistance() {

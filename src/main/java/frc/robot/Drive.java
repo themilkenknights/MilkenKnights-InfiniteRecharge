@@ -19,7 +19,7 @@ import frc.robot.Constants.DRIVE;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
-public class Drive extends SubsystemBase {
+public class Drive {
 
   private final AHRS navX = new AHRS();
   private final TalonFX leftMaster = new TalonFX(CAN.kDriveLeftMasterId);
@@ -27,7 +27,6 @@ public class Drive extends SubsystemBase {
   private final TalonFX rightMaster = new TalonFX(CAN.kDriveRightMasterId);
   private final TalonFX rightSlave = new TalonFX(CAN.kDriveRightSlaveId);
   private double rollOffset, magicTarget, magicStraightTarget;
-  private boolean isOnMagicTarget = false;
   private final DifferentialDriveOdometry m_odometry;
   private PeriodicIO mPeriodicIO;
 
@@ -51,9 +50,6 @@ public class Drive extends SubsystemBase {
     leftSlave.setInverted(DRIVE.kLeftSlaveInverted);
     rightMaster.setInverted(DRIVE.kRightMasterInverted);
     rightSlave.setInverted(DRIVE.kRightSlaveInverted);
-
-    leftMaster.setSensorPhase(DRIVE.kLeftSensorInverted);
-    rightMaster.setSensorPhase(DRIVE.kRightSensorInverted);
 
     leftSlave.follow(leftMaster);
     rightSlave.follow(rightMaster);
@@ -159,7 +155,6 @@ public class Drive extends SubsystemBase {
 
   public void setMagicTurnInPlace(double deg) {
     navX.zeroYaw();
-    isOnMagicTarget = false;
     magicTarget = getYaw() + deg;
   }
 
@@ -169,13 +164,15 @@ public class Drive extends SubsystemBase {
     double delta_v = 22.97 * error_rad / (2 * 0.95);
     leftMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(-delta_v) + mPeriodicIO.left_pos_native);
     rightMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(delta_v) + mPeriodicIO.right_pos_native);
-    if (Math.abs(error_deg) < 3.0 && mPeriodicIO.avg_vel_inches_per_sec < 0.1) {
-      isOnMagicTarget = true;
-    }
+  }
+
+  public void magicTurnInPlaceUpdate(double ang){
+    magicTarget = mPeriodicIO.yaw_continouous + ang;
+    magicTurnInPlaceUpdate();
   }
 
   public boolean isMagicOnTarget() {
-    if (isOnMagicTarget) {
+    if (Math.abs(mPeriodicIO.yaw_continouous - magicTarget) < 3.0 && mPeriodicIO.avg_vel_inches_per_sec < 0.1) {    
       leftMaster.set(ControlMode.PercentOutput, 0);
       rightMaster.set(ControlMode.PercentOutput, 0);
       return true;
@@ -186,6 +183,7 @@ public class Drive extends SubsystemBase {
   public void setOutput(DriveSignal signal) {
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
+    System.out.println(signal);
   }
 
   public void setVoltage(double left, double right) {
@@ -200,7 +198,7 @@ public class Drive extends SubsystemBase {
 
   public double antiTip() {
     if (Math.abs(mPeriodicIO.roll) >= DRIVE.kAntiTipThreshold) {
-      return Math.sin(Math.toRadians(mPeriodicIO.roll)) * -2;
+      return Math.sin(Math.toRadians(navX.getRoll())) * -2;
     } else {
       return 0.0;
     }
@@ -216,7 +214,7 @@ public class Drive extends SubsystemBase {
     SmartDashboard.putNumber("Right Vel Meters/Sec", mPeriodicIO.right_vel_meters_per_sec);
     SmartDashboard.putNumber("Error Deg Turn In Place", mPeriodicIO.yaw_continouous - magicTarget);
     SmartDashboard.putNumber("Delta V Turn In Place", 22.97 * Math.toRadians(mPeriodicIO.yaw_continouous - magicTarget) / (2 * 0.95));
-    SmartDashboard.putBoolean("Magic Turn In Place Done", isOnMagicTarget);
+    SmartDashboard.putBoolean("Magic Turn In Place Done", isMagicOnTarget());
     SmartDashboard.putNumber("Pose X Inches", MkUtil.metersToInches(getPose().getTranslation().getX()));
     SmartDashboard.putNumber("Pose Y Inches", MkUtil.metersToInches(getPose().getTranslation().getY()));
     SmartDashboard.putNumber("Pose Theta Degrees", getPose().getRotation().getDegrees());
@@ -246,7 +244,6 @@ public class Drive extends SubsystemBase {
    * @param pose The pose to which to set the odometry.
    */
   public void resetOdometry(Pose2d pose) {
-    zeroSensors();
     m_odometry.resetPosition(pose, Rotation2d.fromDegrees(getHeading()));
   }
 
@@ -260,17 +257,17 @@ public class Drive extends SubsystemBase {
   }
 
   public void configCoastMode() {
-    leftMaster.setNeutralMode(NeutralMode.Brake);
-    rightMaster.setNeutralMode(NeutralMode.Brake);
-    leftSlave.setNeutralMode(NeutralMode.Brake);
-    rightSlave.setNeutralMode(NeutralMode.Brake);
-  }
-
-  public void configBrakeMode() {
     leftMaster.setNeutralMode(NeutralMode.Coast);
     rightMaster.setNeutralMode(NeutralMode.Coast);
     leftSlave.setNeutralMode(NeutralMode.Coast);
     rightSlave.setNeutralMode(NeutralMode.Coast);
+  }
+
+  public void configBrakeMode() {
+    leftMaster.setNeutralMode(NeutralMode.Brake);
+    rightMaster.setNeutralMode(NeutralMode.Brake);
+    leftSlave.setNeutralMode(NeutralMode.Brake);
+    rightSlave.setNeutralMode(NeutralMode.Brake);
   }
 
   public void zeroSensors() {
@@ -278,6 +275,7 @@ public class Drive extends SubsystemBase {
     navX.zeroYaw();
     leftMaster.setSelectedSensorPosition(0);
     rightMaster.setSelectedSensorPosition(0);
+  //  m_odometry.resetPosition(new Pose2d(translation, rotation), gyroAngle);
   }
 
   public double getYaw() {
