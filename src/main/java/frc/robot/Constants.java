@@ -39,7 +39,7 @@ public final class Constants {
     public static final int climbOff = 8;
     public static final int elevatorUp = 3;
     public static final int elevatorDown = 5;
-    public static final int limeLight = 9;
+    public static final int limeLight = 1;
     public static final int limeAdjust = 11;
 
     // public static final int button 1 is shooterControlEnable and forward and back tics for speed management. hood pov
@@ -87,7 +87,7 @@ public final class Constants {
 
     public static final double kHoodKp = 0.08;
     public static final double kMaxHoodPos = -3.3;
-    public static final double kMaxHoodOutput = 0.4;
+    public static final double kMaxHoodOutput = 0.35;
   }
 
   public static class VISION {

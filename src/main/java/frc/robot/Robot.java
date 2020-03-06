@@ -123,7 +123,7 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (jStick.getRawButton(Constants.INPUT.limeLight)) {
+    if (stick.getRawButton(Constants.INPUT.limeLight)) {
       mLimelight.autoAimShoot(limeOffset);
     } else {
       double forward, turn, rightOut, leftOut;
