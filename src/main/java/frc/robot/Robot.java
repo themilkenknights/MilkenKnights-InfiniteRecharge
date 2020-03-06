@@ -169,22 +169,23 @@ public class Robot extends TimedRobot {
       }
 
       if (jStick.getRawButtonPressed(6)) {
-        shooterSpeed += .05;
+        shooterSpeed += .01;
       } else if (jStick.getRawButtonPressed(4)) {
-        shooterSpeed -= .05;
+        shooterSpeed -= .01;
       }
 
       if (jStick.getRawButtonPressed(10)) {
         ElevatorStopper.getInstance().toggleStopper();
       }
-
+      
       if (jStick.getRawButtonPressed(1)) {
-        mShooter.setHoodPos(hoodPos);
+        mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
         mShooter.setShooterOutput(shooterSpeed);
       } else {
-        mShooter.setHoodPos(hoodPos);
+        mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
         mShooter.setShooterOutput(shooterSpeed);
       }
+      
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
@@ -255,5 +256,14 @@ public class Robot extends TimedRobot {
 
   public enum AutoPosition {
     LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
+  }
+  public double limit(double value, double min, double max)
+  {
+    if(value > max)
+      return max;
+    else if(value < min)
+      return min;
+    else
+      return value;
   }
 }

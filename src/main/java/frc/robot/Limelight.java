@@ -53,7 +53,7 @@ public class Limelight {
     double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     Shooter.getInstance().setShooterRPM(RPM);
-    Shooter.getInstance().setHoodPos(hoodDist); //Add limelight offset
+    Shooter.getInstance().setHoodPos(limit(hoodDist,-3.25, 0)); //Add limelight offset
     Elevator.getInstance().setElevatorOutput(0.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
     if (inRange() && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
@@ -102,6 +102,16 @@ public class Limelight {
     SmartDashboard.putNumber("Vertical Angle", visionPitch);
     SmartDashboard.putNumber("Target Distance", distance);
     SmartDashboard.putBoolean("In Range", inRange());
+  }
+  
+  public double limit(double value, double min, double max)
+  {
+    if(value > max)
+      return max;
+    else if(value < min)
+      return min;
+    else
+      return value;
   }
 
   private static class InstanceHolder {
