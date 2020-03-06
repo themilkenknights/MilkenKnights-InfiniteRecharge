@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
+import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -54,6 +55,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    Shuffleboard.startRecording();
+    Shuffleboard.selectTab("Match");
     mCompressor.start();
     mShooter.zeroHood();
     positionChooser.addOption("Center", AutoPosition.CENTER);
@@ -77,6 +80,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    Shuffleboard.addEventMarker("Auto Init", EventImportance.kNormal);
     mDrive.zeroSensors();
     mDrive.configBrakeMode();
     switch (positionChooser.getSelected()) {
@@ -108,6 +112,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    Shuffleboard.addEventMarker("Teleop Init", EventImportance.kNormal);
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -222,6 +227,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
+    mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
     Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
@@ -231,6 +238,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
+    mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();

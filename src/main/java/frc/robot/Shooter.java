@@ -3,6 +3,7 @@ package frc.robot;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -25,6 +26,9 @@ public class Shooter {
     mShooterSparkMaxLeft.restoreFactoryDefaults();
     mShooterSparkMaxRight.restoreFactoryDefaults();
 
+    mShooterSparkMaxLeft.setIdleMode(CANSparkMax.IdleMode.kCoast);
+    mShooterSparkMaxRight.setIdleMode(CANSparkMax.IdleMode.kCoast);
+
     mShooterSparkMaxRight.follow(mShooterSparkMaxLeft, true);
 
     mShooterSparkMaxLeft.setInverted(Constants.CAN.kLeftShooterInverted);
@@ -42,6 +46,10 @@ public class Shooter {
     mShooterPIDController.setD(SHOOTER.kFlywheelKd);
     mShooterPIDController.setFF(SHOOTER.kFlywheelKf);
     mShooterPIDController.setOutputRange(-1, 1);
+
+    mHoodSparkMax.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    mHoodSparkMax.setControlFramePeriodMs(10);
+    mHoodSparkMax.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10);
   }
 
   public static Shooter getInstance() {

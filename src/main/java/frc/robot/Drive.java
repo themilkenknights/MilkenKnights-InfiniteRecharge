@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.music.Orchestra;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,6 +14,8 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.DRIVE;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Drive {
 
@@ -61,15 +64,11 @@ public class Drive {
     leftMaster.config_kP(0, DRIVE.kDriveKp);
     leftMaster.config_kI(0, DRIVE.kDriveKi);
     leftMaster.config_kD(0, DRIVE.kDriveKD);
-    leftMaster.config_IntegralZone(0, 100);
-    leftMaster.configMaxIntegralAccumulator(0, 50);
 
     rightMaster.config_kF(0, DRIVE.kDriveKf);
     rightMaster.config_kP(0, DRIVE.kDriveKp);
     rightMaster.config_kI(0, DRIVE.kDriveKi);
     rightMaster.config_kD(0, DRIVE.kDriveKD);
-    rightMaster.config_IntegralZone(0, 100);
-    rightMaster.configMaxIntegralAccumulator(0, 50);
 
     /* Set acceleration and vcruise velocity - see documentation */
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
@@ -81,9 +80,9 @@ public class Drive {
     leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     leftMaster.configClosedLoopPeakOutput(0, 1.0);
     rightMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
-    leftMaster.configMotionSCurveStrength(6);
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
-    leftMaster.configVelocityMeasurementWindow(7);
+    leftMaster.configVelocityMeasurementWindow(16);
+    leftMaster.configMotionSCurveStrength(6);
 
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
@@ -94,9 +93,9 @@ public class Drive {
     rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     rightMaster.configClosedLoopPeakOutput(0, 1.0);
     leftMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
-    rightMaster.configMotionSCurveStrength(6);
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
-    rightMaster.configVelocityMeasurementWindow(7);
+    rightMaster.configVelocityMeasurementWindow(16);
+    rightMaster.configMotionSCurveStrength(6);
 
     zeroSensors();
   }
@@ -234,6 +233,53 @@ public class Drive {
   public double getYaw() {
     return navX.getAngle();
   }
+
+  //TODO: Begin Swerd Magic
+
+  Orchestra _orchestra;
+  int _timeToPlayLoops = 0;
+
+  public void initSwerdMagic() {
+    ArrayList<TalonFX> _instruments = new ArrayList<TalonFX>();
+    _instruments.add(leftMaster);
+    _instruments.add(rightMaster);
+    _instruments.add(leftSlave);
+    _instruments.add(rightSlave);
+    _orchestra = new Orchestra(_instruments);
+
+    String[] _songs = new String[] {
+        "song1.chrp",
+        "song2.chrp",
+        "song3.chrp",
+        "song4.chrp",
+        "song5.chrp",
+        "song6.chrp",
+        "song7.chrp",
+        "song8.chrp",
+        "song9.chrp",
+        "song10.chrp",
+        "song11.chrp",
+    };
+    Random random = new Random();
+    _orchestra.loadMusic(_songs[random.nextInt(11)]);
+    _timeToPlayLoops = 10;
+  }
+
+  public void updateSwerdMagic(double time) {
+    if (_timeToPlayLoops > 0) {
+      --_timeToPlayLoops;
+      if (_timeToPlayLoops == 0) {
+        System.out.println("Swerdlow Magic Initiated.");
+        _orchestra.play();
+      }
+    }
+
+    if (time > 6.0) {
+      _orchestra.stop();
+    }
+  }
+
+  //TODO: End Swerd Magic
 
   private static class InstanceHolder {
 
