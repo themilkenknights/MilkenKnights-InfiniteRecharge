@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
@@ -9,6 +10,10 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.music.Orchestra;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DRIVE;
@@ -98,6 +103,7 @@ public class Drive {
     rightMaster.configMotionSCurveStrength(6);
 
     zeroSensors();
+    m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
   }
 
   public static Drive getInstance() {
@@ -127,15 +133,18 @@ public class Drive {
 
     mPeriodicIO.avg_dist_inches = (mPeriodicIO.left_pos_inches + mPeriodicIO.right_pos_inches) / 2.0;
     mPeriodicIO.avg_vel_inches_per_sec = (mPeriodicIO.left_vel_inches_per_sec + mPeriodicIO.right_vel_inches_per_sec) / 2.0;
+
+    m_odometry.update(Rotation2d.fromDegrees(mPeriodicIO.yaw_normalized), mPeriodicIO.left_pos_meters, mPeriodicIO.right_pos_meters);
+    mPeriodicIO.yaw_normalized = getHeading();
   }
 
   public void setDriveStraight(double dist) {
+    zeroSensors();
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     magicStraightTarget = dist;
-    zeroSensors();
   }
 
   public void updateDriveStraight() {
@@ -151,6 +160,7 @@ public class Drive {
   }
 
   public void setMagicTurnInPlace(double deg) {
+    zeroSensors();
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicTurnInPlaceVel);
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicTurnInPlaceAccel);
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicTurnInPlaceVel);
@@ -182,6 +192,13 @@ public class Drive {
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
     mPeriodicIO.left_output = signal.getLeft();
     mPeriodicIO.right_output = signal.getRight();
+  }
+
+  public void setOutput(double leftVelNative, double rightVelNative, double leftFeed, double rightFeed) {
+    leftMaster.set(ControlMode.Velocity, leftVelNative, DemandType.ArbitraryFeedForward, leftFeed);
+    rightMaster.set(ControlMode.Velocity, rightVelNative, DemandType.ArbitraryFeedForward, rightFeed);
+    mPeriodicIO.left_output = leftVelNative;
+    mPeriodicIO.right_output = rightVelNative;
   }
 
   public double antiTip() {
@@ -221,9 +238,9 @@ public class Drive {
   }
 
   public void zeroSensors() {
-    navX.zeroYaw();
     leftMaster.setSelectedSensorPosition(0);
     rightMaster.setSelectedSensorPosition(0);
+    navX.zeroYaw();
   }
 
   public double getAvgVel() {
@@ -313,5 +330,42 @@ public class Drive {
 
     public double left_output;
     public double right_output;
+  }
+
+  private final DifferentialDriveOdometry m_odometry;
+
+  /**
+   * Returns the currently-estimated pose of the robot.
+   *
+   * @return The pose.
+   */
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
+  }
+
+  /**
+   * Returns the current wheel speeds of the robot.
+   *
+   * @return The current wheel speeds.
+   */
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(mPeriodicIO.left_vel_meters_per_sec, mPeriodicIO.right_vel_meters_per_sec);
+  }
+
+  /**
+   * Resets the odometry to the specified pose.
+   */
+  public void resetOdometry() {
+    zeroSensors();
+    m_odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(getHeading()));
+  }
+
+  /**
+   * Returns the heading of the robot.
+   *
+   * @return the robot's heading in degrees, from -180 to 180
+   */
+  public double getHeading() {
+    return -navX.getYaw();
   }
 }

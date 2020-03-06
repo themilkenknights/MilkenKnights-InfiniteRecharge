@@ -81,7 +81,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     Shuffleboard.addEventMarker("Auto Init", EventImportance.kNormal);
-    mDrive.zeroSensors();
+    mDrive.resetOdometry();
     mDrive.configBrakeMode();
     switch (positionChooser.getSelected()) {
       case LEFT:
@@ -112,12 +112,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    Shuffleboard.addEventMarker("Teleop Init", EventImportance.kNormal);
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    mDrive.configBrakeMode();
+    Shuffleboard.addEventMarker("Teleop Init", EventImportance.kNormal);
     mDrive.zeroSensors();
+    mDrive.configBrakeMode();
     hoodPos = shooterSpeed = 0;
   }
 
@@ -177,15 +177,14 @@ public class Robot extends TimedRobot {
       if (jStick.getRawButtonPressed(10)) {
         ElevatorStopper.getInstance().toggleStopper();
       }
-      
+
       if (jStick.getRawButtonPressed(1)) {
-        mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
+        mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
         mShooter.setShooterOutput(shooterSpeed);
       } else {
-        mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
+        mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
         mShooter.setShooterOutput(shooterSpeed);
       }
-      
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
@@ -257,13 +256,14 @@ public class Robot extends TimedRobot {
   public enum AutoPosition {
     LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
   }
-  public double limit(double value, double min, double max)
-  {
-    if(value > max)
+
+  public double limit(double value, double min, double max) {
+    if (value > max) {
       return max;
-    else if(value < min)
+    } else if (value < min) {
       return min;
-    else
+    } else {
       return value;
+    }
   }
 }

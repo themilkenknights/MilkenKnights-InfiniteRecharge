@@ -1,8 +1,17 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.InterpolatingTreeMap;
+import java.util.List;
 
 public final class Constants {
 
@@ -68,7 +77,6 @@ public final class Constants {
 
     public static final int kMotionMagicTurnInPlaceVel = (int) (0.35 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
     public static final int kMotionMagicTurnInPlaceAccel = (int) (0.15 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
-
   }
 
   public static class LIFTER {
@@ -166,5 +174,31 @@ public final class Constants {
     public static final double kPDriveVel = 5.88;
     public static final double kMaxSpeedMetersPerSecond = 2.54;
     public static final double kMaxAccelerationMetersPerSecondSquared = 2.54;
+
+    public static final SimpleMotorFeedforward kFeedforward = new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter);
+
+    // Create a voltage constraint to ensure we don't accelerate too fast
+    public static final DifferentialDriveVoltageConstraint autoVoltageConstraint =
+        new DifferentialDriveVoltageConstraint(kFeedforward, kDriveKinematics, 10);
+
+    // Create config for trajectory
+    public static final TrajectoryConfig config =
+        new TrajectoryConfig(kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared).setKinematics(kDriveKinematics)
+            .addConstraint(autoVoltageConstraint);
+
+    // An example trajectory to follow.  All units in meters.
+    public static final Trajectory traj_1 = TrajectoryGenerator.generateTrajectory(
+        // Start at the origin facing the +X direction
+        new Pose2d(0, 0, new Rotation2d(0)),
+        // Pass through these two interior waypoints, making an 's' curve path
+        List.of(
+            new Translation2d(1, 1),
+            new Translation2d(2, -1)
+        ),
+        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(3, 0, new Rotation2d(0)),
+        // Pass config
+        config
+    );
   }
 }
