@@ -34,6 +34,9 @@ public class Drive {
     rightMaster.configFactoryDefault();
     rightSlave.configFactoryDefault();
 
+    leftSlave.follow(leftMaster);
+    rightSlave.follow(rightMaster);
+
     leftMaster.configVoltageCompSaturation(12.0);
     leftMaster.enableVoltageCompensation(true);
     leftSlave.configVoltageCompSaturation(12.0);
@@ -132,9 +135,6 @@ public class Drive {
 
     mPeriodicIO.avg_dist_inches = (mPeriodicIO.left_pos_inches + mPeriodicIO.right_pos_inches) / 2.0;
     mPeriodicIO.avg_vel_inches_per_sec = (mPeriodicIO.left_vel_inches_per_sec + mPeriodicIO.right_vel_inches_per_sec) / 2.0;
-
-    
-    SmartDashboard.putNumber("Encoder", leftMaster.getSelectedSensorPosition());
   }
 
   public void setDriveStraight(double dist) {
@@ -195,11 +195,6 @@ public class Drive {
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
     
-    leftSlave.set(ControlMode.PercentOutput, signal.getLeft());
-    rightSlave.set(ControlMode.PercentOutput, signal.getRight());
-
-    System.out.println(signal);
-
     mPeriodicIO.left_output = signal.getLeft();
     mPeriodicIO.right_output = signal.getRight();
   }
