@@ -74,7 +74,7 @@ public class Drive {
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     leftMaster.configAllowableClosedloopError(0, 1);
-    leftMaster.configNeutralDeadband(0.0001);
+    leftMaster.configNeutralDeadband(0.02);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
@@ -87,7 +87,7 @@ public class Drive {
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configAllowableClosedloopError(0, 1);
-    rightMaster.configNeutralDeadband(0.0001);
+    rightMaster.configNeutralDeadband(0.02);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
@@ -96,6 +96,14 @@ public class Drive {
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     rightMaster.configVelocityMeasurementWindow(16);
     rightMaster.configMotionSCurveStrength(6);
+
+    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+
+    leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+    rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
+    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
 
     zeroSensors();
   }
@@ -204,6 +212,8 @@ public class Drive {
     SmartDashboard.putNumber("Error Deg Turn In Place", mPeriodicIO.yaw_continouous - magicTarget);
     SmartDashboard.putNumber("Delta V Turn In Place", 22.97 * Math.toRadians(mPeriodicIO.yaw_continouous - magicTarget) / (2 * 0.95));
     SmartDashboard.putBoolean("Magic Turn In Place Done", isMagicTurnInPlaceDone());
+    SmartDashboard.putNumber("Left Master Drive Stator Current", leftMaster.getStatorCurrent());
+    SmartDashboard.putNumber("Right Master Drive Stator Current", leftMaster.getStatorCurrent());
   }
 
   public void configCoastMode() {
@@ -272,10 +282,6 @@ public class Drive {
         System.out.println("Swerdlow Magic Initiated.");
         _orchestra.play();
       }
-    }
-
-    if (time > 6.0) {
-      _orchestra.stop();
     }
   }
 
