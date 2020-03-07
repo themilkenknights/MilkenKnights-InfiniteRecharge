@@ -71,8 +71,10 @@ public final class Constants {
     public static final int kMotionMagicTurnInPlaceVel = (int) (0.35 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
     public static final int kMotionMagicTurnInPlaceAccel = (int) (0.15 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
 
-    public static final StatorCurrentLimitConfiguration config = new StatorCurrentLimitConfiguration(false, 5, 20,
-        0.05);
+    //False So The Limit Only Applies In Neutral (ie when stopping). 2nd param is current limit, 3rd is current limit threshold
+    //4th param is limit threshold duration
+    //The current limit threshold must be exceeded for the 'threshold duration' seconds to enable the current limit
+    public static final StatorCurrentLimitConfiguration config = new StatorCurrentLimitConfiguration(false, 5, 20, 0.05);
   }
 
   public static class LIFTER {
