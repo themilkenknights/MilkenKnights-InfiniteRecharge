@@ -34,6 +34,9 @@ public class Drive {
     rightMaster.configFactoryDefault();
     rightSlave.configFactoryDefault();
 
+    leftSlave.follow(leftMaster);
+    rightSlave.follow(rightMaster);
+
     leftMaster.configVoltageCompSaturation(12.0);
     leftMaster.enableVoltageCompensation(true);
     leftSlave.configVoltageCompSaturation(12.0);
@@ -71,7 +74,7 @@ public class Drive {
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     leftMaster.configAllowableClosedloopError(0, 1);
-    leftMaster.configNeutralDeadband(0.0001);
+    leftMaster.configNeutralDeadband(0.02);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
@@ -84,7 +87,7 @@ public class Drive {
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configAllowableClosedloopError(0, 1);
-    rightMaster.configNeutralDeadband(0.0001);
+    rightMaster.configNeutralDeadband(0.02);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
@@ -93,6 +96,14 @@ public class Drive {
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     rightMaster.configVelocityMeasurementWindow(16);
     rightMaster.configMotionSCurveStrength(6);
+
+    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+
+    leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+    rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
+    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
 
     zeroSensors();
   }
@@ -124,9 +135,6 @@ public class Drive {
 
     mPeriodicIO.avg_dist_inches = (mPeriodicIO.left_pos_inches + mPeriodicIO.right_pos_inches) / 2.0;
     mPeriodicIO.avg_vel_inches_per_sec = (mPeriodicIO.left_vel_inches_per_sec + mPeriodicIO.right_vel_inches_per_sec) / 2.0;
-
-    
-    SmartDashboard.putNumber("Encoder", leftMaster.getSelectedSensorPosition());
   }
 
   public void setDriveStraight(double dist) {
@@ -187,11 +195,6 @@ public class Drive {
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
     
-    leftSlave.set(ControlMode.PercentOutput, signal.getLeft());
-    rightSlave.set(ControlMode.PercentOutput, signal.getRight());
-
-    System.out.println(signal);
-
     mPeriodicIO.left_output = signal.getLeft();
     mPeriodicIO.right_output = signal.getRight();
   }
@@ -216,6 +219,8 @@ public class Drive {
     SmartDashboard.putNumber("Error Deg Turn In Place", mPeriodicIO.yaw_continouous - magicTarget);
     SmartDashboard.putNumber("Delta V Turn In Place", 22.97 * Math.toRadians(mPeriodicIO.yaw_continouous - magicTarget) / (2 * 0.95));
     SmartDashboard.putBoolean("Magic Turn In Place Done", isMagicTurnInPlaceDone());
+    SmartDashboard.putNumber("Left Master Drive Stator Current", leftMaster.getStatorCurrent());
+    SmartDashboard.putNumber("Right Master Drive Stator Current", leftMaster.getStatorCurrent());
   }
 
   public void configCoastMode() {
@@ -249,7 +254,7 @@ public class Drive {
   //TODO: Begin Swerd Magic
 
   Orchestra _orchestra;
-  int _timeToPlayLoops = 0;
+  int _timeToPlayLoops = 10;
 
   public void initSwerdMagic() {
     ArrayList<TalonFX> _instruments = new ArrayList<TalonFX>();
@@ -272,22 +277,21 @@ public class Drive {
         "song10.chrp",
         "song11.chrp",
     };
-    Random random = new Random();
-    _orchestra.loadMusic(_songs[random.nextInt(11)]);
+    _orchestra.loadMusic(_songs[9]);
     _timeToPlayLoops = 10;
   }
 
-  public void updateSwerdMagic(double time) {
-    if (_timeToPlayLoops > 0) {
-      --_timeToPlayLoops;
-      if (_timeToPlayLoops == 0) {
+  public void updateSwerdMagic() {
+    --_timeToPlayLoops;
+    
+    if (_timeToPlayLoops == 0) {
         System.out.println("Swerdlow Magic Initiated.");
         _orchestra.play();
-      }
     }
 
-    if (time > 6.0) {
-      _orchestra.stop();
+    if (_timeToPlayLoops < -5000) {
+      initSwerdMagic();
+      _timeToPlayLoops = 10;
     }
   }
 

@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -49,6 +50,9 @@ public class Robot extends TimedRobot {
   private Shooter mShooter = Shooter.getInstance();
   private Elevator mElevator = Elevator.getInstance();
   private Limelight mLimelight = Limelight.getInstance();
+
+  //TODO: Max of 0.5 units/second. Modify As Necessary
+  private final SlewRateLimiter filter = new SlewRateLimiter(0.5);
 
   public Robot() {
     super(Constants.kDt);
@@ -113,6 +117,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    mDrive.initSwerdMagic(); // TODO: Maybe Look Here
     Shuffleboard.addEventMarker("Teleop Init", EventImportance.kNormal);
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
@@ -126,9 +131,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    mDrive.updateSwerdMagic(); // TODO: Maybe Look Here
     updateSensors();
     input();
-
   }
 
   public void input() {
@@ -139,7 +144,8 @@ public class Robot extends TimedRobot {
       double forward, turn, rightOut, leftOut;
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = (-stick.getRawAxis(0));
-      DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
+      //disable filter first
+      DriveSignal controlSig = MkUtil.cheesyDrive(filter.calculate(forward), turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
 
@@ -234,7 +240,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
-    mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
     Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
@@ -244,7 +249,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
