@@ -74,7 +74,7 @@ public final class Constants {
     //False So The Limit Only Applies In Neutral (ie when stopping). 2nd param is current limit, 3rd is current limit threshold
     //4th param is limit threshold duration
     //The current limit threshold must be exceeded for the 'threshold duration' seconds to enable the current limit
-    public static final StatorCurrentLimitConfiguration config = new StatorCurrentLimitConfiguration(false, 2.5, 5, 0.01);
+    public static final StatorCurrentLimitConfiguration config = new StatorCurrentLimitConfiguration(true, 7.0, 15, 0.01);
   }
 
   public static class LIFTER {
