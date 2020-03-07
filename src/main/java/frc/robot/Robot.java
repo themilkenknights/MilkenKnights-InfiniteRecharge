@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
   private Elevator mElevator = Elevator.getInstance();
   private Limelight mLimelight = Limelight.getInstance();
 
-  private SlewRateLimiter limiter = new SlewRateLimiter(4.0);
+  private SlewRateLimiter limiter = new SlewRateLimiter(2.0);
 
   public Robot() {
     super(Constants.kDt);
