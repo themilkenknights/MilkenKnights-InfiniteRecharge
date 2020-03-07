@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpiutil.net.PortForwarder;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
@@ -116,6 +117,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    DefenceMode();
+    Climber.getInstance().setClimbState(Climber.ClimbState.RETRACT);
     mDrive.configBrakeMode();
     mDrive.zeroSensors();
     hoodPos = shooterSpeed = 0;
@@ -125,12 +128,14 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     updateSensors();
     input();
+
   }
 
   public void input() {
     if (stick.getRawButton(Constants.INPUT.limeLight)) {
       mLimelight.autoAimShoot(limeOffset);
     } else {
+      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       double forward, turn, rightOut, leftOut;
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = (-stick.getRawAxis(0));

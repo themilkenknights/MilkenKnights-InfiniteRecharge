@@ -48,9 +48,6 @@ public class Drive {
     rightMaster.setInverted(DRIVE.kRightMasterInverted);
     rightSlave.setInverted(DRIVE.kRightSlaveInverted);
 
-    leftSlave.follow(leftMaster);
-    rightSlave.follow(rightMaster);
-
     leftMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
@@ -135,6 +132,9 @@ public class Drive {
 
     mPeriodicIO.avg_dist_inches = (mPeriodicIO.left_pos_inches + mPeriodicIO.right_pos_inches) / 2.0;
     mPeriodicIO.avg_vel_inches_per_sec = (mPeriodicIO.left_vel_inches_per_sec + mPeriodicIO.right_vel_inches_per_sec) / 2.0;
+
+    
+    SmartDashboard.putNumber("Encoder", leftMaster.getSelectedSensorPosition());
   }
 
   public void setDriveStraight(double dist) {
@@ -151,6 +151,9 @@ public class Drive {
     rightMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(magicStraightTarget));
     mPeriodicIO.left_output = MkUtil.inchesToNative(magicStraightTarget);
     mPeriodicIO.right_output = MkUtil.inchesToNative(magicStraightTarget);
+
+    leftSlave.set(ControlMode.MotionMagic, MkUtil.inchesToNative(magicStraightTarget));
+    rightSlave.set(ControlMode.MotionMagic, MkUtil.inchesToNative(magicStraightTarget));
   }
 
   public boolean isDriveStraightDone() { //No Longer Sets Output to Zero when finished
@@ -176,6 +179,9 @@ public class Drive {
 
     leftMaster.set(ControlMode.MotionMagic, left_out);
     rightMaster.set(ControlMode.MotionMagic, right_out);
+    
+    leftSlave.set(ControlMode.MotionMagic, left_out);
+    rightSlave.set(ControlMode.MotionMagic, right_out);
 
     mPeriodicIO.left_output = left_out;
     mPeriodicIO.right_output = right_out;
@@ -188,6 +194,12 @@ public class Drive {
   public void setOutput(DriveSignal signal) {
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
+    
+    leftSlave.set(ControlMode.PercentOutput, signal.getLeft());
+    rightSlave.set(ControlMode.PercentOutput, signal.getRight());
+
+    System.out.println(signal);
+
     mPeriodicIO.left_output = signal.getLeft();
     mPeriodicIO.right_output = signal.getRight();
   }

@@ -89,9 +89,9 @@ public final class Constants {
     public static final double kFlywheelKd = 0.008;
     public static final double kFlywheelKf = 1.0 / kFlywheelMaxVel;
 
-    public static final double kHoodKp = 0.08;
+    public static final double kHoodKp = 0.15;
     public static final double kMaxHoodPos = -3.3;
-    public static final double kMaxHoodOutput = 0.35;
+    public static final double kMaxHoodOutput = 0.25;
   }
 
   public static class VISION {
@@ -105,13 +105,14 @@ public final class Constants {
     public static final double max_angular_vel = 300;
     public static final double max_angular_accel = 120;
     public static final double elevatorSlope = .002;
+    public static final int limelight_Pipeline = 0;
 
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kRPMMap = new InterpolatingTreeMap<>();
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kHoodMap = new InterpolatingTreeMap<>();
 
     public static double[][] kDistanceRpmValues = {
         {88.78, 2950.0}, // {Distance(Inches), RPM},
-        {101.85, 3100.0},
+        {101.85, 3200.0},
         {106.9, 3180.0},
         {111.55, 3200.0},
         {114.3, 3250.0},

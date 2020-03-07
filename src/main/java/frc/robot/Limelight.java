@@ -21,6 +21,7 @@ public class Limelight {
   private final NetworkTableEntry ty = table.getEntry("ty");
   private final NetworkTableEntry led = table.getEntry("ledMode");
   private final NetworkTableEntry tv = table.getEntry("tv");
+  private final NetworkTableEntry pipeline = table.getEntry("pipeline");
   private final Timer shootTimer = new Timer();
   private boolean shootOn, hasTarget;
   private double distance, visionYaw, visionPitch;
@@ -28,6 +29,7 @@ public class Limelight {
   private Limelight() {
     m_turn_controller.setTolerance(VISION.angle_tol);
     m_turn_controller.setIntegratorRange(-100.0, 100.0);
+    table.getEntry("pipeline").setValue(Constants.VISION.limelight_Pipeline);
   }
 
   public static Limelight getInstance() {
@@ -53,8 +55,9 @@ public class Limelight {
     double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     Shooter.getInstance().setShooterRPM(RPM);
+    SmartDashboard.putNumber("Target RPM", RPM);
     Shooter.getInstance().setHoodPos(limit(hoodDist,-3.25, 0)); //Add limelight offset
-    Elevator.getInstance().setElevatorOutput(0.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
+    Elevator.getInstance().setElevatorOutput(0.60 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
     if (inRange() && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
       shootTimer.start();
@@ -62,7 +65,7 @@ public class Limelight {
     } else if (shootTimer.hasElapsed(0.25) || !shootOn) {
       shootTimer.reset();
       shootOn = false;
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+      //ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
     }
   }
 
