@@ -144,7 +144,7 @@ public class Robot extends TimedRobot {
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = (-stick.getRawAxis(0));
       //Change below
-      forward = limiter.calculate(forward);
+      //forward = limiter.calculate(forward);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
