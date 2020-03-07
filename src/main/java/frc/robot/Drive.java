@@ -254,7 +254,7 @@ public class Drive {
   //TODO: Begin Swerd Magic
 
   Orchestra _orchestra;
-  int _timeToPlayLoops = 0;
+  int _timeToPlayLoops = 10;
 
   public void initSwerdMagic() {
     ArrayList<TalonFX> _instruments = new ArrayList<TalonFX>();
@@ -277,18 +277,21 @@ public class Drive {
         "song10.chrp",
         "song11.chrp",
     };
-    Random random = new Random();
-    _orchestra.loadMusic(_songs[random.nextInt(11)]);
+    _orchestra.loadMusic(_songs[9]);
     _timeToPlayLoops = 10;
   }
 
-  public void updateSwerdMagic(double time) {
-    if (_timeToPlayLoops > 0) {
-      --_timeToPlayLoops;
-      if (_timeToPlayLoops == 0) {
+  public void updateSwerdMagic() {
+    --_timeToPlayLoops;
+    
+    if (_timeToPlayLoops == 0) {
         System.out.println("Swerdlow Magic Initiated.");
         _orchestra.play();
-      }
+    }
+
+    if (_timeToPlayLoops < -5000) {
+      initSwerdMagic();
+      _timeToPlayLoops = 10;
     }
   }
 

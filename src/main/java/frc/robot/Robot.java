@@ -117,6 +117,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    mDrive.initSwerdMagic(); // TODO: Maybe Look Here
     Shuffleboard.addEventMarker("Teleop Init", EventImportance.kNormal);
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
@@ -130,9 +131,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    mDrive.updateSwerdMagic(); // TODO: Maybe Look Here
     updateSensors();
     input();
-
   }
 
   public void input() {
@@ -143,6 +144,7 @@ public class Robot extends TimedRobot {
       double forward, turn, rightOut, leftOut;
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = (-stick.getRawAxis(0));
+      //disable filter first
       DriveSignal controlSig = MkUtil.cheesyDrive(filter.calculate(forward), turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
@@ -238,7 +240,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
-    mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
     Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
@@ -248,7 +249,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
