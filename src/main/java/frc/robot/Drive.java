@@ -74,7 +74,7 @@ public class Drive {
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     leftMaster.configAllowableClosedloopError(0, 1);
-    leftMaster.configNeutralDeadband(0.02);
+    leftMaster.configNeutralDeadband(0.001);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
@@ -87,7 +87,7 @@ public class Drive {
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configAllowableClosedloopError(0, 1);
-    rightMaster.configNeutralDeadband(0.02);
+    rightMaster.configNeutralDeadband(0.001);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
@@ -100,10 +100,15 @@ public class Drive {
     leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
 
-    leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
-    rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);
-    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
-    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
+    //leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+   // rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+   // leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
+    //leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
+
+    leftMaster.configOpenloopRamp(0.5);
+    rightMaster.configOpenloopRamp(0.5);
+    leftSlave.configOpenloopRamp(0.5);
+    rightSlave.configOpenloopRamp(0.5);
 
     zeroSensors();
   }
