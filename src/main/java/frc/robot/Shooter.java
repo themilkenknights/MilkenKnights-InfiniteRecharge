@@ -79,7 +79,7 @@ public class Shooter {
   }
 
   public void setHoodPos(double pos) {
-    pos = limit(MkUtil.clamp(pos, SHOOTER.kMaxHoodPos), -3.25, 0);
+    pos = limit(pos, -3.25, 0);
     mHoodSparkMax.set(MkUtil.clamp((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp, SHOOTER.kMaxHoodOutput));
     hoodSetpoint = pos;
   }
