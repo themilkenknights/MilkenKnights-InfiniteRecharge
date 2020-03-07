@@ -49,6 +49,8 @@ public final class Constants {
 
   public static class DRIVE {
 
+    public static final double kRampRate = 0.75;
+
     public static final double kWheelDiameterInches = 5.9575;
     public static final double kWheelCircumference = kWheelDiameterInches * kPi;
 
@@ -107,14 +109,14 @@ public final class Constants {
     public static final double max_angular_vel = 300;
     public static final double max_angular_accel = 120;
     public static final double elevatorSlope = .002;
-    public static final int limelight_Pipeline = 2;
+    public static final int limelight_Pipeline = 0;
 
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kRPMMap = new InterpolatingTreeMap<>();
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kHoodMap = new InterpolatingTreeMap<>();
 
     public static double[][] kDistanceRpmValues = {
-        {88.78, 2950.0}, // {Distance(Inches), RPM},
-        {101.85, 3200.0},
+        {88.78, 2925.0}, // {Distance(Inches), RPM},
+        {101.85, 3150.0},
         {106.9, 3180.0},
         {111.55, 3200.0},
         {114.3, 3250.0},

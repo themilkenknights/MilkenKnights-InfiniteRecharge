@@ -221,8 +221,7 @@ public class Robot extends TimedRobot {
   public void AttackMode() {
     Intake.getInstance().setIntakeRoller(.75);
     Intake.getInstance().setIntakeState(IntakeState.INTAKE);
-    mElevator.setElevatorOutput(0.35);
-    Intake.getInstance().setHopperRoller(.42);
+    mElevator.setElevatorOutput(0.25);
     ElevatorStopper.getInstance().setStopper(StopperState.STOP);
   }
 

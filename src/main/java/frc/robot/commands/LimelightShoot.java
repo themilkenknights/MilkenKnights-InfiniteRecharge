@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Limelight;
+import frc.robot.Shooter;
 
 public class LimelightShoot extends CommandBase {
 
@@ -29,6 +30,6 @@ public class LimelightShoot extends CommandBase {
   // Called once after isFinished returns true
   @Override
   public void end(boolean interrupted) {
-
+  Shooter.getInstance().setHoodPos(0);
   }
 }

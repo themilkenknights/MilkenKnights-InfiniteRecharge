@@ -53,6 +53,8 @@ public class Drive {
 
     leftMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    leftSlave.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    rightSlave.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
     leftMaster.setNeutralMode(NeutralMode.Brake);
     rightMaster.setNeutralMode(NeutralMode.Brake);
@@ -105,10 +107,10 @@ public class Drive {
    // leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
     //leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
 
-    leftMaster.configOpenloopRamp(0.5);
-    rightMaster.configOpenloopRamp(0.5);
-    leftSlave.configOpenloopRamp(0.5);
-    rightSlave.configOpenloopRamp(0.5);
+    leftMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    rightMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    leftSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    rightSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
 
     zeroSensors();
   }
@@ -118,6 +120,9 @@ public class Drive {
   }
 
   public void updateSensors() {
+    leftSlave.follow(leftMaster);
+    rightSlave.follow(rightMaster);
+
     mPeriodicIO.timestamp = Timer.getFPGATimestamp();
 
     mPeriodicIO.yaw_continouous = getYaw();
@@ -156,9 +161,6 @@ public class Drive {
     rightMaster.set(ControlMode.MotionMagic, MkUtil.inchesToNative(magicStraightTarget));
     mPeriodicIO.left_output = MkUtil.inchesToNative(magicStraightTarget);
     mPeriodicIO.right_output = MkUtil.inchesToNative(magicStraightTarget);
-
-    leftSlave.set(ControlMode.MotionMagic, MkUtil.inchesToNative(magicStraightTarget));
-    rightSlave.set(ControlMode.MotionMagic, MkUtil.inchesToNative(magicStraightTarget));
   }
 
   public boolean isDriveStraightDone() { //No Longer Sets Output to Zero when finished
@@ -184,9 +186,6 @@ public class Drive {
 
     leftMaster.set(ControlMode.MotionMagic, left_out);
     rightMaster.set(ControlMode.MotionMagic, right_out);
-    
-    leftSlave.set(ControlMode.MotionMagic, left_out);
-    rightSlave.set(ControlMode.MotionMagic, right_out);
 
     mPeriodicIO.left_output = left_out;
     mPeriodicIO.right_output = right_out;
