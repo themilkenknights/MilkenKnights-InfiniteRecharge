@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -43,12 +44,15 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
   private ShuffleboardTab mTab = Shuffleboard.getTab("Match");
-  private ComplexWidget positionChooserTab = mTab.add("Auto Chooser", positionChooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
+  private ComplexWidget positionChooserTab = mTab.add("Auto Chooser", positionChooser)
+      .withWidget(BuiltInWidgets.kSplitButtonChooser);
 
   private Drive mDrive = Drive.getInstance();
   private Shooter mShooter = Shooter.getInstance();
   private Elevator mElevator = Elevator.getInstance();
   private Limelight mLimelight = Limelight.getInstance();
+
+  private SlewRateLimiter limiter = new SlewRateLimiter(4.0);
 
   public Robot() {
     super(Constants.kDt);
@@ -139,7 +143,8 @@ public class Robot extends TimedRobot {
       double forward, turn, rightOut, leftOut;
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = (-stick.getRawAxis(0));
-      DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
+      //Change below
+      DriveSignal controlSig = MkUtil.cheesyDrive(limiter.calculate(forward), turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
 
@@ -244,7 +249,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
+   //mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();

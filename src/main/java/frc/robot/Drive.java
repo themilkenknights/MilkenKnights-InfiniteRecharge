@@ -100,10 +100,10 @@ public class Drive {
     leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
     rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
 
-    leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
-    rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);
-    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
-    leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
+    //leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+    //rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);
+    //leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
+    //leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
 
     zeroSensors();
   }
