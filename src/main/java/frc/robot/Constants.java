@@ -1,7 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
-
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.InterpolatingTreeMap;
@@ -48,7 +46,6 @@ public final class Constants {
   }
 
   public static class DRIVE {
-
     public static final double kRampRate = 0.75;
 
     public static final double kWheelDiameterInches = 5.9575;
@@ -72,11 +69,6 @@ public final class Constants {
 
     public static final int kMotionMagicTurnInPlaceVel = (int) (0.35 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
     public static final int kMotionMagicTurnInPlaceAccel = (int) (0.15 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
-
-    //False So The Limit Only Applies In Neutral (ie when stopping). 2nd param is current limit, 3rd is current limit threshold
-    //4th param is limit threshold duration
-    //The current limit threshold must be exceeded for the 'threshold duration' seconds to enable the current limit
-    public static final StatorCurrentLimitConfiguration config = new StatorCurrentLimitConfiguration(true, 7.0, 15, 0.01);
   }
 
   public static class LIFTER {
@@ -94,22 +86,26 @@ public final class Constants {
     public static final double kFlywheelKf = 1.0 / kFlywheelMaxVel;
 
     public static final double kHoodKp = 0.15;
-    public static final double kMaxHoodPos = -3.3;
+    public static final double kMaxHoodPos = -3.20;
     public static final double kMaxHoodOutput = 0.25;
   }
 
   public static class VISION {
+    public static final double kShootAngleTol = 5.0;
+    public static final double kShootVelTol = 0.4;
 
-    public static final double max_auto_output = 0.11;
-    public static final double kP_turn = 0.0121;
+    public static final double kMaxAutoAimOutput = 0.105;
+    public static final double kP_turn = 0.01205;
     public static final double kI_turn = 0.0;
-    public static final double kD_turn = 0.00325;
-    public static final double angle_tol = 7.0;
-    public static final double angle_do_nothing_tol = 0.1;
-    public static final double max_angular_vel = 300;
-    public static final double max_angular_accel = 120;
-    public static final double elevatorSlope = .002;
-    public static final int limelight_Pipeline = 0;
+    public static final double kD_turn = 0.0033;
+
+    public static final double kAimAngleDeadband = 0.1;
+    public static final double kMaxAimAngularVel = 300;
+    public static final double kMaxAimAngularAccel = 110;
+
+    public static final double kElevatorDistanceConst = 0.002;
+    public static final double kElevatorRpmConst = 0.01;
+    public static final int kLimelightPipeline = 0;
 
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kRPMMap = new InterpolatingTreeMap<>();
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kHoodMap = new InterpolatingTreeMap<>();

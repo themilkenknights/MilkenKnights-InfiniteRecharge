@@ -9,7 +9,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -18,10 +17,8 @@ import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpiutil.net.PortForwarder;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
@@ -34,26 +31,28 @@ import frc.robot.lib.MkUtil.DriveSignal;
 
 public class Robot extends TimedRobot {
 
-  private Joystick stick = new Joystick(0);
-  private Joystick jStick = new Joystick(1);
+  private Joystick mDriverJoystick = new Joystick(0);
+  private Joystick mOperatorJoystick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
 
-  private double hoodPos, shooterSpeed, limeOffset;
-  private boolean isInAttackMode, updateDashboard;
+  private double mManualHoodPos = -0.1;
+  private double mManualShooterSpeed = 2600;
+  private boolean mIsInAttackMode;
   private Timer brakeTimer = new Timer();
+  private Timer shootTimer = new Timer();
 
   private Command m_autonomousCommand;
   private SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
   private ShuffleboardTab mTab = Shuffleboard.getTab("Match");
-  private ComplexWidget positionChooserTab = mTab.add("Auto Chooser", positionChooser)
-      .withWidget(BuiltInWidgets.kSplitButtonChooser);
+  private ComplexWidget positionChooserTab = mTab.add("Auto Chooser", positionChooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
 
   private Drive mDrive = Drive.getInstance();
   private Shooter mShooter = Shooter.getInstance();
   private Elevator mElevator = Elevator.getInstance();
   private Limelight mLimelight = Limelight.getInstance();
-
-  private SlewRateLimiter limiter = new SlewRateLimiter(2.0);
+  private ElevatorStopper mElevatorStopper = ElevatorStopper.getInstance();
+  private Climber mClimber = Climber.getInstance();
+  private Intake mIntake = Intake.getInstance();
 
   public Robot() {
     super(Constants.kDt);
@@ -75,13 +74,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    Shuffle.getInstance().updateDeltaTime();
-    if (updateDashboard) {
-      Shuffle.getInstance().update();
-      updateDashboard = false;
-    } else {
-      updateDashboard = true;
-    }
+    Shuffle.getInstance().update();
   }
 
   @Override
@@ -103,7 +96,7 @@ public class Robot extends TimedRobot {
         m_autonomousCommand = new DriveStraight(60);
         break;
       case NOTHING:
-        //This may break things. Test this.
+        //TODO: This may break things. Test this.
         break;
     }
     if (m_autonomousCommand != null) {
@@ -122,124 +115,107 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    DefenceMode();
-    Climber.getInstance().setClimbState(Climber.ClimbState.RETRACT);
+    defenseMode();
     mDrive.configBrakeMode();
     mDrive.zeroSensors();
-    hoodPos = shooterSpeed = 0;
   }
 
   @Override
   public void teleopPeriodic() {
     updateSensors();
     input();
-    SmartDashboard.putBoolean("Stopper State", !ElevatorStopper.getInstance().getStopper());
-
   }
 
   public void input() {
-    if (stick.getRawButton(Constants.INPUT.limeLight)) {
-      mLimelight.autoAimShoot(limeOffset);
-      if(jStick.getRawButtonPressed(1))
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      else if(jStick.getRawButtonReleased(1))
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
-      
+    if (mDriverJoystick.getRawButton(Constants.INPUT.limeLight)) {
+      mLimelight.autoAimShoot(false);
+      shootTimer.start();
+    } else if (mOperatorJoystick.getRawButton(1)) {
+      mLimelight.autoAimShoot(true);
+      shootTimer.start();
     } else {
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       double forward, turn, rightOut, leftOut;
-      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
-      turn = 0.9 * Math.pow(-stick.getRawAxis(0), 3);
-      //Change below
-      //forward = limiter.calculate(forward);
+      forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
+      //TODO: LOOK BELOW AARON. CHHESY DRIVE ALREADY DOES THIS.
+      turn = 0.9 * Math.pow(-mDriverJoystick.getRawAxis(0), 3); //TODO: VERY BAD. WE ARE ALREADY CUBING THE INPUTS. THIS IS DOING IT TWICE
+      //TODO: LOOK ABOVE AARON
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
 
-      if (jStick.getRawButtonPressed(Constants.INPUT.attackMode)) {
-        isInAttackMode = true;
-      } else if (jStick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
-        isInAttackMode = false;
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
+        mIsInAttackMode = true;
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
+        mIsInAttackMode = false;
       }
 
-      if (isInAttackMode) {
+      if (mIsInAttackMode) {
         mDrive.setOutput(new DriveSignal(leftOut / 2.7, rightOut / 2.7));
-        AttackMode();
+        attackMode();
       } else {
         mDrive.setOutput(new DriveSignal(leftOut, rightOut));
-        DefenceMode();
+        defenseMode();
       }
 
-      if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
-        Climber.getInstance().setClimbState(ClimbState.CLIMB);
-      } else if (jStick.getRawButtonPressed(Constants.INPUT.climbOff)) {
-        Climber.getInstance().setClimbState(ClimbState.RETRACT);
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn)) {
+        mClimber.setClimbState(ClimbState.CLIMB);
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
+        mClimber.setClimbState(ClimbState.RETRACT);
       }
 
-      boolean isOperatorJoystickConnected = jStick.getRawAxis(3) != 0.0;
-
-      if (isOperatorJoystickConnected) {
-        if (jStick.getPOV() == 0) {
-          hoodPos -= .05;
-        } else if (jStick.getPOV() == 180) {
-          hoodPos += .05;
+      if (mOperatorJoystick.getButtonCount() > 0) {
+        if (mOperatorJoystick.getPOV() == 0) {
+          mManualHoodPos -= .05;
+        } else if (mOperatorJoystick.getPOV() == 180) {
+          mManualHoodPos += .05;
         }
       }
 
-      if (jStick.getRawButtonPressed(6)) {
-        shooterSpeed += .01;
-      } else if (jStick.getRawButtonPressed(4)) {
-        shooterSpeed -= .01;
+      if (mOperatorJoystick.getRawButtonPressed(6)) {
+        mManualShooterSpeed += 100;
+      } else if (mOperatorJoystick.getRawButtonPressed(4)) {
+        mManualShooterSpeed -= 100;
       }
 
-      if (stick.getRawButton(2)) {
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+      if (mOperatorJoystick.getRawButton(3)) {
+        mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
+        mShooter.setShooterRPM(mManualShooterSpeed);
+        shootTimer.start();
+        mShooter.setShootingMode(Shooter.ShootingMode.MANUAL_RPM);
+      } else if (shootTimer.hasElapsed(0.25)) {
+        mShooter.setHoodPos(0);
+        mShooter.setShooterOutput(0);
       }
-      
-      if (jStick.getRawButton(1)) {
-        mShooter.setHoodPos(limit(0.00, -3.25, 0));
-        mShooter.setShooterOutput(0.450);
-        Elevator.getInstance().setElevatorOutput(.5);
-        if(Shooter.getInstance().getShooterRPM() > 2350)
-          ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      }
-      else if(jStick.getRawButtonReleased(1))
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP); 
-      else 
-      {
-        mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
-        mShooter.setShooterOutput(shooterSpeed);
-      }
-      
 
-      if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
+      if (mOperatorJoystick.getRawButtonPressed(2)) {
+        mElevatorStopper.setStopper(StopperState.GO);
+      } else {
+        mElevatorStopper.setStopper(StopperState.STOP);
+      }
+
+      if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
-      } else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
-      } else if (!isInAttackMode) {
+      } else if (!mIsInAttackMode) {
         mElevator.setElevatorOutput(0);
       }
 
-      if (stick.getRawButtonPressed(5)) { //Change this
+      if (mDriverJoystick.getRawButtonPressed(5)) {
         mLimelight.toggleLED();
-      }
-
-      if (stick.getRawButtonPressed(6)) { //Change this
-        mShooter.zeroHood();
       }
     }
   }
 
-  public void AttackMode() {
-    Intake.getInstance().setIntakeRoller(.75);
-    Intake.getInstance().setIntakeState(IntakeState.INTAKE);
+  public void attackMode() {
+    mIntake.setIntakeRoller(.75);
+    mIntake.setIntakeState(IntakeState.INTAKE);
     mElevator.setElevatorOutput(0.25);
-    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
   }
 
-  public void DefenceMode() {
-    Intake.getInstance().setIntakeRoller(0.0);
-    Intake.getInstance().setIntakeState(IntakeState.STOW);
+  public void defenseMode() {
+    mIntake.setIntakeRoller(0.0);
+    mIntake.setIntakeState(IntakeState.STOW);
     mElevator.setElevatorOutput(0);
   }
 
@@ -251,41 +227,22 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
-    //mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
-    Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
-    Intake.getInstance().setIntakeState(IntakeState.STOW);
-    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
+    mClimber.setClimbState(ClimbState.RETRACT);
+    mIntake.setIntakeState(IntakeState.STOW);
+    mElevatorStopper.setStopper(StopperState.STOP);
   }
 
   @Override
   public void disabledPeriodic() {
-   //mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
     }
   }
 
-  @Override
-  public void testInit() {
-  }
-
-  @Override
-  public void testPeriodic() {
-  }
-
   public enum AutoPosition {
     LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
-  }
-  public double limit(double value, double min, double max)
-  {
-    if(value > max)
-      return max;
-    else if(value < min)
-      return min;
-    else
-      return value;
   }
 }

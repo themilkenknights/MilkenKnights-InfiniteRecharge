@@ -6,7 +6,6 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.music.Orchestra;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,8 +13,6 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.DRIVE;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class Drive {
 
@@ -33,6 +30,9 @@ public class Drive {
     leftSlave.configFactoryDefault();
     rightMaster.configFactoryDefault();
     rightSlave.configFactoryDefault();
+
+    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
 
     leftSlave.follow(leftMaster);
     rightSlave.follow(rightMaster);
@@ -79,7 +79,6 @@ public class Drive {
     leftMaster.configNeutralDeadband(0.001);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
     leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
-    //leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     leftMaster.configClosedLoopPeakOutput(0, 1.0);
     rightMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
@@ -92,20 +91,11 @@ public class Drive {
     rightMaster.configNeutralDeadband(0.001);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
     rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
-    //rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     rightMaster.configClosedLoopPeakOutput(0, 1.0);
     leftMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     rightMaster.configVelocityMeasurementWindow(16);
     rightMaster.configMotionSCurveStrength(6);
-
-    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
-    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
-
-    //leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
-   // rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);
-   // leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
-    //leftSlave.configStatorCurrentLimit(Constants.DRIVE.config);
 
     leftMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
     rightMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
@@ -163,7 +153,7 @@ public class Drive {
     mPeriodicIO.right_output = MkUtil.inchesToNative(magicStraightTarget);
   }
 
-  public boolean isDriveStraightDone() { //No Longer Sets Output to Zero when finished
+  public boolean isDriveStraightDone() {
     double err = magicStraightTarget - mPeriodicIO.avg_dist_inches;
     return Math.abs(err) < 0.5 && Math.abs(mPeriodicIO.avg_vel_inches_per_sec) < 0.1;
   }
@@ -178,7 +168,7 @@ public class Drive {
 
   public void magicTurnInPlaceUpdate() {
     double error_deg = mPeriodicIO.yaw_continouous - magicTarget;
-    double error_rad = Math.toRadians(error_deg);//22.97
+    double error_rad = Math.toRadians(error_deg);
     double delta_v = 22.97 * error_rad / (2 * 0.95);
 
     double left_out = MkUtil.inchesToNative(-delta_v) + leftMaster.getSelectedSensorPosition();
@@ -198,7 +188,7 @@ public class Drive {
   public void setOutput(DriveSignal signal) {
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
-    
+
     mPeriodicIO.left_output = signal.getLeft();
     mPeriodicIO.right_output = signal.getRight();
   }
@@ -254,52 +244,6 @@ public class Drive {
   public double getYaw() {
     return navX.getAngle();
   }
-
-  //TODO: Begin Swerd Magic
-
-  Orchestra _orchestra;
-  int _timeToPlayLoops = 10;
-
-  public void initSwerdMagic() {
-    ArrayList<TalonFX> _instruments = new ArrayList<TalonFX>();
-    _instruments.add(leftMaster);
-    _instruments.add(rightMaster);
-    _instruments.add(leftSlave);
-    _instruments.add(rightSlave);
-    _orchestra = new Orchestra(_instruments);
-
-    String[] _songs = new String[] {
-        "song1.chrp",
-        "song2.chrp",
-        "song3.chrp",
-        "song4.chrp",
-        "song5.chrp",
-        "song6.chrp",
-        "song7.chrp",
-        "song8.chrp",
-        "song9.chrp",
-        "song10.chrp",
-        "song11.chrp",
-    };
-    _orchestra.loadMusic(_songs[9]);
-    _timeToPlayLoops = 10;
-  }
-
-  public void updateSwerdMagic() {
-    --_timeToPlayLoops;
-    
-    if (_timeToPlayLoops == 0) {
-        System.out.println("Swerdlow Magic Initiated.");
-        _orchestra.play();
-    }
-
-    if (_timeToPlayLoops < -5000) {
-      initSwerdMagic();
-      _timeToPlayLoops = 10;
-    }
-  }
-
-  //TODO: End Swerd Magic
 
   private static class InstanceHolder {
 
