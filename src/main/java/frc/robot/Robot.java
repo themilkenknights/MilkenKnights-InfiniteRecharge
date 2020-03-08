@@ -136,8 +136,6 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     updateSensors();
     input();
-    SmartDashboard.putBoolean("Stopper State", !ElevatorStopper.getInstance().getStopper());
-
   }
 
   public void input() {
