@@ -140,12 +140,9 @@ public class Robot extends TimedRobot {
 
   public void input() {
     if (stick.getRawButton(Constants.INPUT.limeLight)) {
-      mLimelight.autoAimShoot(limeOffset);
-      if (jStick.getRawButtonPressed(1))
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      else if (jStick.getRawButtonReleased(1))
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
-
+      mLimelight.autoAimShoot(limeOffset, false);
+    } else if (jStick.getRawButton(0)) {
+      mLimelight.autoAimShoot(limeOffset, true);
     } else {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       double forward, turn, rightOut, leftOut;
@@ -197,27 +194,12 @@ public class Robot extends TimedRobot {
         ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
       }
 
-      if (jStick.getRawButton(1)) {
-        Intake.getInstance().setIntakeRoller(0.0);
-        Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
-        mLimelight.update();
-        double curDist = mLimelight.getDistance();
-        double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
-        double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
-        Shooter.getInstance().setShooterRPM(RPM);
-        Shooter.getInstance().setHoodPos(limit(hoodDist, -3.25, 0)); // Add limelight offset
-        Elevator.getInstance().setElevatorOutput(0.60 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
-        if (Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 35) {
-          ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-        } else {
-          ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
-        }
-      } else if (jStick.getRawButtonReleased(1)) {
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
-        Shooter.getInstance().setShooterOutput(0);
-      } else {
+      if (jStick.getRawButton(3)) {
         mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
-        // mShooter.setShooterOutput(shooterSpeed);
+        mShooter.setShooterOutput(shooterSpeed);
+        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+      } else if (jStick.getRawButtonReleased(3)) {
+        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       }
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
@@ -229,7 +211,7 @@ public class Robot extends TimedRobot {
       }
 
       if (stick.getRawButtonPressed(5)) { // Change this
-       mLimelight.toggleLED();
+        mLimelight.toggleLED();
       }
 
       if (stick.getRawButtonPressed(6)) { // Change this

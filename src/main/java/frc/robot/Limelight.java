@@ -44,10 +44,10 @@ public class Limelight {
   }
 
   public boolean inRange() {
-    return hasTarget && Math.abs(visionYaw) < Constants.VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < 0.3;
+    return hasTarget && Math.abs(visionYaw) < Constants.VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < 0.4;
   }
 
-  public void autoAimShoot(double limelightOffset) {
+  public void autoAimShoot(double limelightOffset, boolean ignoreAim) {
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
     update();
@@ -58,14 +58,14 @@ public class Limelight {
     SmartDashboard.putNumber("Target RPM", RPM);
     Shooter.getInstance().setHoodPos(limit(hoodDist,-3.25, 0)); //Add limelight offset
     Elevator.getInstance().setElevatorOutput(0.60 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
-    if (inRange() && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
+    if ((ignoreAim || inRange()) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 35) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
       shootTimer.start();
       shootOn = true;
     } else if (shootTimer.hasElapsed(0.25) || !shootOn) {
       shootTimer.reset();
       shootOn = false;
-      //ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
     }
   }
 
