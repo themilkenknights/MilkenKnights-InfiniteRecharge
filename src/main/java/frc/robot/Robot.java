@@ -141,7 +141,7 @@ public class Robot extends TimedRobot {
   public void input() {
     if (stick.getRawButton(Constants.INPUT.limeLight)) {
       mLimelight.autoAimShoot(limeOffset, false);
-    } else if (jStick.getRawButton(0)) {
+    } else if (jStick.getRawButton(1)) {
       mLimelight.autoAimShoot(limeOffset, true);
     } else {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
