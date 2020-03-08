@@ -49,9 +49,6 @@ public class Shooter {
 
     mHoodSparkMax.setIdleMode(CANSparkMax.IdleMode.kBrake);
     mHoodSparkMax.setSmartCurrentLimit(5);
-    mHoodSparkMax.setOpenLoopRampRate(0);
-    //mHoodSparkMax.setControlFramePeriodMs(10);
-    //mHoodSparkMax.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10);
   }
 
   public static Shooter getInstance() {

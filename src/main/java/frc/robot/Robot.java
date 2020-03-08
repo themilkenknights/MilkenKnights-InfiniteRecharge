@@ -9,7 +9,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -18,10 +17,8 @@ import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpiutil.net.PortForwarder;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
@@ -29,7 +26,6 @@ import frc.robot.commands.CenterAuto;
 import frc.robot.commands.DriveStraight;
 import frc.robot.commands.LeftTrenchAuto;
 import frc.robot.commands.RightAuto;
-import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
@@ -40,23 +36,19 @@ public class Robot extends TimedRobot {
   private Compressor mCompressor = new Compressor(0);
 
   private double hoodPos = -0.1;
-  private double shooterSpeed = 2500;
-  private double limeOffset;
+  private double shooterSpeed = 2600;
   private boolean isInAttackMode, updateDashboard;
   private Timer brakeTimer = new Timer();
 
   private Command m_autonomousCommand;
   private SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
   private ShuffleboardTab mTab = Shuffleboard.getTab("Match");
-  private ComplexWidget positionChooserTab = mTab.add("Auto Chooser", positionChooser)
-      .withWidget(BuiltInWidgets.kSplitButtonChooser);
+  private ComplexWidget positionChooserTab = mTab.add("Auto Chooser", positionChooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
 
   private Drive mDrive = Drive.getInstance();
   private Shooter mShooter = Shooter.getInstance();
   private Elevator mElevator = Elevator.getInstance();
   private Limelight mLimelight = Limelight.getInstance();
-
-  private SlewRateLimiter limiter = new SlewRateLimiter(2.0);
 
   public Robot() {
     super(Constants.kDt);
@@ -126,7 +118,6 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     DefenceMode();
-    Climber.getInstance().setClimbState(Climber.ClimbState.RETRACT);
     mDrive.configBrakeMode();
     mDrive.zeroSensors();
   }
@@ -139,16 +130,14 @@ public class Robot extends TimedRobot {
 
   public void input() {
     if (stick.getRawButton(Constants.INPUT.limeLight)) {
-      mLimelight.autoAimShoot(limeOffset, false);
+      mLimelight.autoAimShoot(false);
     } else if (jStick.getRawButton(1)) {
-      mLimelight.autoAimShoot(limeOffset, true);
+      mLimelight.autoAimShoot(true);
     } else {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       double forward, turn, rightOut, leftOut;
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = 0.9 * Math.pow(-stick.getRawAxis(0), 3);
-      // Change below
-      // forward = limiter.calculate(forward);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
@@ -173,9 +162,7 @@ public class Robot extends TimedRobot {
         Climber.getInstance().setClimbState(ClimbState.RETRACT);
       }
 
-      boolean isOperatorJoystickConnected = jStick.getRawAxis(3) != 0.0;
-
-      if (isOperatorJoystickConnected) {
+      if (jStick.getButtonCount() > 0) {
         if (jStick.getPOV() == 0) {
           hoodPos -= .05;
         } else if (jStick.getPOV() == 180) {
@@ -189,19 +176,18 @@ public class Robot extends TimedRobot {
         shooterSpeed -= 100;
       }
 
-      if (stick.getRawButton(2)) {
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      }
-
-      // TODO: LOOK AT THESE TWO BUTTONS BELOW
-
       if (jStick.getRawButton(3)) {
         mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
         mShooter.setShooterRPM(shooterSpeed);
+      } else {
+        mShooter.setHoodPos(0);
+        mShooter.setShooterOutput(0);
       }
 
-      if (jStick.getRawButtonPressed(9)) { //TOGGLE HERE
-        ElevatorStopper.getInstance().toggleStopper();
+      if (jStick.getRawButtonPressed(2)) {
+        ElevatorStopper.getInstance().setStopper(StopperState.GO);
+      } else {
+        ElevatorStopper.getInstance().setStopper(StopperState.STOP);
       }
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
@@ -212,12 +198,8 @@ public class Robot extends TimedRobot {
         mElevator.setElevatorOutput(0);
       }
 
-      if (stick.getRawButtonPressed(5)) { // Change this
+      if (stick.getRawButtonPressed(5)) {
         mLimelight.toggleLED();
-      }
-
-      if (stick.getRawButtonPressed(6)) { // Change this
-        // mShooter.zeroHood();
       }
     }
   }
@@ -243,7 +225,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
-    // mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
     Climber.getInstance().setClimbState(ClimbState.RETRACT); // When disabled reset to default state for safety
@@ -253,19 +234,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    // mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
     }
-  }
-
-  @Override
-  public void testInit() {
-  }
-
-  @Override
-  public void testPeriodic() {
   }
 
   public enum AutoPosition {
@@ -273,11 +245,12 @@ public class Robot extends TimedRobot {
   }
 
   public double limit(double value, double min, double max) {
-    if (value > max)
+    if (value > max) {
       return max;
-    else if (value < min)
+    } else if (value < min) {
       return min;
-    else
+    } else {
       return value;
+    }
   }
 }

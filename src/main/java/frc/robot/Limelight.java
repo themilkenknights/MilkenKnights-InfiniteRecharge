@@ -23,12 +23,10 @@ public class Limelight {
   private final NetworkTableEntry tv = table.getEntry("tv");
   private final NetworkTableEntry pipeline = table.getEntry("pipeline");
   private final Timer shootTimer = new Timer();
-  private boolean shootOn, hasTarget;
+  private boolean hasTarget;
   private double distance, visionYaw, visionPitch;
 
   private Limelight() {
-    m_turn_controller.setTolerance(VISION.angle_tol);
-    m_turn_controller.setIntegratorRange(-100.0, 100.0);
     table.getEntry("pipeline").setValue(Constants.VISION.limelight_Pipeline);
   }
 
@@ -47,7 +45,7 @@ public class Limelight {
     return hasTarget && Math.abs(visionYaw) < Constants.VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < Constants.VISION.vel_tol;
   }
 
-  public void autoAimShoot(double limelightOffset, boolean ignoreAim) {
+  public void autoAimShoot(boolean ignoreAim) {
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
     update();
@@ -56,16 +54,12 @@ public class Limelight {
     double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     Shooter.getInstance().setShooterRPM(RPM);
     SmartDashboard.putNumber("Target RPM", RPM);
-    Shooter.getInstance().setHoodPos(limit(hoodDist,-3.25, 0)); //Add limelight offset
-    Elevator.getInstance().setElevatorOutput(0.60 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
-    if ((ignoreAim || inRange()) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 35) {
+    Shooter.getInstance().setHoodPos(limit(hoodDist, -3.25, 0));
+    double distance_mod = Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance();
+    double rpm_mod = VISION.rpmSlope * (RPM - Shooter.getInstance().getShooterRPM());
+    Elevator.getInstance().setElevatorOutput(limit(0.60 - rpm_mod, 0.2, 1.0));
+    if ((ignoreAim || inRange()) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      shootTimer.start();
-      shootOn = true;
-    } else if (shootTimer.hasElapsed(0.25) || !shootOn) {
-      shootTimer.reset();
-      shootOn = false;
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
     }
   }
 
@@ -73,7 +67,6 @@ public class Limelight {
     double horizontal_angle = tx.getDouble(0.0);
     double turn_output = 0;
     if (Math.abs(horizontal_angle) > VISION.angle_do_nothing_tol) {
-      // Get PID controller output
       TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0, 0));
       double turn_controllout_out = m_turn_controller.calculate(-horizontal_angle, 0);
       double feedforward = ((1.0) / (VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity;
@@ -106,15 +99,15 @@ public class Limelight {
     SmartDashboard.putNumber("Target Distance", distance);
     SmartDashboard.putBoolean("In Range", inRange());
   }
-  
-  public double limit(double value, double min, double max)
-  {
-    if(value > max)
+
+  public double limit(double value, double min, double max) {
+    if (value > max) {
       return max;
-    else if(value < min)
+    } else if (value < min) {
       return min;
-    else
+    } else {
       return value;
+    }
   }
 
   private static class InstanceHolder {

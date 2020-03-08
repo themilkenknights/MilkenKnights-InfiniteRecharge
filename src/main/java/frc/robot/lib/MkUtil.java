@@ -77,8 +77,7 @@ public class MkUtil {
   private static double limit(double num) {
     if (num > 1.0) {
       return 1.0;
-    }
-    if (num < -1.0) {
+    } else if (num < -1.0) {
       return -1.0;
     }
     return num;
