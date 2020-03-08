@@ -39,7 +39,9 @@ public class Robot extends TimedRobot {
   private Joystick jStick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
 
-  private double hoodPos, shooterSpeed, limeOffset;
+  private double hoodPos = -0.1;
+  private double shooterSpeed = 2500;
+  private double limeOffset;
   private boolean isInAttackMode, updateDashboard;
   private Timer brakeTimer = new Timer();
 
@@ -185,21 +187,24 @@ public class Robot extends TimedRobot {
       }
 
       if (jStick.getRawButtonPressed(6)) {
-        shooterSpeed += .01;
+        shooterSpeed += 100;
       } else if (jStick.getRawButtonPressed(4)) {
-        shooterSpeed -= .01;
+        shooterSpeed -= 100;
       }
 
       if (stick.getRawButton(2)) {
         ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
       }
 
+      // TODO: LOOK AT THESE TWO BUTTONS BELOW
+
       if (jStick.getRawButton(3)) {
         mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
-        mShooter.setShooterOutput(shooterSpeed);
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      } else if (jStick.getRawButtonReleased(3)) {
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+        mShooter.setShooterRPM(shooterSpeed);
+      }
+
+      if (jStick.getRawButtonPressed(9)) { //TOGGLE HERE
+        ElevatorStopper.getInstance().toggleStopper();
       }
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {

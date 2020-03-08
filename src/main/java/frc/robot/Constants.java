@@ -100,11 +100,15 @@ public final class Constants {
 
   public static class VISION {
 
+    //Two below are important!!
+    public static final double angle_tol = 5.0;
+    public static final double vel_tol = 0.4;
+
     public static final double max_auto_output = 0.105;
     public static final double kP_turn = 0.01205;
     public static final double kI_turn = 0.0;
     public static final double kD_turn = 0.0033;
-    public static final double angle_tol = 5.0;
+
     public static final double angle_do_nothing_tol = 0.1;
     public static final double max_angular_vel = 300;
     public static final double max_angular_accel = 120;

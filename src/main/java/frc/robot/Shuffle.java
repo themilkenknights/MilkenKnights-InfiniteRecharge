@@ -20,6 +20,7 @@ public class Shuffle {
   }
 
   public void update() {
+    SmartDashboard.putString("Elevator Stopper", ElevatorStopper.getInstance().getStopperState());
     SmartDashboard.putNumber("Pressure", ((((pressure.getVoltage()) * 250 / 5.0 - 25.0) / 112) * 120));
     SmartDashboard.putNumber("Elevator Setpoint", Elevator.getInstance().getElevatorSetpoint());
     Drive.getInstance().updateDashboard();
