@@ -214,6 +214,7 @@ public class Robot extends TimedRobot {
         }
       } else if (jStick.getRawButtonReleased(1)) {
         ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+        Shooter.getInstance().setShooterOutput(0);
       } else {
         mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
         // mShooter.setShooterOutput(shooterSpeed);
@@ -228,7 +229,7 @@ public class Robot extends TimedRobot {
       }
 
       if (stick.getRawButtonPressed(5)) { // Change this
-        // mLimelight.toggleLED();
+       mLimelight.toggleLED();
       }
 
       if (stick.getRawButtonPressed(6)) { // Change this
