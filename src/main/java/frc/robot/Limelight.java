@@ -44,7 +44,7 @@ public class Limelight {
   }
 
   public boolean inRange() {
-    return hasTarget && Math.abs(visionYaw) < Constants.VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < 0.25;
+    return hasTarget && Math.abs(visionYaw) < Constants.VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < 0.3;
   }
 
   public void autoAimShoot(double limelightOffset) {

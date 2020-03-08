@@ -29,6 +29,7 @@ import frc.robot.commands.CenterAuto;
 import frc.robot.commands.DriveStraight;
 import frc.robot.commands.LeftTrenchAuto;
 import frc.robot.commands.RightAuto;
+import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
@@ -103,7 +104,7 @@ public class Robot extends TimedRobot {
         m_autonomousCommand = new DriveStraight(60);
         break;
       case NOTHING:
-        //This may break things. Test this.
+        // This may break things. Test this.
         break;
     }
     if (m_autonomousCommand != null) {
@@ -140,18 +141,18 @@ public class Robot extends TimedRobot {
   public void input() {
     if (stick.getRawButton(Constants.INPUT.limeLight)) {
       mLimelight.autoAimShoot(limeOffset);
-      if(jStick.getRawButtonPressed(1))
+      if (jStick.getRawButtonPressed(1))
         ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      else if(jStick.getRawButtonReleased(1))
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
-      
+      else if (jStick.getRawButtonReleased(1))
+        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+
     } else {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       double forward, turn, rightOut, leftOut;
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
       turn = 0.9 * Math.pow(-stick.getRawAxis(0), 3);
-      //Change below
-      //forward = limiter.calculate(forward);
+      // Change below
+      // forward = limiter.calculate(forward);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
@@ -195,22 +196,28 @@ public class Robot extends TimedRobot {
       if (stick.getRawButton(2)) {
         ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
       }
-      
+
       if (jStick.getRawButton(1)) {
-        mShooter.setHoodPos(limit(0.00, -3.25, 0));
-        mShooter.setShooterOutput(0.450);
-        Elevator.getInstance().setElevatorOutput(.5);
-        if(Shooter.getInstance().getShooterRPM() > 2350)
+        Intake.getInstance().setIntakeRoller(0.0);
+        Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
+        mLimelight.update();
+        double curDist = mLimelight.getDistance();
+        double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+        double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+        Shooter.getInstance().setShooterRPM(RPM);
+        Shooter.getInstance().setHoodPos(limit(hoodDist, -3.25, 0)); // Add limelight offset
+        Elevator.getInstance().setElevatorOutput(0.60 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
+        if (Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 35) {
           ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+        } else {
+          ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+        }
+      } else if (jStick.getRawButtonReleased(1)) {
+        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+      } else {
+        mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
+        // mShooter.setShooterOutput(shooterSpeed);
       }
-      else if(jStick.getRawButtonReleased(1))
-        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP); 
-      else 
-      {
-        mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
-        mShooter.setShooterOutput(shooterSpeed);
-      }
-      
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
@@ -220,12 +227,12 @@ public class Robot extends TimedRobot {
         mElevator.setElevatorOutput(0);
       }
 
-      if (stick.getRawButtonPressed(5)) { //Change this
-        mLimelight.toggleLED();
+      if (stick.getRawButtonPressed(5)) { // Change this
+        // mLimelight.toggleLED();
       }
 
-      if (stick.getRawButtonPressed(6)) { //Change this
-        mShooter.zeroHood();
+      if (stick.getRawButtonPressed(6)) { // Change this
+        // mShooter.zeroHood();
       }
     }
   }
@@ -251,17 +258,17 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
-    //mDrive.initSwerdMagic(); //TODO: Maybe Look Here
+    // mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
-    Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
+    Climber.getInstance().setClimbState(ClimbState.RETRACT); // When disabled reset to default state for safety
     Intake.getInstance().setIntakeState(IntakeState.STOW);
     ElevatorStopper.getInstance().setStopper(StopperState.STOP);
   }
 
   @Override
   public void disabledPeriodic() {
-   //mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
+    // mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
@@ -279,11 +286,11 @@ public class Robot extends TimedRobot {
   public enum AutoPosition {
     LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
   }
-  public double limit(double value, double min, double max)
-  {
-    if(value > max)
+
+  public double limit(double value, double min, double max) {
+    if (value > max)
       return max;
-    else if(value < min)
+    else if (value < min)
       return min;
     else
       return value;
