@@ -15,8 +15,12 @@ public class Shuffle {
 
   public void updateDeltaTime() {
     double time = Timer.getFPGATimestamp();
-    SmartDashboard.putNumber("Loop Dt", (time - lastTime) * 1e3);
+    double dt = (time - lastTime) * 1e3;
+    SmartDashboard.putNumber("Loop Dt", dt);
     lastTime = time;
+    if (dt > 40) {
+      System.out.println("If you see this message appear a bunch in a row contact swerdlow");
+    }
   }
 
   public void update() {
