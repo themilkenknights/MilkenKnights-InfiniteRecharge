@@ -61,6 +61,9 @@ public class Limelight {
 
     if ((ignoreAim || inRange()) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+      Shooter.getInstance().setShootingMode(ignoreAim ? Shooter.ShootingMode.AUTO_SHOOTING_IGNORING_AIM : Shooter.ShootingMode.AUTO_SHOOTING_AIMED);
+    } else {
+      Shooter.getInstance().setShootingMode(Shooter.ShootingMode.AUTO_AIMIMG);
     }
 
     Intake.getInstance().setIntakeRoller(0.0);

@@ -97,7 +97,7 @@ public class Shooter {
   }
 
   public enum ShootingMode {
-    NOTHING, MANUAL_PERCENT_OUT, MANUAL_RPM, AUTO_AIMIMG, AUTO_SHOOTING_AIMED, AUTO_SHOOTING_IGNORING_AIM
+    NOTHING, MANUAL_RPM, AUTO_AIMIMG, AUTO_SHOOTING_AIMED, AUTO_SHOOTING_IGNORING_AIM
   }
 
   private static class InstanceHolder {

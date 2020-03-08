@@ -181,6 +181,7 @@ public class Robot extends TimedRobot {
         mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
         mShooter.setShooterRPM(mManualShooterSpeed);
         shootTimer.start();
+        mShooter.setShootingMode(Shooter.ShootingMode.MANUAL_RPM);
       } else if (shootTimer.hasElapsed(0.25)) {
         mShooter.setHoodPos(0);
         mShooter.setShooterOutput(0);
