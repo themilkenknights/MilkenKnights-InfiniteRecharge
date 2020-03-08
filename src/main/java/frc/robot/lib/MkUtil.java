@@ -46,10 +46,10 @@ public class MkUtil {
     double kWheelDeadband = 0.003;
     double leftMotorSpeed;
     double rightMotorSpeed;
-    double moveValue = limit(throttle);
-    double rotateValue = limit(wheel);
-    moveValue = handleDeadband(moveValue, kThrottleDeadband);
-    rotateValue = handleDeadband(rotateValue, kWheelDeadband);
+    double moveValue = limitAbsolute(throttle, 1.0);
+    double rotateValue = limitAbsolute(wheel, 1.0);
+    moveValue = deadband(moveValue, kThrottleDeadband);
+    rotateValue = deadband(rotateValue, kWheelDeadband);
     if (cubeInputs) {
       rotateValue = rotateValue * rotateValue * rotateValue;
     }
@@ -74,15 +74,6 @@ public class MkUtil {
     return new DriveSignal(leftMotorSpeed, rightMotorSpeed);
   }
 
-  private static double limit(double num) {
-    if (num > 1.0) {
-      return 1.0;
-    } else if (num < -1.0) {
-      return -1.0;
-    }
-    return num;
-  }
-
   public static double limit(double value, double min, double max) {
     if (value > max) {
       return max;
@@ -93,11 +84,11 @@ public class MkUtil {
     }
   }
 
-  private static double handleDeadband(double val, double deadband) {
+  private static double deadband(double val, double deadband) {
     return (Math.abs(val) > Math.abs(deadband)) ? val : 0.0;
   }
 
-  public static double clamp(double a, double max) {
+  public static double limitAbsolute(double a, double max) {
     return Math.abs(a) < max ? a : Math.copySign(max, a);
   }
 

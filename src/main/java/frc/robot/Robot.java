@@ -31,13 +31,13 @@ import frc.robot.lib.MkUtil.DriveSignal;
 
 public class Robot extends TimedRobot {
 
-  private Joystick stick = new Joystick(0);
-  private Joystick jStick = new Joystick(1);
+  private Joystick mDriverJoystick = new Joystick(0);
+  private Joystick mOperatorJoystick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
 
-  private double hoodPos = -0.1;
-  private double shooterSpeed = 2600;
-  private boolean isInAttackMode, updateDashboard;
+  private double mManualHoodPos = -0.1;
+  private double mManualShooterSpeed = 2600;
+  private boolean mIsInAttackMode;
   private Timer brakeTimer = new Timer();
 
   private Command m_autonomousCommand;
@@ -49,6 +49,9 @@ public class Robot extends TimedRobot {
   private Shooter mShooter = Shooter.getInstance();
   private Elevator mElevator = Elevator.getInstance();
   private Limelight mLimelight = Limelight.getInstance();
+  private ElevatorStopper mElevatorStopper = ElevatorStopper.getInstance();
+  private Climber mClimber = Climber.getInstance();
+  private Intake mIntake = Intake.getInstance();
 
   public Robot() {
     super(Constants.kDt);
@@ -70,13 +73,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    Shuffle.getInstance().updateDeltaTime();
-    if (updateDashboard) {
-      Shuffle.getInstance().update();
-      updateDashboard = false;
-    } else {
-      updateDashboard = true;
-    }
+    Shuffle.getInstance().update();
   }
 
   @Override
@@ -98,7 +95,7 @@ public class Robot extends TimedRobot {
         m_autonomousCommand = new DriveStraight(60);
         break;
       case NOTHING:
-        // This may break things. Test this.
+        //TODO: This may break things. Test this.
         break;
     }
     if (m_autonomousCommand != null) {
@@ -117,7 +114,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    DefenceMode();
+    defenseMode();
     mDrive.configBrakeMode();
     mDrive.zeroSensors();
   }
@@ -129,91 +126,92 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (stick.getRawButton(Constants.INPUT.limeLight)) {
+    if (mDriverJoystick.getRawButton(Constants.INPUT.limeLight)) {
       mLimelight.autoAimShoot(false);
-    } else if (jStick.getRawButton(1)) {
+    } else if (mOperatorJoystick.getRawButton(1)) {
       mLimelight.autoAimShoot(true);
     } else {
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       double forward, turn, rightOut, leftOut;
-      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
-      turn = 0.9 * Math.pow(-stick.getRawAxis(0), 3);
+      forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
+      //TODO: LOOK BELOW AARON. CHHESY DRIVE ALREADY DOES THIS.
+      turn = 0.9 * Math.pow(-mDriverJoystick.getRawAxis(0), 3); //TODO: VERY BAD. WE ARE ALREADY CUBING THE INPUTS. THIS IS DOING IT TWICE
+      //TODO: LOOK ABOVE AARON
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
 
-      if (jStick.getRawButtonPressed(Constants.INPUT.attackMode)) {
-        isInAttackMode = true;
-      } else if (jStick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
-        isInAttackMode = false;
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
+        mIsInAttackMode = true;
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
+        mIsInAttackMode = false;
       }
 
-      if (isInAttackMode) {
+      if (mIsInAttackMode) {
         mDrive.setOutput(new DriveSignal(leftOut / 2.7, rightOut / 2.7));
-        AttackMode();
+        attackMode();
       } else {
         mDrive.setOutput(new DriveSignal(leftOut, rightOut));
-        DefenceMode();
+        defenseMode();
       }
 
-      if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
-        Climber.getInstance().setClimbState(ClimbState.CLIMB);
-      } else if (jStick.getRawButtonPressed(Constants.INPUT.climbOff)) {
-        Climber.getInstance().setClimbState(ClimbState.RETRACT);
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn)) {
+        mClimber.setClimbState(ClimbState.CLIMB);
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
+        mClimber.setClimbState(ClimbState.RETRACT);
       }
 
-      if (jStick.getButtonCount() > 0) {
-        if (jStick.getPOV() == 0) {
-          hoodPos -= .05;
-        } else if (jStick.getPOV() == 180) {
-          hoodPos += .05;
+      if (mOperatorJoystick.getButtonCount() > 0) {
+        if (mOperatorJoystick.getPOV() == 0) {
+          mManualHoodPos -= .05;
+        } else if (mOperatorJoystick.getPOV() == 180) {
+          mManualHoodPos += .05;
         }
       }
 
-      if (jStick.getRawButtonPressed(6)) {
-        shooterSpeed += 100;
-      } else if (jStick.getRawButtonPressed(4)) {
-        shooterSpeed -= 100;
+      if (mOperatorJoystick.getRawButtonPressed(6)) {
+        mManualShooterSpeed += 100;
+      } else if (mOperatorJoystick.getRawButtonPressed(4)) {
+        mManualShooterSpeed -= 100;
       }
 
-      if (jStick.getRawButton(3)) {
-        mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
-        mShooter.setShooterRPM(shooterSpeed);
+      if (mOperatorJoystick.getRawButton(3)) {
+        mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
+        mShooter.setShooterRPM(mManualShooterSpeed);
       } else {
         mShooter.setHoodPos(0);
         mShooter.setShooterOutput(0);
       }
 
-      if (jStick.getRawButtonPressed(2)) {
-        ElevatorStopper.getInstance().setStopper(StopperState.GO);
+      if (mOperatorJoystick.getRawButtonPressed(2)) {
+        mElevatorStopper.setStopper(StopperState.GO);
       } else {
-        ElevatorStopper.getInstance().setStopper(StopperState.STOP);
+        mElevatorStopper.setStopper(StopperState.STOP);
       }
 
-      if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
+      if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
-      } else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
-      } else if (!isInAttackMode) {
+      } else if (!mIsInAttackMode) {
         mElevator.setElevatorOutput(0);
       }
 
-      if (stick.getRawButtonPressed(5)) {
+      if (mDriverJoystick.getRawButtonPressed(5)) {
         mLimelight.toggleLED();
       }
     }
   }
 
-  public void AttackMode() {
-    Intake.getInstance().setIntakeRoller(.75);
-    Intake.getInstance().setIntakeState(IntakeState.INTAKE);
+  public void attackMode() {
+    mIntake.setIntakeRoller(.75);
+    mIntake.setIntakeState(IntakeState.INTAKE);
     mElevator.setElevatorOutput(0.25);
-    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
+    mElevatorStopper.setStopper(StopperState.STOP);
   }
 
-  public void DefenceMode() {
-    Intake.getInstance().setIntakeRoller(0.0);
-    Intake.getInstance().setIntakeState(IntakeState.STOW);
+  public void defenseMode() {
+    mIntake.setIntakeRoller(0.0);
+    mIntake.setIntakeState(IntakeState.STOW);
     mElevator.setElevatorOutput(0);
   }
 
@@ -227,9 +225,9 @@ public class Robot extends TimedRobot {
     Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
     brakeTimer.reset();
     brakeTimer.start();
-    Climber.getInstance().setClimbState(ClimbState.RETRACT); // When disabled reset to default state for safety
-    Intake.getInstance().setIntakeState(IntakeState.STOW);
-    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
+    mClimber.setClimbState(ClimbState.RETRACT);
+    mIntake.setIntakeState(IntakeState.STOW);
+    mElevatorStopper.setStopper(StopperState.STOP);
   }
 
   @Override
@@ -237,16 +235,6 @@ public class Robot extends TimedRobot {
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
-    }
-  }
-
-  public double limit(double value, double min, double max) {
-    if (value > max) {
-      return max;
-    } else if (value < min) {
-      return min;
-    } else {
-      return value;
     }
   }
 

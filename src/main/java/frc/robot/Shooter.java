@@ -79,8 +79,8 @@ public class Shooter {
   }
 
   public void setHoodPos(double pos) {
-    pos = limit(pos, -3.20, 0);
-    mHoodSparkMax.set(MkUtil.clamp((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp, SHOOTER.kMaxHoodOutput));
+    pos = MkUtil.limit(pos, SHOOTER.kMaxHoodPos, 0);
+    mHoodSparkMax.set(MkUtil.limitAbsolute((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp, SHOOTER.kMaxHoodOutput));
     mHoodSetpoint = pos;
   }
 
@@ -89,16 +89,11 @@ public class Shooter {
     SmartDashboard.putNumber("Hood Setpoint", mHoodSetpoint);
     SmartDashboard.putNumber("Shooter RPM", getShooterRPM());
     SmartDashboard.putNumber("Shooter Setpoint (RPM/PercentOut)", mShooterSetpoint);
+    SmartDashboard.putString("Shooting Mode", mShootingMode.toString());
   }
 
-  public double limit(double value, double min, double max) {
-    if (value > max) {
-      return max;
-    } else if (value < min) {
-      return min;
-    } else {
-      return value;
-    }
+  public void setShootingMode(ShootingMode mode) {
+    mShootingMode = mode;
   }
 
   public enum ShootingMode {
