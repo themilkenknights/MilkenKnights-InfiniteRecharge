@@ -33,7 +33,7 @@ public class ElevatorStopper {
 
   public boolean getStopper()
   {
-    if(StopperState.GO == mState)
+    if(StopperState.GO.state == true)
       return true;
     else
       return false;
