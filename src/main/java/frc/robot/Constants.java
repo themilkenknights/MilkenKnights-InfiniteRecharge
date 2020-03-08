@@ -101,7 +101,7 @@ public final class Constants {
 
     public static final double kAimAngleDeadband = 0.1;
     public static final double kMaxAimAngularVel = 300;
-    public static final double kMaxAimAngularAccel = 120;
+    public static final double kMaxAimAngularAccel = 110;
 
     public static final double kElevatorDistanceConst = 0.002;
     public static final double kElevatorRpmConst = 0.01;

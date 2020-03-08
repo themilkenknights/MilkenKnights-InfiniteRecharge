@@ -39,6 +39,7 @@ public class Robot extends TimedRobot {
   private double mManualShooterSpeed = 2600;
   private boolean mIsInAttackMode;
   private Timer brakeTimer = new Timer();
+  private Timer shootTimer = new Timer();
 
   private Command m_autonomousCommand;
   private SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
@@ -128,8 +129,10 @@ public class Robot extends TimedRobot {
   public void input() {
     if (mDriverJoystick.getRawButton(Constants.INPUT.limeLight)) {
       mLimelight.autoAimShoot(false);
+      shootTimer.start();
     } else if (mOperatorJoystick.getRawButton(1)) {
       mLimelight.autoAimShoot(true);
+      shootTimer.start();
     } else {
       double forward, turn, rightOut, leftOut;
       forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
@@ -177,7 +180,8 @@ public class Robot extends TimedRobot {
       if (mOperatorJoystick.getRawButton(3)) {
         mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
         mShooter.setShooterRPM(mManualShooterSpeed);
-      } else {
+        shootTimer.start();
+      } else if (shootTimer.hasElapsed(0.25)) {
         mShooter.setHoodPos(0);
         mShooter.setShooterOutput(0);
       }
@@ -206,7 +210,6 @@ public class Robot extends TimedRobot {
     mIntake.setIntakeRoller(.75);
     mIntake.setIntakeState(IntakeState.INTAKE);
     mElevator.setElevatorOutput(0.25);
-    mElevatorStopper.setStopper(StopperState.STOP);
   }
 
   public void defenseMode() {
