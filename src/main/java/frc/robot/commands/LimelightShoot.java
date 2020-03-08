@@ -30,6 +30,6 @@ public class LimelightShoot extends CommandBase {
   // Called once after isFinished returns true
   @Override
   public void end(boolean interrupted) {
-  Shooter.getInstance().setHoodPos(0);
+    Shooter.getInstance().setHoodPos(0);
   }
 }

@@ -83,6 +83,16 @@ public class MkUtil {
     return num;
   }
 
+  public static double limit(double value, double min, double max) {
+    if (value > max) {
+      return max;
+    } else if (value < min) {
+      return min;
+    } else {
+      return value;
+    }
+  }
+
   private static double handleDeadband(double val, double deadband) {
     return (Math.abs(val) > Math.abs(deadband)) ? val : 0.0;
   }

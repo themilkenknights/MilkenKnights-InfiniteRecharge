@@ -240,10 +240,6 @@ public class Robot extends TimedRobot {
     }
   }
 
-  public enum AutoPosition {
-    LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
-  }
-
   public double limit(double value, double min, double max) {
     if (value > max) {
       return max;
@@ -252,5 +248,9 @@ public class Robot extends TimedRobot {
     } else {
       return value;
     }
+  }
+
+  public enum AutoPosition {
+    LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
   }
 }

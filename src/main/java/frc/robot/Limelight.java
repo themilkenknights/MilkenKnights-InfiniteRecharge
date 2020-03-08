@@ -12,6 +12,8 @@ import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
+import static frc.robot.lib.MkUtil.limit;
+
 public class Limelight {
 
   private final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel);
@@ -27,7 +29,7 @@ public class Limelight {
   private double distance, visionYaw, visionPitch;
 
   private Limelight() {
-    table.getEntry("pipeline").setValue(Constants.VISION.limelight_Pipeline);
+    table.getEntry("pipeline").setValue(VISION.limelight_Pipeline);
   }
 
   public static Limelight getInstance() {
@@ -42,7 +44,7 @@ public class Limelight {
   }
 
   public boolean inRange() {
-    return hasTarget && Math.abs(visionYaw) < Constants.VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < Constants.VISION.vel_tol;
+    return hasTarget && Math.abs(visionYaw) < VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < VISION.vel_tol;
   }
 
   public void autoAimShoot(boolean ignoreAim) {
@@ -50,8 +52,8 @@ public class Limelight {
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
     update();
     double curDist = getDistance();
-    double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
-    double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+    double RPM = VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+    double hoodDist = VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     Shooter.getInstance().setShooterRPM(RPM);
     SmartDashboard.putNumber("Target RPM", RPM);
     Shooter.getInstance().setHoodPos(limit(hoodDist, -3.25, 0));
@@ -98,16 +100,6 @@ public class Limelight {
     SmartDashboard.putNumber("Vertical Angle", visionPitch);
     SmartDashboard.putNumber("Target Distance", distance);
     SmartDashboard.putBoolean("In Range", inRange());
-  }
-
-  public double limit(double value, double min, double max) {
-    if (value > max) {
-      return max;
-    } else if (value < min) {
-      return min;
-    } else {
-      return value;
-    }
   }
 
   private static class InstanceHolder {
