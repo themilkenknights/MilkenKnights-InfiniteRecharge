@@ -48,8 +48,10 @@ public class Shooter {
     mShooterPIDController.setOutputRange(-1, 1);
 
     mHoodSparkMax.setIdleMode(CANSparkMax.IdleMode.kBrake);
-    mHoodSparkMax.setControlFramePeriodMs(10);
-    mHoodSparkMax.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10);
+    mHoodSparkMax.setSmartCurrentLimit(5);
+    mHoodSparkMax.setOpenLoopRampRate(0);
+    //mHoodSparkMax.setControlFramePeriodMs(10);
+    //mHoodSparkMax.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10);
   }
 
   public static Shooter getInstance() {
@@ -79,7 +81,7 @@ public class Shooter {
   }
 
   public void setHoodPos(double pos) {
-    pos = limit(pos, -3.25, 0);
+    pos = limit(pos, -3.20, 0);
     mHoodSparkMax.set(MkUtil.clamp((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp, SHOOTER.kMaxHoodOutput));
     hoodSetpoint = pos;
   }

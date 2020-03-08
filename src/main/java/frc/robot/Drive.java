@@ -77,9 +77,9 @@ public class Drive {
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     leftMaster.configAllowableClosedloopError(0, 1);
     leftMaster.configNeutralDeadband(0.001);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
+    //leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     leftMaster.configClosedLoopPeakOutput(0, 1.0);
     rightMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
@@ -90,17 +90,17 @@ public class Drive {
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configAllowableClosedloopError(0, 1);
     rightMaster.configNeutralDeadband(0.001);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
+    //rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
     rightMaster.configClosedLoopPeakOutput(0, 1.0);
     leftMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     rightMaster.configVelocityMeasurementWindow(16);
     rightMaster.configMotionSCurveStrength(6);
 
-    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
-    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
 
     //leftMaster.configStatorCurrentLimit(Constants.DRIVE.config);
    // rightMaster.configStatorCurrentLimit(Constants.DRIVE.config);

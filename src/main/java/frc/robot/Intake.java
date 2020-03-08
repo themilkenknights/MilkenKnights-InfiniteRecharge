@@ -10,7 +10,6 @@ public class Intake {
 
   private final Solenoid intakeSolenoid = new Solenoid(0);
   private final TalonSRX mTalon = new TalonSRX(Constants.CAN.kIntakeRollerTalonId);
-  private final CANSparkMax hopperSparkMax = new CANSparkMax(Constants.CAN.kHopperId, MotorType.kBrushless);
   private IntakeState mState = IntakeState.STOW;
 
   private Intake() {
@@ -18,8 +17,6 @@ public class Intake {
     mTalon.setInverted(false);
     mTalon.configVoltageCompSaturation(12.0);
     mTalon.enableVoltageCompensation(true);
-    hopperSparkMax.restoreFactoryDefaults();
-    hopperSparkMax.setIdleMode(CANSparkMax.IdleMode.kBrake);
     intakeSolenoid.set(false);
   }
 
@@ -29,10 +26,6 @@ public class Intake {
 
   public void setIntakeRoller(double percentOut) {
     mTalon.set(ControlMode.PercentOutput, percentOut);
-  }
-
-  public void setHopperRoller(double percentOut) {
-    hopperSparkMax.set(percentOut);
   }
 
   public void setIntakeState(IntakeState pos) {

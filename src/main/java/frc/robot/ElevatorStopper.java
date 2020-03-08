@@ -31,6 +31,16 @@ public class ElevatorStopper {
     }
   }
 
+  public boolean getStopper()
+  {
+    if(StopperState.GO == mState)
+      return true;
+    else
+      return false;
+    
+  }
+
+
   public enum StopperState {
     GO(true), STOP(false);
 

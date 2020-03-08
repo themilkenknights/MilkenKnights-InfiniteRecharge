@@ -24,7 +24,6 @@ public class IntakeBalls extends CommandBase {
     Intake.getInstance().setIntakeState(IntakeState.INTAKE);
     Intake.getInstance().setIntakeRoller(.75);
     Elevator.getInstance().setElevatorOutput(0.20);
-    Intake.getInstance().setHopperRoller(.42);
     ElevatorStopper.getInstance().setStopper(StopperState.STOP);
   }
 
@@ -37,6 +36,7 @@ public class IntakeBalls extends CommandBase {
   // Called once after isFinished returns true
   @Override
   public void end(boolean interrupted) {
-
+    Intake.getInstance().setIntakeState(IntakeState.STOW);
+    Intake.getInstance().setIntakeRoller(0.00);
   }
 }

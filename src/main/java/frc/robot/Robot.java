@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpiutil.net.PortForwarder;
@@ -132,17 +133,23 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     updateSensors();
     input();
+    SmartDashboard.putBoolean("Stopper State", !ElevatorStopper.getInstance().getStopper());
 
   }
 
   public void input() {
     if (stick.getRawButton(Constants.INPUT.limeLight)) {
       mLimelight.autoAimShoot(limeOffset);
+      if(jStick.getRawButtonPressed(1))
+        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+      else if(jStick.getRawButtonReleased(1))
+      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
+      
     } else {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
       double forward, turn, rightOut, leftOut;
       forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
-      turn = (-stick.getRawAxis(0));
+      turn = 0.9 * Math.pow(-stick.getRawAxis(0), 3);
       //Change below
       //forward = limiter.calculate(forward);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
@@ -185,14 +192,21 @@ public class Robot extends TimedRobot {
         shooterSpeed -= .01;
       }
 
-      if (jStick.getRawButtonPressed(10)) {
-        ElevatorStopper.getInstance().toggleStopper();
+      if (stick.getRawButton(2)) {
+        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
       }
       
-      if (jStick.getRawButtonPressed(1)) {
-        mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
-        mShooter.setShooterOutput(shooterSpeed);
-      } else {
+      if (jStick.getRawButton(1)) {
+        mShooter.setHoodPos(limit(0.00, -3.25, 0));
+        mShooter.setShooterOutput(0.450);
+        Elevator.getInstance().setElevatorOutput(.5);
+        if(Shooter.getInstance().getShooterRPM() > 2350)
+          ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+      }
+      else if(jStick.getRawButtonReleased(1))
+        ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP); 
+      else 
+      {
         mShooter.setHoodPos(limit(hoodPos,-3.25, 0));
         mShooter.setShooterOutput(shooterSpeed);
       }
@@ -200,10 +214,8 @@ public class Robot extends TimedRobot {
 
       if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
-        ElevatorStopper.getInstance().setStopper(StopperState.GO);
       } else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
-        ElevatorStopper.getInstance().setStopper(StopperState.GO);
       } else if (!isInAttackMode) {
         mElevator.setElevatorOutput(0);
       }

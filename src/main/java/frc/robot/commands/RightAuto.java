@@ -6,7 +6,7 @@ public class RightAuto extends SequentialCommandGroup {
   public RightAuto() {
     addCommands(
         deadline(new LimelightShoot().withTimeout(7)),
-        deadline(new DriveStraight(18.0).withTimeout(3), new SpinUp(0))
+        deadline(new DriveStraight(18.0).withTimeout(3), new SpinUp(5))
     );
   }
 }
