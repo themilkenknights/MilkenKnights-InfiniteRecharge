@@ -6,7 +6,7 @@ public class CenterAuto extends SequentialCommandGroup {
   public CenterAuto() {
     addCommands(
       deadline(new LimelightShoot().withTimeout(7)),
-      deadline(new DriveStraight(18.0).withTimeout(3), new SpinUp(5))
+      deadline(new DriveStraight(18.0).withTimeout(3))
     );
   }
 }
