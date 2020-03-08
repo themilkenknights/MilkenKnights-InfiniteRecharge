@@ -129,7 +129,6 @@ public class Robot extends TimedRobot {
     Climber.getInstance().setClimbState(Climber.ClimbState.RETRACT);
     mDrive.configBrakeMode();
     mDrive.zeroSensors();
-    hoodPos = shooterSpeed = 0;
   }
 
   @Override
