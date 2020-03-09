@@ -12,22 +12,24 @@ import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
+import static frc.robot.lib.MkUtil.limit;
+
 public class Limelight {
 
-  private final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(VISION.max_angular_vel, VISION.max_angular_accel);
+  private final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(VISION.kMaxAimAngularVel, VISION.kMaxAimAngularAccel);
   private final ProfiledPIDController m_turn_controller = new ProfiledPIDController(VISION.kP_turn, VISION.kI_turn, VISION.kD_turn, constraints);
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
   private final NetworkTableEntry tx = table.getEntry("tx");
   private final NetworkTableEntry ty = table.getEntry("ty");
   private final NetworkTableEntry led = table.getEntry("ledMode");
   private final NetworkTableEntry tv = table.getEntry("tv");
+  private final NetworkTableEntry pipeline = table.getEntry("pipeline");
   private final Timer shootTimer = new Timer();
-  private boolean shootOn, hasTarget;
+  private boolean hasTarget;
   private double distance, visionYaw, visionPitch;
 
   private Limelight() {
-    m_turn_controller.setTolerance(VISION.angle_tol);
-    m_turn_controller.setIntegratorRange(-100.0, 100.0);
+    table.getEntry("pipeline").setValue(VISION.kLimelightPipeline);
   }
 
   public static Limelight getInstance() {
@@ -42,39 +44,39 @@ public class Limelight {
   }
 
   public boolean inRange() {
-    return hasTarget && Math.abs(visionYaw) < Constants.VISION.angle_tol && Math.abs(Drive.getInstance().getAvgVel()) < 0.1;
+    return hasTarget && Math.abs(visionYaw) < VISION.kShootAngleTol;
   }
 
-  public void autoAimShoot(double limelightOffset) {
+  public void autoAimShoot(boolean ignoreAim) {
+    updateAutoAimOutput();
+    double curDist = getDistance();
+    double RPM = VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+    double hoodDist = VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
+    Shooter.getInstance().setShooterRPM(RPM);
+    SmartDashboard.putNumber("Target RPM", RPM);
+    Shooter.getInstance().setHoodPos(limit(hoodDist, -3.25, 0));
+    double distance_mod = Constants.VISION.kElevatorDistanceConst * Limelight.getInstance().getDistance();
+    double rpm_mod = VISION.kElevatorRpmConst * (RPM - Shooter.getInstance().getShooterRPM());
+    Elevator.getInstance().setElevatorOutput(limit(0.60 - distance_mod, 0.2, 1.0));
+    if ((ignoreAim || inRange()) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30) {
+      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
+      Shooter.getInstance().setShootingMode(ignoreAim ? Shooter.ShootingMode.AUTO_SHOOTING_IGNORING_AIM : Shooter.ShootingMode.AUTO_SHOOTING_AIMED);
+    } else {
+      Shooter.getInstance().setShootingMode(Shooter.ShootingMode.AUTO_AIMIMG);
+    }
+
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
-    update();
-    double curDist = getDistance();
-    double RPM = Constants.VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
-    double hoodDist = Constants.VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
-    Shooter.getInstance().setShooterRPM(RPM);
-    Shooter.getInstance().setHoodPos(limit(hoodDist,-3.25, 0)); //Add limelight offset
-    Elevator.getInstance().setElevatorOutput(0.79 - Constants.VISION.elevatorSlope * Limelight.getInstance().getDistance());
-    if (inRange() && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 25) {
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      shootTimer.start();
-      shootOn = true;
-    } else if (shootTimer.hasElapsed(0.25) || !shootOn) {
-      shootTimer.reset();
-      shootOn = false;
-      ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.STOP);
-    }
   }
 
-  public void update() {
+  public void updateAutoAimOutput() {
     double horizontal_angle = tx.getDouble(0.0);
     double turn_output = 0;
-    if (Math.abs(horizontal_angle) > VISION.angle_do_nothing_tol) {
-      // Get PID controller output
+    if (Math.abs(horizontal_angle) > VISION.kAimAngleDeadband) {
       TrapezoidProfile trap = new TrapezoidProfile(constraints, new TrapezoidProfile.State(0, 0));
       double turn_controllout_out = m_turn_controller.calculate(-horizontal_angle, 0);
-      double feedforward = ((1.0) / (VISION.max_angular_vel)) * trap.calculate(Constants.kDt).velocity;
-      turn_output = MkUtil.clamp(turn_controllout_out + feedforward, Constants.VISION.max_auto_output);
+      double feedforward = ((1.0) / (VISION.kMaxAimAngularVel)) * trap.calculate(Constants.kDt).velocity;
+      turn_output = MkUtil.limitAbsolute(turn_controllout_out + feedforward, Constants.VISION.kMaxAutoAimOutput);
     }
     Drive.getInstance().setOutput(new DriveSignal(turn_output, -turn_output));
   }
@@ -102,16 +104,6 @@ public class Limelight {
     SmartDashboard.putNumber("Vertical Angle", visionPitch);
     SmartDashboard.putNumber("Target Distance", distance);
     SmartDashboard.putBoolean("In Range", inRange());
-  }
-  
-  public double limit(double value, double min, double max)
-  {
-    if(value > max)
-      return max;
-    else if(value < min)
-      return min;
-    else
-      return value;
   }
 
   private static class InstanceHolder {

@@ -31,6 +31,14 @@ public class ElevatorStopper {
     }
   }
 
+  public void setStopper(boolean state) {
+    stopperSolenoid.set(state);
+  }
+
+  public String getStopperState() {
+    return mState.toString();
+  }
+
   public enum StopperState {
     GO(true), STOP(false);
 

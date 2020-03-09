@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
+import frc.robot.commands.BackAuto;
 import frc.robot.commands.CenterAuto;
 import frc.robot.commands.DriveStraight;
 import frc.robot.commands.LeftTrenchAuto;
@@ -31,13 +32,15 @@ import frc.robot.lib.MkUtil.DriveSignal;
 
 public class Robot extends TimedRobot {
 
-  private Joystick stick = new Joystick(0);
-  private Joystick jStick = new Joystick(1);
+  private Joystick mDriverJoystick = new Joystick(0);
+  private Joystick mOperatorJoystick = new Joystick(1);
   private Compressor mCompressor = new Compressor(0);
 
-  private double hoodPos, shooterSpeed, limeOffset;
-  private boolean isInAttackMode, updateDashboard;
+  private double mManualHoodPos = -0.1;
+  private double mManualShooterSpeed = 2600;
+  private boolean mIsInAttackMode;
   private Timer brakeTimer = new Timer();
+  private Timer shootTimer = new Timer();
 
   private Command m_autonomousCommand;
   private SendableChooser<AutoPosition> positionChooser = new SendableChooser<>();
@@ -48,6 +51,9 @@ public class Robot extends TimedRobot {
   private Shooter mShooter = Shooter.getInstance();
   private Elevator mElevator = Elevator.getInstance();
   private Limelight mLimelight = Limelight.getInstance();
+  private ElevatorStopper mElevatorStopper = ElevatorStopper.getInstance();
+  private Climber mClimber = Climber.getInstance();
+  private Intake mIntake = Intake.getInstance();
 
   public Robot() {
     super(Constants.kDt);
@@ -64,18 +70,13 @@ public class Robot extends TimedRobot {
     positionChooser.setDefaultOption("Left Trench", AutoPosition.LEFT);
     positionChooser.addOption("Right", AutoPosition.RIGHT);
     positionChooser.addOption("Drive Straight", AutoPosition.DRIVE_STRAIGHT);
+    positionChooser.addOption("Back Auto", AutoPosition.BACK);
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    Shuffle.getInstance().updateDeltaTime();
-    if (updateDashboard) {
-      Shuffle.getInstance().update();
-      updateDashboard = false;
-    } else {
-      updateDashboard = true;
-    }
+    Shuffle.getInstance().update();
   }
 
   @Override
@@ -96,8 +97,10 @@ public class Robot extends TimedRobot {
       case DRIVE_STRAIGHT:
         m_autonomousCommand = new DriveStraight(60);
         break;
+      case BACK:
+        m_autonomousCommand = new BackAuto();
       case NOTHING:
-        //This may break things. Test this.
+        //TODO: This may break things. Test this.
         break;
     }
     if (m_autonomousCommand != null) {
@@ -116,9 +119,9 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     Shuffleboard.addEventMarker("Teleop Init", EventImportance.kNormal);
-    mDrive.zeroSensors();
+    defenseMode();
     mDrive.configBrakeMode();
-    hoodPos = shooterSpeed = 0;
+    mDrive.zeroSensors();
   }
 
   @Override
@@ -128,95 +131,93 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (stick.getRawButton(Constants.INPUT.limeLight)) {
-      mLimelight.autoAimShoot(limeOffset);
+    if (mDriverJoystick.getRawButton(1)) {
+      mLimelight.autoAimShoot(false);
+      shootTimer.start();
+      if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
+        mElevator.setElevatorOutput(.420);
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
+        mElevator.setElevatorOutput(-.420);
+      }
+    } else if (mDriverJoystick.getRawButton(2)) {
+      mLimelight.autoAimShoot(true);
+      shootTimer.start();
     } else {
-      double forward, turn, rightOut, leftOut;
-      forward = (-stick.getRawAxis(2) + stick.getRawAxis(3) + mDrive.antiTip());
-      turn = (-stick.getRawAxis(0));
-      DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
-      leftOut = controlSig.getLeft();
-      rightOut = controlSig.getRight();
-
-      if (jStick.getRawButtonPressed(Constants.INPUT.attackMode)) {
-        isInAttackMode = true;
-      } else if (jStick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
-        isInAttackMode = false;
-      }
-
-      if (isInAttackMode) {
-        mDrive.setOutput(new DriveSignal(leftOut / 2.7, rightOut / 2.7));
-        AttackMode();
+      double forward, turn;
+      if (mIsInAttackMode) {
+        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
       } else {
-        mDrive.setOutput(new DriveSignal(leftOut, rightOut));
-        DefenceMode();
+        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
+      }
+      turn = .75 * -mDriverJoystick.getRawAxis(0);
+      DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
+      mDrive.setOutput(new DriveSignal(controlSig.getLeft(), controlSig.getRight()));
+
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
+        mIsInAttackMode = true;
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
+        mIsInAttackMode = false;
       }
 
-      if (jStick.getRawButtonPressed(Constants.INPUT.climbOn)) {
-        Climber.getInstance().setClimbState(ClimbState.CLIMB);
-      } else if (jStick.getRawButtonPressed(Constants.INPUT.climbOff)) {
-        Climber.getInstance().setClimbState(ClimbState.RETRACT);
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn)) {
+        mClimber.setClimbState(ClimbState.CLIMB);
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
+        mClimber.setClimbState(ClimbState.RETRACT);
       }
 
-      boolean isOperatorJoystickConnected = jStick.getRawAxis(3) != 0.0;
-
-      if (isOperatorJoystickConnected) {
-        if (jStick.getPOV() == 0) {
-          hoodPos -= .05;
-        } else if (jStick.getPOV() == 180) {
-          hoodPos += .05;
+      if (mOperatorJoystick.getButtonCount() > 0) {
+        if (mOperatorJoystick.getPOV() == 0) {
+          mManualShooterSpeed += 1;
+        } else if (mOperatorJoystick.getPOV() == 180) {
+          mManualShooterSpeed -= 1;
         }
       }
 
-      if (jStick.getRawButtonPressed(6)) {
-        shooterSpeed += .01;
-      } else if (jStick.getRawButtonPressed(4)) {
-        shooterSpeed -= .01;
+      if (mIsInAttackMode) {
+        attackMode();
+      } else if (!mIsInAttackMode) {
+        defenseMode();
       }
 
-      if (jStick.getRawButtonPressed(10)) {
-        ElevatorStopper.getInstance().toggleStopper();
+      if (mOperatorJoystick.getRawButton(1)) {
+        mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
+        mShooter.setShooterRPM(mManualShooterSpeed);
+        shootTimer.start();
+        mShooter.setShootingMode(Shooter.ShootingMode.MANUAL_RPM);
+      } else if (shootTimer.hasElapsed(0.25)) {
+        mShooter.setHoodPos(0);
+        mShooter.setShooterOutput(0);
       }
 
-      if (jStick.getRawButtonPressed(1)) {
-        mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
-        mShooter.setShooterOutput(shooterSpeed);
+      if (mOperatorJoystick.getRawButton(4)) {
+        mElevatorStopper.setStopper(ElevatorStopper.StopperState.GO);
       } else {
-        mShooter.setHoodPos(limit(hoodPos, -3.25, 0));
-        mShooter.setShooterOutput(shooterSpeed);
-      }
+        mElevatorStopper.setStopper(ElevatorStopper.StopperState.STOP);
+    }
 
-      if (jStick.getRawButton(Constants.INPUT.elevatorUp)) {
+      if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
-        ElevatorStopper.getInstance().setStopper(StopperState.GO);
-      } else if (jStick.getRawButton(Constants.INPUT.elevatorDown)) {
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
-        ElevatorStopper.getInstance().setStopper(StopperState.GO);
-      } else if (!isInAttackMode) {
+      } else if (!mIsInAttackMode) {
         mElevator.setElevatorOutput(0);
       }
 
-      if (stick.getRawButtonPressed(5)) { //Change this
+      if (mDriverJoystick.getRawButtonPressed(5)) {
         mLimelight.toggleLED();
-      }
-
-      if (stick.getRawButtonPressed(6)) { //Change this
-        mShooter.zeroHood();
       }
     }
   }
 
-  public void AttackMode() {
-    Intake.getInstance().setIntakeRoller(.75);
-    Intake.getInstance().setIntakeState(IntakeState.INTAKE);
-    mElevator.setElevatorOutput(0.35);
-    Intake.getInstance().setHopperRoller(.42);
-    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
+  public void attackMode() {
+    mIntake.setIntakeRoller(.75);
+    mIntake.setIntakeState(IntakeState.INTAKE);
+    mElevator.setElevatorOutput(0.25);
   }
 
-  public void DefenceMode() {
-    Intake.getInstance().setIntakeRoller(0.0);
-    Intake.getInstance().setIntakeState(IntakeState.STOW);
+  public void defenseMode() {
+    mIntake.setIntakeRoller(0.0);
+    mIntake.setIntakeState(IntakeState.STOW);
     mElevator.setElevatorOutput(0);
   }
 
@@ -228,42 +229,22 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     Shuffleboard.addEventMarker("Disabled Init", EventImportance.kNormal);
-    mDrive.initSwerdMagic(); //TODO: Maybe Look Here
     brakeTimer.reset();
     brakeTimer.start();
-    Climber.getInstance().setClimbState(ClimbState.RETRACT); //When disabled reset to default state for safety
-    Intake.getInstance().setIntakeState(IntakeState.STOW);
-    ElevatorStopper.getInstance().setStopper(StopperState.STOP);
+    mClimber.setClimbState(ClimbState.RETRACT);
+    mIntake.setIntakeState(IntakeState.STOW);
+    mElevatorStopper.setStopper(StopperState.STOP);
   }
 
   @Override
   public void disabledPeriodic() {
-    mDrive.updateSwerdMagic(brakeTimer.get()); //TODO: Maybe Look Here
     updateSensors();
     if (brakeTimer.hasElapsed(1.5)) {
       mDrive.configCoastMode();
     }
   }
 
-  @Override
-  public void testInit() {
-  }
-
-  @Override
-  public void testPeriodic() {
-  }
-
   public enum AutoPosition {
-    LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
-  }
-
-  public double limit(double value, double min, double max) {
-    if (value > max) {
-      return max;
-    } else if (value < min) {
-      return min;
-    } else {
-      return value;
-    }
+    LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT, BACK
   }
 }

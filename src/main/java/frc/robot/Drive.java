@@ -7,7 +7,6 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.music.Orchestra;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -19,8 +18,6 @@ import frc.robot.Constants.CAN;
 import frc.robot.Constants.DRIVE;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class Drive {
 
@@ -39,6 +36,12 @@ public class Drive {
     rightMaster.configFactoryDefault();
     rightSlave.configFactoryDefault();
 
+    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+
+    leftSlave.follow(leftMaster);
+    rightSlave.follow(rightMaster);
+
     leftMaster.configVoltageCompSaturation(12.0);
     leftMaster.enableVoltageCompensation(true);
     leftSlave.configVoltageCompSaturation(12.0);
@@ -53,11 +56,10 @@ public class Drive {
     rightMaster.setInverted(DRIVE.kRightMasterInverted);
     rightSlave.setInverted(DRIVE.kRightSlaveInverted);
 
-    leftSlave.follow(leftMaster);
-    rightSlave.follow(rightMaster);
-
     leftMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    leftSlave.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    rightSlave.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
     leftMaster.setNeutralMode(NeutralMode.Brake);
     rightMaster.setNeutralMode(NeutralMode.Brake);
@@ -79,10 +81,9 @@ public class Drive {
     leftMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     leftMaster.configAllowableClosedloopError(0, 1);
-    leftMaster.configNeutralDeadband(0.0001);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
+    leftMaster.configNeutralDeadband(0.001);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
     leftMaster.configClosedLoopPeakOutput(0, 1.0);
     rightMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
@@ -92,15 +93,19 @@ public class Drive {
     rightMaster.configMotionCruiseVelocity(DRIVE.kMotionMagicStraightVel);
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configAllowableClosedloopError(0, 1);
-    rightMaster.configNeutralDeadband(0.0001);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10);
+    rightMaster.configNeutralDeadband(0.001);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
     rightMaster.configClosedLoopPeakOutput(0, 1.0);
     leftMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_25Ms);
     rightMaster.configVelocityMeasurementWindow(16);
     rightMaster.configMotionSCurveStrength(6);
+
+    leftMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    rightMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    leftSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    rightSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
 
     zeroSensors();
     m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
@@ -111,6 +116,9 @@ public class Drive {
   }
 
   public void updateSensors() {
+    leftSlave.follow(leftMaster);
+    rightSlave.follow(rightMaster);
+
     mPeriodicIO.timestamp = Timer.getFPGATimestamp();
 
     mPeriodicIO.yaw_continouous = getYaw();
@@ -154,7 +162,7 @@ public class Drive {
     mPeriodicIO.right_output = MkUtil.inchesToNative(magicStraightTarget);
   }
 
-  public boolean isDriveStraightDone() { //No Longer Sets Output to Zero when finished
+  public boolean isDriveStraightDone() {
     double err = magicStraightTarget - mPeriodicIO.avg_dist_inches;
     return Math.abs(err) < 0.5 && Math.abs(mPeriodicIO.avg_vel_inches_per_sec) < 0.1;
   }
@@ -170,7 +178,7 @@ public class Drive {
 
   public void magicTurnInPlaceUpdate() {
     double error_deg = mPeriodicIO.yaw_continouous - magicTarget;
-    double error_rad = Math.toRadians(error_deg);//22.97
+    double error_rad = Math.toRadians(error_deg);
     double delta_v = 22.97 * error_rad / (2 * 0.95);
 
     double left_out = MkUtil.inchesToNative(-delta_v) + leftMaster.getSelectedSensorPosition();
@@ -190,6 +198,7 @@ public class Drive {
   public void setOutput(DriveSignal signal) {
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
+
     mPeriodicIO.left_output = signal.getLeft();
     mPeriodicIO.right_output = signal.getRight();
   }
@@ -212,6 +221,7 @@ public class Drive {
   public void updateDashboard() {
     SmartDashboard.putNumber("Left Output", mPeriodicIO.left_output);
     SmartDashboard.putNumber("Right Output", mPeriodicIO.left_output);
+    SmartDashboard.putNumber("Avg Vel", mPeriodicIO.avg_vel_inches_per_sec);
     SmartDashboard.putNumber("Left Pos Inches", mPeriodicIO.left_pos_inches);
     SmartDashboard.putNumber("Right Pos Inches", mPeriodicIO.right_pos_inches);
     SmartDashboard.putNumber("Left Vel Inches/Sec", mPeriodicIO.left_vel_inches_per_sec);
@@ -221,6 +231,8 @@ public class Drive {
     SmartDashboard.putNumber("Error Deg Turn In Place", mPeriodicIO.yaw_continouous - magicTarget);
     SmartDashboard.putNumber("Delta V Turn In Place", 22.97 * Math.toRadians(mPeriodicIO.yaw_continouous - magicTarget) / (2 * 0.95));
     SmartDashboard.putBoolean("Magic Turn In Place Done", isMagicTurnInPlaceDone());
+    SmartDashboard.putNumber("Left Master Drive Stator Current", leftMaster.getStatorCurrent());
+    SmartDashboard.putNumber("Right Master Drive Stator Current", leftMaster.getStatorCurrent());
   }
 
   public void configCoastMode() {
@@ -250,53 +262,6 @@ public class Drive {
   public double getYaw() {
     return navX.getAngle();
   }
-
-  //TODO: Begin Swerd Magic
-
-  Orchestra _orchestra;
-  int _timeToPlayLoops = 0;
-
-  public void initSwerdMagic() {
-    ArrayList<TalonFX> _instruments = new ArrayList<TalonFX>();
-    _instruments.add(leftMaster);
-    _instruments.add(rightMaster);
-    _instruments.add(leftSlave);
-    _instruments.add(rightSlave);
-    _orchestra = new Orchestra(_instruments);
-
-    String[] _songs = new String[] {
-        "song1.chrp",
-        "song2.chrp",
-        "song3.chrp",
-        "song4.chrp",
-        "song5.chrp",
-        "song6.chrp",
-        "song7.chrp",
-        "song8.chrp",
-        "song9.chrp",
-        "song10.chrp",
-        "song11.chrp",
-    };
-    Random random = new Random();
-    _orchestra.loadMusic(_songs[random.nextInt(11)]);
-    _timeToPlayLoops = 10;
-  }
-
-  public void updateSwerdMagic(double time) {
-    if (_timeToPlayLoops > 0) {
-      --_timeToPlayLoops;
-      if (_timeToPlayLoops == 0) {
-        System.out.println("Swerdlow Magic Initiated.");
-        _orchestra.play();
-      }
-    }
-
-    if (time > 6.0) {
-      _orchestra.stop();
-    }
-  }
-
-  //TODO: End Swerd Magic
 
   private static class InstanceHolder {
 

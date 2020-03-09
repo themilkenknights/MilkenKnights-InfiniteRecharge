@@ -6,15 +6,15 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 public class Elevator {
 
-  private final TalonSRX eTalon = new TalonSRX(Constants.CAN.kElevatorId);
+  private final TalonSRX mTalon = new TalonSRX(Constants.CAN.kElevatorId);
   private double elevatorSetpoint;
 
   private Elevator() {
-    eTalon.configFactoryDefault();
-    eTalon.configVoltageCompSaturation(12.0);
-    eTalon.enableVoltageCompensation(true);
-    eTalon.setNeutralMode(NeutralMode.Brake);
-    eTalon.setInverted(Constants.CAN.kElevatorInverted);
+    mTalon.configFactoryDefault();
+    mTalon.configVoltageCompSaturation(12.0);
+    mTalon.enableVoltageCompensation(true);
+    mTalon.setNeutralMode(NeutralMode.Brake);
+    mTalon.setInverted(Constants.CAN.kElevatorInverted);
   }
 
   public static Elevator getInstance() {
@@ -22,7 +22,7 @@ public class Elevator {
   }
 
   public void setElevatorOutput(double ePercentOut) {
-    eTalon.set(ControlMode.PercentOutput, ePercentOut);
+    mTalon.set(ControlMode.PercentOutput, ePercentOut);
     elevatorSetpoint = ePercentOut;
   }
 

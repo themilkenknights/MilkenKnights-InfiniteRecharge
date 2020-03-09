@@ -3,7 +3,6 @@ package frc.robot;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,7 +19,9 @@ public class Shooter {
   private CANEncoder hEncoder = new CANEncoder(mHoodSparkMax);
 
   private CANPIDController mShooterPIDController;
-  private double shooterSetpoint, hoodSetpoint;
+  private double mShooterSetpoint, mHoodSetpoint;
+
+  private ShootingMode mShootingMode = ShootingMode.NOTHING;
 
   private Shooter() {
     mShooterSparkMaxLeft.restoreFactoryDefaults();
@@ -48,8 +49,7 @@ public class Shooter {
     mShooterPIDController.setOutputRange(-1, 1);
 
     mHoodSparkMax.setIdleMode(CANSparkMax.IdleMode.kBrake);
-    mHoodSparkMax.setControlFramePeriodMs(10);
-    mHoodSparkMax.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10);
+    mHoodSparkMax.setSmartCurrentLimit(5);
   }
 
   public static Shooter getInstance() {
@@ -58,7 +58,7 @@ public class Shooter {
 
   public void setShooterOutput(double percentOut) {
     mShooterSparkMaxLeft.set(percentOut);
-    shooterSetpoint = percentOut;
+    mShooterSetpoint = percentOut;
   }
 
   public double getShooterRPM() {
@@ -66,8 +66,8 @@ public class Shooter {
   }
 
   public void setShooterRPM(double rpm) {
-    mShooterPIDController.setReference(rpm, ControlType.kVelocity);
-    shooterSetpoint = rpm;
+    mShooterPIDController.setReference(rpm - 25, ControlType.kVelocity);
+    mShooterSetpoint = rpm;
   }
 
   public void zeroHood() {
@@ -79,28 +79,29 @@ public class Shooter {
   }
 
   public void setHoodPos(double pos) {
-    pos = limit(MkUtil.clamp(pos, SHOOTER.kMaxHoodPos), -3.25, 0);
-    mHoodSparkMax.set(MkUtil.clamp((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp, SHOOTER.kMaxHoodOutput));
-    hoodSetpoint = pos;
+    pos = MkUtil.limit(pos, SHOOTER.kMaxHoodPos, 0);
+    mHoodSparkMax.set(MkUtil.limitAbsolute((pos - hEncoder.getPosition()) * SHOOTER.kHoodKp, SHOOTER.kMaxHoodOutput));
+    mHoodSetpoint = pos;
   }
 
   public void updateDashboard() {
     SmartDashboard.putNumber("Hood Pos", getHoodPos());
-    SmartDashboard.putNumber("Hood Setpoint", hoodSetpoint);
-    SmartDashboard.putNumber("Shooter RPM", getShooterRPM());
-    SmartDashboard.putNumber("Shooter Setpoint (RPM/PercentOut)", shooterSetpoint);
+    SmartDashboard.putNumber("Hood Setpoint", mHoodSetpoint);
+    double rpm = getShooterRPM();
+    SmartDashboard.putNumber("Shooter RPM", rpm);
+    SmartDashboard.putNumber("Shooter Setpoint", mShooterSetpoint);
+    SmartDashboard.putString("Shooting Mode", mShootingMode.toString());
+    SmartDashboard.putNumber("Shooter Error", rpm - mShooterSetpoint);
+    mShooterSparkMaxRight.follow(mShooterSparkMaxLeft, true);
   }
-  
-  public double limit(double value, double min, double max)
-  {
-    if(value > max)
-      return max;
-    else if(value < min)
-      return min;
-    else
-      return value;
+
+  public void setShootingMode(ShootingMode mode) {
+    mShootingMode = mode;
   }
-  
+
+  public enum ShootingMode {
+    NOTHING, MANUAL_RPM, AUTO_AIMIMG, AUTO_SHOOTING_AIMED, AUTO_SHOOTING_IGNORING_AIM
+  }
 
   private static class InstanceHolder {
 
