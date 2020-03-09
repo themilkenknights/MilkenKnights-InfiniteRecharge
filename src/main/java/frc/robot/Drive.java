@@ -191,7 +191,7 @@ public class Drive {
     mPeriodicIO.right_output = right_out;
   }
 
-  public boolean isMagicTurnInPlaceDone() { //No Longer Sets Output to Zero when finished
+  public boolean isMagicTurnInPlaceDone() {
     return Math.abs(mPeriodicIO.yaw_continouous - magicTarget) < 3.0 && Math.abs(mPeriodicIO.avg_vel_inches_per_sec) < 0.1;
   }
 

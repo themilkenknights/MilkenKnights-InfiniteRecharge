@@ -8,7 +8,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -28,18 +27,19 @@ import frc.robot.commands.CenterAuto;
 import frc.robot.commands.DriveStraight;
 import frc.robot.commands.LeftTrenchAuto;
 import frc.robot.commands.RightAuto;
+import frc.robot.lib.MkJoystick;
 import frc.robot.lib.MkUtil;
 import frc.robot.lib.MkUtil.DriveSignal;
 
 public class Robot extends TimedRobot {
 
-  private Joystick mDriverJoystick = new Joystick(0);
-  private Joystick mOperatorJoystick = new Joystick(1);
+  private MkJoystick mDriverJoystick = new MkJoystick(0);
+  private MkJoystick mOperatorJoystick = new MkJoystick(1);
   private Compressor mCompressor = new Compressor(0);
 
   private double mManualHoodPos = -0.1;
   private double mManualShooterSpeed = 2600;
-  private boolean mIsInAttackMode;
+  private boolean mIsInAttackMode, mAutoShooting;
   private Timer brakeTimer = new Timer();
   private Timer shootTimer = new Timer();
 
@@ -134,41 +134,26 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (mDriverJoystick.getRawButton(1)) {
+    if (mDriverJoystick.getRawButton(1, "Full Limelight Shoot")) {
       mLimelight.autoAimShoot(false);
       shootTimer.start();
-      if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
-        mElevator.setElevatorOutput(.420);
-      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
-        mElevator.setElevatorOutput(-.420);
-      }
-    } else if (mDriverJoystick.getRawButton(2)) {
+      mAutoShooting = true;
+    } else if (mDriverJoystick.getRawButton(2, "Limelight Shooting—Ignore Aim")) {
       mLimelight.autoAimShoot(true);
       shootTimer.start();
+      mAutoShooting = true;
     } else {
+      mAutoShooting = false;
       double forward = accelLimiter.calculate(-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3));
       double antiTip = mIsInAttackMode ? mDrive.antiTip() / 2.0 : mDrive.antiTip();
       double turn = -mDriverJoystick.getRawAxis(0);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       mDrive.setOutput(controlSig.getLeftVel(), controlSig.getRightVel(), antiTip, antiTip);
-      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
+
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode, "Attack Mode")) {
         mIsInAttackMode = true;
-      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode, "Defense Mode")) {
         mIsInAttackMode = false;
-      }
-
-      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn)) {
-        mClimber.setClimbState(ClimbState.CLIMB);
-      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
-        mClimber.setClimbState(ClimbState.RETRACT);
-      }
-
-      if (mOperatorJoystick.getButtonCount() > 0) {
-        if (mOperatorJoystick.getPOV() == 0) {
-          mManualShooterSpeed += 1;
-        } else if (mOperatorJoystick.getPOV() == 180) {
-          mManualShooterSpeed -= 1;
-        }
       }
 
       if (mIsInAttackMode) {
@@ -177,7 +162,21 @@ public class Robot extends TimedRobot {
         defenseMode();
       }
 
-      if (mOperatorJoystick.getRawButton(1)) {
+      if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn, "Extend Climb Actuators")) {
+        mClimber.setClimbState(ClimbState.CLIMB);
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff, "Retract Climb Actuators")) {
+        mClimber.setClimbState(ClimbState.RETRACT);
+      }
+
+      if (mOperatorJoystick.getButtonCount() > 0) {
+        if (mOperatorJoystick.getPOV() == 0) {
+          mManualShooterSpeed += 2;
+        } else if (mOperatorJoystick.getPOV() == 180) {
+          mManualShooterSpeed -= 2;
+        }
+      }
+
+      if (mOperatorJoystick.getRawButton(1, "Set Manual RPM/Hood Pos")) {
         mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
         mShooter.setShooterRPM(mManualShooterSpeed);
         shootTimer.start();
@@ -187,36 +186,36 @@ public class Robot extends TimedRobot {
         mShooter.setShooterOutput(0);
       }
 
-      if (mOperatorJoystick.getRawButton(4)) {
+      if (mOperatorJoystick.getRawButton(4, "Set Elevator Stopper To GO")) {
         mElevatorStopper.setStopper(ElevatorStopper.StopperState.GO);
       } else {
         mElevatorStopper.setStopper(ElevatorStopper.StopperState.STOP);
       }
 
-      if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
-        mElevator.setElevatorOutput(.420);
-      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
-        mElevator.setElevatorOutput(-.420);
-      } else if (!mIsInAttackMode) {
-        mElevator.setElevatorOutput(0);
-      }
-
-      if (mDriverJoystick.getRawButtonPressed(5)) {
+      if (mDriverJoystick.getRawButtonPressed(5, "Toggle Limelight LED")) {
         mLimelight.toggleLED();
       }
+    }
+
+    if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp, "Set Elevator Up to 0.420")) {
+      mElevator.setElevatorOutput(.420);
+    } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown, "Set Elevator Down to -0.420")) {
+      mElevator.setElevatorOutput(-.420);
+    } else if (!mAutoShooting && mIsInAttackMode) {
+      mElevator.setElevatorOutput(0.25);
+    } else if (!mAutoShooting) {
+      mElevator.setElevatorOutput(0);
     }
   }
 
   public void attackMode() {
     mIntake.setIntakeRoller(.75);
     mIntake.setIntakeState(IntakeState.INTAKE);
-    mElevator.setElevatorOutput(0.25);
   }
 
   public void defenseMode() {
     mIntake.setIntakeRoller(0.0);
     mIntake.setIntakeState(IntakeState.STOW);
-    mElevator.setElevatorOutput(0);
   }
 
   public void updateSensors() {
