@@ -134,7 +134,8 @@ public class Drive {
     mPeriodicIO.timestamp = Timer.getFPGATimestamp();
 
     mPeriodicIO.yaw_continouous = getYaw();
-    mPeriodicIO.roll = navX.getRoll();
+    mPeriodicIO.yaw_normalized = getHeading();
+    mPeriodicIO.pitch = navX.getRoll();
 
     mPeriodicIO.left_vel_native = leftMaster.getSelectedSensorVelocity();
     mPeriodicIO.right_vel_native = leftMaster.getSelectedSensorVelocity();
@@ -155,7 +156,6 @@ public class Drive {
     mPeriodicIO.avg_vel_inches_per_sec = (mPeriodicIO.left_vel_inches_per_sec + mPeriodicIO.right_vel_inches_per_sec) / 2.0;
 
     m_odometry.update(Rotation2d.fromDegrees(mPeriodicIO.yaw_normalized), mPeriodicIO.left_pos_meters, mPeriodicIO.right_pos_meters);
-    mPeriodicIO.yaw_normalized = getHeading();
   }
 
   public void setDriveStraight(double dist) {
@@ -225,8 +225,8 @@ public class Drive {
   }
 
   public double antiTip() {
-    if (Math.abs(mPeriodicIO.roll) >= DRIVE.kAntiTipThreshold) {
-      return Math.sin(Math.toRadians(navX.getRoll())) * -2;
+    if (Math.abs(mPeriodicIO.pitch) >= DRIVE.kAntiTipThreshold) {
+      return Math.sin(Math.toRadians(mPeriodicIO.pitch)) * -2;
     } else {
       return 0.0;
     }
@@ -242,7 +242,7 @@ public class Drive {
     SmartDashboard.putNumber("Right Vel Inches/Sec", mPeriodicIO.right_vel_inches_per_sec);
     SmartDashboard.putNumber("Left Vel Error", MkUtil.nativePer100MstoInchesPerSec(mPeriodicIO.left_vel_native - mPeriodicIO.left_output));
     SmartDashboard.putNumber("Right Vel Error", MkUtil.nativePer100MstoInchesPerSec(mPeriodicIO.right_vel_native - mPeriodicIO.right_output));
-    SmartDashboard.putNumber("NavX Roll", mPeriodicIO.roll);
+    SmartDashboard.putNumber("NavX Roll", mPeriodicIO.pitch);
     SmartDashboard.putNumber("NavX Yaw Continuous", mPeriodicIO.yaw_continouous);
     SmartDashboard.putNumber("Error Deg Turn In Place", mPeriodicIO.yaw_continouous - magicTarget);
     SmartDashboard.putNumber("Delta V Turn In Place", degreesToDeltaInches(mPeriodicIO.yaw_continouous - magicTarget));
@@ -289,7 +289,7 @@ public class Drive {
 
     public double yaw_normalized;
     public double yaw_continouous;
-    public double roll;
+    public double pitch;
 
     public int left_vel_native;
     public int right_vel_native;

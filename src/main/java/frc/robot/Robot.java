@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpiutil.net.PortForwarder;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
@@ -74,6 +75,11 @@ public class Robot extends TimedRobot {
     positionChooser.addOption("Right", AutoPosition.RIGHT);
     positionChooser.addOption("Drive Straight", AutoPosition.DRIVE_STRAIGHT);
     positionChooser.addOption("Back Auto", AutoPosition.BACK);
+    PortForwarder.add(5800, "10.18.36.11", 5800);
+    PortForwarder.add(5801, "10.18.36.11", 5801);
+    PortForwarder.add(5800, "limelight.local", 5800);
+    PortForwarder.add(5801, "limelight.local", 5801);
+    PortForwarder.add(5805, "limelight.local", 5805);
   }
 
   @Override

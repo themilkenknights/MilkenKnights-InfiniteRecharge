@@ -92,7 +92,6 @@ public class Shooter {
     SmartDashboard.putNumber("Shooter Setpoint", mShooterSetpoint);
     SmartDashboard.putString("Shooting Mode", mShootingMode.toString());
     SmartDashboard.putNumber("Shooter Error", rpm - mShooterSetpoint);
-    mShooterSparkMaxRight.follow(mShooterSparkMaxLeft, true);
   }
 
   public void setShootingMode(ShootingMode mode) {

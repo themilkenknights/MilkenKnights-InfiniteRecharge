@@ -76,12 +76,6 @@ public final class Constants {
     public static final StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration(false, 8, 14, 0.1);
   }
 
-  public static class LIFTER {
-
-    public static final boolean kOutputInverted = false;
-    public static final boolean kSensorInverted = false;
-  }
-
   public static class SHOOTER {
 
     public static final double kFlywheelMaxVel = 5100.0;
