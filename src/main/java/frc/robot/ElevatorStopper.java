@@ -30,8 +30,8 @@ public class ElevatorStopper {
       mState = state;
     }
   }
-  public void setStopper(boolean state)
-  {
+
+  public void setStopper(boolean state) {
     stopperSolenoid.set(state);
   }
 

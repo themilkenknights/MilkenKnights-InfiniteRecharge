@@ -71,7 +71,6 @@ public class Robot extends TimedRobot {
     positionChooser.addOption("Right", AutoPosition.RIGHT);
     positionChooser.addOption("Drive Straight", AutoPosition.DRIVE_STRAIGHT);
     positionChooser.addOption("Back Auto", AutoPosition.BACK);
-
   }
 
   @Override
@@ -99,7 +98,7 @@ public class Robot extends TimedRobot {
         m_autonomousCommand = new DriveStraight(60);
         break;
       case BACK:
-      m_autonomousCommand = new BackAuto();
+        m_autonomousCommand = new BackAuto();
       case NOTHING:
         //TODO: This may break things. Test this.
         break;
@@ -140,34 +139,32 @@ public class Robot extends TimedRobot {
       } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
       }
-    }
-    else if (mDriverJoystick.getRawButton(2)) {
+    } else if (mDriverJoystick.getRawButton(2)) {
       mLimelight.autoAimShoot(true);
       shootTimer.start();
     } else {
-      double forward, turn, rightOut, leftOut;
-      if(mIsInAttackMode)
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip())/2;
-      else 
+      double forward, turn;
+      if (mIsInAttackMode) {
+        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
+      } else {
         forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
+      }
       turn = .75 * -mDriverJoystick.getRawAxis(0);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
-      leftOut = controlSig.getLeft();
-      rightOut = controlSig.getRight();
+      mDrive.setOutput(new DriveSignal(controlSig.getLeft(), controlSig.getRight()));
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
         mIsInAttackMode = true;
       } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
         mIsInAttackMode = false;
       }
-      mDrive.setOutput(new DriveSignal(leftOut, rightOut));
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn)) {
         mClimber.setClimbState(ClimbState.CLIMB);
       } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
         mClimber.setClimbState(ClimbState.RETRACT);
       }
-      
+
       if (mOperatorJoystick.getButtonCount() > 0) {
         if (mOperatorJoystick.getPOV() == 0) {
           mManualShooterSpeed += 1;
@@ -175,20 +172,12 @@ public class Robot extends TimedRobot {
           mManualShooterSpeed -= 1;
         }
       }
-      /*
-      if (mOperatorJoystick.getRawButtonPressed(6)) {
-        mManualShooterSpeed += 100;
-      } else if (mOperatorJoystick.getRawButtonPressed(4)) {
-        mManualShooterSpeed -= 100;
-      }
-      */
 
-      //System.out.println(mManualShooterSpeed);
-
-      if(mIsInAttackMode)
+      if (mIsInAttackMode) {
         attackMode();
-      else if(!mIsInAttackMode)
+      } else if (!mIsInAttackMode) {
         defenseMode();
+      }
 
       if (mOperatorJoystick.getRawButton(1)) {
         mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));

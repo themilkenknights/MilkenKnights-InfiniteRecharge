@@ -44,7 +44,7 @@ public class Limelight {
   }
 
   public boolean inRange() {
-    return hasTarget && Math.abs(visionYaw) < VISION.kShootAngleTol; // && Math.abs(Drive.getInstance().getAvgVel()) < VISION.kShootVelTol
+    return hasTarget && Math.abs(visionYaw) < VISION.kShootAngleTol;
   }
 
   public void autoAimShoot(boolean ignoreAim) {
@@ -58,7 +58,6 @@ public class Limelight {
     double distance_mod = Constants.VISION.kElevatorDistanceConst * Limelight.getInstance().getDistance();
     double rpm_mod = VISION.kElevatorRpmConst * (RPM - Shooter.getInstance().getShooterRPM());
     Elevator.getInstance().setElevatorOutput(limit(0.60 - distance_mod, 0.2, 1.0));
-
     if ((ignoreAim || inRange()) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
       Shooter.getInstance().setShootingMode(ignoreAim ? Shooter.ShootingMode.AUTO_SHOOTING_IGNORING_AIM : Shooter.ShootingMode.AUTO_SHOOTING_AIMED);
@@ -68,7 +67,6 @@ public class Limelight {
 
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
-    //System.out.println( Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30);
   }
 
   public void updateAutoAimOutput() {
