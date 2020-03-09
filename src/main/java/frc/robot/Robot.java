@@ -39,7 +39,7 @@ public class Robot extends TimedRobot {
 
   private double mManualHoodPos = -0.1;
   private double mManualShooterSpeed = 2600;
-  private boolean mIsInAttackMode, mAutoShooting;
+  private boolean mIsInAttackMode, mAutoShooting, mDriverAssist;
   private Timer brakeTimer = new Timer();
   private Timer shootTimer = new Timer();
 
@@ -135,11 +135,7 @@ public class Robot extends TimedRobot {
 
   public void input() {
     if (mDriverJoystick.getRawButton(1, "Full Limelight Shoot")) {
-      mLimelight.autoAimShoot(false);
-      shootTimer.start();
-      mAutoShooting = true;
-    } else if (mDriverJoystick.getRawButton(2, "Limelight Shooting—Ignore Aim")) {
-      mLimelight.autoAimShoot(true);
+      mLimelight.autoAimShoot();
       shootTimer.start();
       mAutoShooting = true;
     } else {
@@ -148,7 +144,19 @@ public class Robot extends TimedRobot {
       double antiTip = mIsInAttackMode ? mDrive.antiTip() / 2.0 : mDrive.antiTip();
       double turn = -mDriverJoystick.getRawAxis(0);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
-      mDrive.setOutput(controlSig.getLeftVel(), controlSig.getRightVel(), antiTip, antiTip);
+      double assist = mDriverAssist ? mLimelight.updateAutoAimOutput() : 0;
+      mDrive.setOutput(controlSig.getLeftVel() + assist, controlSig.getRightVel() - assist, antiTip, antiTip);
+
+      if (mOperatorJoystick.getRawButton(26, "Driver Assist Fire")) {
+        mLimelight.spinUpShoot(5.0, Shooter.ShootingMode.VISION_ASSIST_SHOOTING);
+        mIsInAttackMode = false;
+      } else if (mDriverAssist) {
+        mShooter.setShooterRPM(2000);
+      }
+
+      if (mDriverJoystick.getRawButtonPressed(7, "Driver Assist")) {
+        mDriverAssist = !mDriverAssist;
+      }
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode, "Attack Mode")) {
         mIsInAttackMode = true;
@@ -181,7 +189,7 @@ public class Robot extends TimedRobot {
         mShooter.setShooterRPM(mManualShooterSpeed);
         shootTimer.start();
         mShooter.setShootingMode(Shooter.ShootingMode.MANUAL_RPM);
-      } else if (shootTimer.hasElapsed(0.25)) {
+      } else if (shootTimer.hasElapsed(0.25) && !mDriverAssist) {
         mShooter.setHoodPos(0);
         mShooter.setShooterOutput(0);
       }

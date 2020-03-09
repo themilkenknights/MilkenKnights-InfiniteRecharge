@@ -178,8 +178,7 @@ public class Drive {
 
   public void magicTurnInPlaceUpdate() {
     double error_deg = mPeriodicIO.yaw_continouous - magicTarget;
-    double error_rad = Math.toRadians(error_deg);
-    double delta_v = 22.97 * error_rad / (2 * 0.95);
+    double delta_v = degreesToDeltaInches(error_deg);
 
     double left_out = MkUtil.inchesToNative(-delta_v) + leftMaster.getSelectedSensorPosition();
     double right_out = MkUtil.inchesToNative(delta_v) + rightMaster.getSelectedSensorPosition();
@@ -195,10 +194,13 @@ public class Drive {
     return Math.abs(mPeriodicIO.yaw_continouous - magicTarget) < 3.0 && Math.abs(mPeriodicIO.avg_vel_inches_per_sec) < 0.1;
   }
 
+  public double degreesToDeltaInches(double error_deg){
+    return 22.97 * Math.toRadians(error_deg) / (2 * 0.95);
+  }
+
   public void setOutput(DriveSignal signal) {
     leftMaster.set(ControlMode.PercentOutput, signal.getLeft());
     rightMaster.set(ControlMode.PercentOutput, signal.getRight());
-
     mPeriodicIO.left_output = signal.getLeft();
     mPeriodicIO.right_output = signal.getRight();
   }

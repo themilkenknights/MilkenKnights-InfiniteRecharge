@@ -35,8 +35,12 @@ public class ElevatorStopper {
     stopperSolenoid.set(state);
   }
 
-  public String getStopperState() {
+  public String getStopperStateString() {
     return mState.toString();
+  }
+
+  public StopperState getStopperState(){
+    return mState;
   }
 
   public enum StopperState {

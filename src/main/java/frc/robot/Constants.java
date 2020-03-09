@@ -101,13 +101,14 @@ public final class Constants {
     public static final double kShootAngleTol = 3.50;
 
     public static final double kMaxAutoAimOutput = 0.105;
+    public static final double kMaxAutoAimVelOutput = 35;
     public static final double kP_turn = 0.01205;
     public static final double kI_turn = 0.0;
     public static final double kD_turn = 0.0033;
 
     public static final double kAimAngleDeadband = 0.1;
-    public static final double kMaxAimAngularVel = 300;
-    public static final double kMaxAimAngularAccel = 110;
+    public static final double kMaxAimAngularVel = 100;
+    public static final double kMaxAimAngularAccel = 75;
 
     public static final double kElevatorDistanceConst = 0.002;
     public static final double kElevatorRpmConst = 0.01;

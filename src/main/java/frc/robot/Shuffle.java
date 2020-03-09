@@ -40,7 +40,7 @@ public class Shuffle {
   public void update() {
     updateDeltaTime();
     if (mUpdateDashboard) {
-      SmartDashboard.putString("Elevator Stopper", ElevatorStopper.getInstance().getStopperState());
+      SmartDashboard.putString("Elevator Stopper", ElevatorStopper.getInstance().getStopperStateString());
       SmartDashboard.putNumber("Pressure", ((((pressure.getVoltage()) * 250 / 5.0 - 25.0) / 112) * 120));
       SmartDashboard.putNumber("Elevator Setpoint", Elevator.getInstance().getElevatorSetpoint());
       Drive.getInstance().updateDashboard();
