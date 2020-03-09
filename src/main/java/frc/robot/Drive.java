@@ -102,10 +102,10 @@ public class Drive {
     rightMaster.configVelocityMeasurementWindow(16);
     rightMaster.configMotionSCurveStrength(6);
 
-    leftMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
-    rightMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
-    leftSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
-    rightSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    leftMaster.configStatorCurrentLimit(DRIVE.currentConfig);
+    rightMaster.configStatorCurrentLimit(DRIVE.currentConfig);
+    leftSlave.configStatorCurrentLimit(DRIVE.currentConfig);
+    rightSlave.configStatorCurrentLimit(DRIVE.currentConfig);
 
     zeroSensors();
     m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));

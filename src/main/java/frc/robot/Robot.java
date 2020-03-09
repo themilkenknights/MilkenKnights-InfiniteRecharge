@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -54,6 +55,8 @@ public class Robot extends TimedRobot {
   private ElevatorStopper mElevatorStopper = ElevatorStopper.getInstance();
   private Climber mClimber = Climber.getInstance();
   private Intake mIntake = Intake.getInstance();
+
+  private SlewRateLimiter accelLimiter = new SlewRateLimiter(Constants.DRIVE.kAccelLimit);
 
   public Robot() {
     super(Constants.kDt);
@@ -143,16 +146,11 @@ public class Robot extends TimedRobot {
       mLimelight.autoAimShoot(true);
       shootTimer.start();
     } else {
-      double forward, turn;
-      if (mIsInAttackMode) {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
-      } else {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
-      }
-      turn = .75 * -mDriverJoystick.getRawAxis(0);
+      double forward = accelLimiter.calculate(-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3));
+      double antiTip = mIsInAttackMode ? mDrive.antiTip() / 2.0 : mDrive.antiTip();
+      double turn = -mDriverJoystick.getRawAxis(0);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
-      mDrive.setOutput(new DriveSignal(controlSig.getLeft(), controlSig.getRight()));
-
+      mDrive.setOutput(controlSig.getLeftVel(), controlSig.getRightVel(), antiTip, antiTip);
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
         mIsInAttackMode = true;
       } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
@@ -175,7 +173,7 @@ public class Robot extends TimedRobot {
 
       if (mIsInAttackMode) {
         attackMode();
-      } else if (!mIsInAttackMode) {
+      } else {
         defenseMode();
       }
 
@@ -193,7 +191,7 @@ public class Robot extends TimedRobot {
         mElevatorStopper.setStopper(ElevatorStopper.StopperState.GO);
       } else {
         mElevatorStopper.setStopper(ElevatorStopper.StopperState.STOP);
-    }
+      }
 
       if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);

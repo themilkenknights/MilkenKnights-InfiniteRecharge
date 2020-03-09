@@ -111,6 +111,14 @@ public class MkUtil {
       return mRightMotor;
     }
 
+    public double getLeftVel() {
+      return mLeftMotor * (1.0 / DRIVE.kMaxNativeVel);
+    }
+
+    public double getRightVel() {
+      return mRightMotor * (1.0 / DRIVE.kMaxNativeVel);
+    }
+
     @Override
     public String toString() {
       return "L: " + mLeftMotor + " R: " + mRightMotor;

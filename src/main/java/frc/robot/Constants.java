@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -41,7 +42,6 @@ public final class Constants {
   }
 
   public static class INPUT {
-
     public static final int attackMode = 2;
     public static final int defenseMode = 12;
     public static final int climbOn = 7;
@@ -49,12 +49,10 @@ public final class Constants {
     public static final int elevatorUp = 3;
     public static final int elevatorDown = 5;
     public static final int limeLight = 1;
-
-    // public static final int button 1 is shooterControlEnable and forward and back tics for speed management. hood pov
   }
 
   public static class DRIVE {
-    public static final double kRampRate = 0.75;
+    public static final double kAccelLimit = 1.0 / 0.75;
 
     public static final double kWheelDiameterInches = 5.9575;
     public static final double kWheelCircumference = kWheelDiameterInches * kPi;
@@ -72,11 +70,12 @@ public final class Constants {
     public static final double kDriveKD = 3.0 * kDriveKp;
     public static final double kDriveKf = 1023.0 / DRIVE.kMaxNativeVel;
 
-    public static final int kMotionMagicStraightVel = (int) (0.65 * DRIVE.kMaxNativeVel); //Increase to drive straight faster, decrease to slow
-    public static final int kMotionMagicStraightAccel = (int) (0.4 * DRIVE.kMaxNativeVel); //Increase to drive straight faster, decrease to slow
+    public static final int kMotionMagicStraightVel = (int) (0.65 * DRIVE.kMaxNativeVel);
+    public static final int kMotionMagicStraightAccel = (int) (0.4 * DRIVE.kMaxNativeVel);
 
-    public static final int kMotionMagicTurnInPlaceVel = (int) (0.35 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
-    public static final int kMotionMagicTurnInPlaceAccel = (int) (0.15 * DRIVE.kMaxNativeVel); //May Need to lower this if turning overshoots
+    public static final int kMotionMagicTurnInPlaceVel = (int) (0.35 * DRIVE.kMaxNativeVel);
+    public static final int kMotionMagicTurnInPlaceAccel = (int) (0.15 * DRIVE.kMaxNativeVel);
+    public static final StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration(true, 8, 14, 0.1);
   }
 
   public static class LIFTER {
