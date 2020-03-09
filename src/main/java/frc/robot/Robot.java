@@ -244,7 +244,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledPeriodic() {
     updateSensors();
-    if (brakeTimer.hasElapsed(1.5)) {
+    if (brakeTimer.hasElapsed(1.0)) {
       mDrive.configCoastMode();
     }
   }

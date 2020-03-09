@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlFrame;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -8,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -21,7 +23,7 @@ import frc.robot.lib.MkUtil.DriveSignal;
 
 public class Drive {
 
-  private final AHRS navX = new AHRS();
+  private final AHRS navX = new AHRS(SPI.Port.kMXP, (byte) 200);
   private final TalonFX leftMaster = new TalonFX(CAN.kDriveLeftMasterId);
   private final TalonFX leftSlave = new TalonFX(CAN.kDriveLeftSlaveId);
   private final TalonFX rightMaster = new TalonFX(CAN.kDriveRightMasterId);
@@ -36,11 +38,22 @@ public class Drive {
     rightMaster.configFactoryDefault();
     rightSlave.configFactoryDefault();
 
-    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
-    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+    leftMaster.setControlFramePeriod(ControlFrame.Control_3_General, 5);
+    leftSlave.setControlFramePeriod(ControlFrame.Control_3_General, 5);
+    leftSlave.setControlFramePeriod(ControlFrame.Control_3_General, 5);
+    rightSlave.setControlFramePeriod(ControlFrame.Control_3_General, 5);
 
-    leftSlave.follow(leftMaster);
-    rightSlave.follow(rightMaster);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
+
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 5);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5);
+
+    leftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+    leftSlave.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
+
+    rightSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+    rightSlave.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
 
     leftMaster.configVoltageCompSaturation(12.0);
     leftMaster.enableVoltageCompensation(true);
@@ -82,8 +95,6 @@ public class Drive {
     leftMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     leftMaster.configAllowableClosedloopError(0, 1);
     leftMaster.configNeutralDeadband(0.001);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
     leftMaster.configClosedLoopPeakOutput(0, 1.0);
     rightMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     leftMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_10Ms);
@@ -94,8 +105,6 @@ public class Drive {
     rightMaster.configMotionAcceleration(DRIVE.kMotionMagicStraightAccel);
     rightMaster.configAllowableClosedloopError(0, 1);
     rightMaster.configNeutralDeadband(0.001);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10);
     rightMaster.configClosedLoopPeakOutput(0, 1.0);
     leftMaster.configSelectedFeedbackCoefficient(1.0 / 10.75);
     rightMaster.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_10Ms);
@@ -106,6 +115,9 @@ public class Drive {
     rightMaster.configStatorCurrentLimit(DRIVE.currentConfig);
     leftSlave.configStatorCurrentLimit(DRIVE.currentConfig);
     rightSlave.configStatorCurrentLimit(DRIVE.currentConfig);
+
+    leftSlave.follow(leftMaster);
+    rightSlave.follow(rightMaster);
 
     zeroSensors();
     m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
@@ -194,7 +206,7 @@ public class Drive {
     return Math.abs(mPeriodicIO.yaw_continouous - magicTarget) < 3.0 && Math.abs(mPeriodicIO.avg_vel_inches_per_sec) < 0.1;
   }
 
-  public double degreesToDeltaInches(double error_deg){
+  public double degreesToDeltaInches(double error_deg) {
     return 22.97 * Math.toRadians(error_deg) / (2 * 0.95);
   }
 
@@ -228,10 +240,12 @@ public class Drive {
     SmartDashboard.putNumber("Right Pos Inches", mPeriodicIO.right_pos_inches);
     SmartDashboard.putNumber("Left Vel Inches/Sec", mPeriodicIO.left_vel_inches_per_sec);
     SmartDashboard.putNumber("Right Vel Inches/Sec", mPeriodicIO.right_vel_inches_per_sec);
+    SmartDashboard.putNumber("Left Vel Error", MkUtil.nativePer100MstoInchesPerSec(mPeriodicIO.left_vel_native - mPeriodicIO.left_output));
+    SmartDashboard.putNumber("Right Vel Error", MkUtil.nativePer100MstoInchesPerSec(mPeriodicIO.right_vel_native - mPeriodicIO.right_output));
     SmartDashboard.putNumber("NavX Roll", mPeriodicIO.roll);
     SmartDashboard.putNumber("NavX Yaw Continuous", mPeriodicIO.yaw_continouous);
     SmartDashboard.putNumber("Error Deg Turn In Place", mPeriodicIO.yaw_continouous - magicTarget);
-    SmartDashboard.putNumber("Delta V Turn In Place", 22.97 * Math.toRadians(mPeriodicIO.yaw_continouous - magicTarget) / (2 * 0.95));
+    SmartDashboard.putNumber("Delta V Turn In Place", degreesToDeltaInches(mPeriodicIO.yaw_continouous - magicTarget));
     SmartDashboard.putBoolean("Magic Turn In Place Done", isMagicTurnInPlaceDone());
     SmartDashboard.putNumber("Left Master Drive Stator Current", leftMaster.getStatorCurrent());
     SmartDashboard.putNumber("Right Master Drive Stator Current", leftMaster.getStatorCurrent());

@@ -18,14 +18,12 @@ public class Limelight {
   private final TrapezoidProfile.Constraints m_constraints = new TrapezoidProfile.Constraints(VISION.kMaxAimAngularVel, VISION.kMaxAimAngularAccel);
   private final ProfiledPIDController m_turn_controller = new ProfiledPIDController(VISION.kP_turn, VISION.kI_turn, VISION.kD_turn, m_constraints);
   private final TrapezoidProfile.State m_goal = new TrapezoidProfile.State(0, 0);
-  private TrapezoidProfile.State m_state = new TrapezoidProfile.State(0, 0);
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
   private final NetworkTableEntry tx = table.getEntry("tx");
   private final NetworkTableEntry ty = table.getEntry("ty");
   private final NetworkTableEntry led = table.getEntry("ledMode");
   private final NetworkTableEntry tv = table.getEntry("tv");
   private final NetworkTableEntry pipeline = table.getEntry("pipeline");
-  private final Timer shootTimer = new Timer();
   private boolean hasTarget;
   private double distance, visionYaw, visionPitch, visionYawVel, lastTime, lastVisionYaw;
 
@@ -80,6 +78,7 @@ public class Limelight {
     double visionYaw = tx.getDouble(0.0);
     double curTime = Timer.getFPGATimestamp();
     visionYawVel = (visionYaw / lastVisionYaw) / (curTime - lastTime);
+    lastTime = curTime;
     lastVisionYaw = visionYaw;
     TrapezoidProfile trap = new TrapezoidProfile(m_constraints, m_goal, new TrapezoidProfile.State(visionYaw, visionYawVel));
     double vel = Drive.getInstance().degreesToDeltaInches(trap.calculate(Constants.kDt).velocity);

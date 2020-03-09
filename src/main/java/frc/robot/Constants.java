@@ -1,7 +1,6 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -9,7 +8,6 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
-import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.InterpolatingTreeMap;
 import java.util.List;
@@ -17,7 +15,7 @@ import java.util.List;
 public final class Constants {
 
   public static final double kPi = 3.14159265359;
-  public static final double kDt = 0.01; // Sec
+  public static final double kDt = 0.005; // Sec
 
   public static class CAN {
 
@@ -75,7 +73,7 @@ public final class Constants {
 
     public static final int kMotionMagicTurnInPlaceVel = (int) (0.35 * DRIVE.kMaxNativeVel);
     public static final int kMotionMagicTurnInPlaceAccel = (int) (0.15 * DRIVE.kMaxNativeVel);
-    public static final StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration(true, 8, 14, 0.1);
+    public static final StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration(false, 8, 14, 0.1);
   }
 
   public static class LIFTER {
@@ -170,25 +168,14 @@ public final class Constants {
     public static final double kTrackwidthMeters = 0.69;
     public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
 
-    public static final double ksVolts = 0.266;
-    public static final double kvVoltSecondsPerMeter = 2.47;
-    public static final double kaVoltSecondsSquaredPerMeter = 0.148;
-
     // Example value only - as above, this must be tuned for your drive!
     public static final double kPDriveVel = 5.88;
     public static final double kMaxSpeedMetersPerSecond = 2.54;
     public static final double kMaxAccelerationMetersPerSecondSquared = 2.54;
 
-    public static final SimpleMotorFeedforward kFeedforward = new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter);
-
-    // Create a voltage constraint to ensure we don't accelerate too fast
-    public static final DifferentialDriveVoltageConstraint autoVoltageConstraint =
-        new DifferentialDriveVoltageConstraint(kFeedforward, kDriveKinematics, 10);
-
     // Create config for trajectory
     public static final TrajectoryConfig config =
-        new TrajectoryConfig(kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared).setKinematics(kDriveKinematics)
-            .addConstraint(autoVoltageConstraint);
+        new TrajectoryConfig(kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared).setKinematics(kDriveKinematics);
 
     // An example trajectory to follow.  All units in meters.
     public static final Trajectory traj_1 = TrajectoryGenerator.generateTrajectory(
