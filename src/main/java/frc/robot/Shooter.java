@@ -66,7 +66,7 @@ public class Shooter {
   }
 
   public void setShooterRPM(double rpm) {
-    mShooterPIDController.setReference(rpm, ControlType.kVelocity);
+    mShooterPIDController.setReference(rpm - 25, ControlType.kVelocity);
     mShooterSetpoint = rpm;
   }
 
@@ -87,9 +87,12 @@ public class Shooter {
   public void updateDashboard() {
     SmartDashboard.putNumber("Hood Pos", getHoodPos());
     SmartDashboard.putNumber("Hood Setpoint", mHoodSetpoint);
-    SmartDashboard.putNumber("Shooter RPM", getShooterRPM());
-    SmartDashboard.putNumber("Shooter Setpoint (RPM/PercentOut)", mShooterSetpoint);
+    double rpm = getShooterRPM();
+    SmartDashboard.putNumber("Shooter RPM", rpm);
+    SmartDashboard.putNumber("Shooter Setpoint", mShooterSetpoint);
     SmartDashboard.putString("Shooting Mode", mShootingMode.toString());
+    SmartDashboard.putNumber("Shooter Error", rpm - mShooterSetpoint);
+    mShooterSparkMaxRight.follow(mShooterSparkMaxLeft, true);
   }
 
   public void setShootingMode(ShootingMode mode) {

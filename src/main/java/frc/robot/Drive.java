@@ -204,6 +204,7 @@ public class Drive {
   public void updateDashboard() {
     SmartDashboard.putNumber("Left Output", mPeriodicIO.left_output);
     SmartDashboard.putNumber("Right Output", mPeriodicIO.left_output);
+    SmartDashboard.putNumber("Avg Vel", mPeriodicIO.avg_vel_inches_per_sec);
     SmartDashboard.putNumber("Left Pos Inches", mPeriodicIO.left_pos_inches);
     SmartDashboard.putNumber("Right Pos Inches", mPeriodicIO.right_pos_inches);
     SmartDashboard.putNumber("Left Vel Inches/Sec", mPeriodicIO.left_vel_inches_per_sec);

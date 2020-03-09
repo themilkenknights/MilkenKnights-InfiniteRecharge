@@ -40,7 +40,6 @@ public final class Constants {
     public static final int elevatorUp = 3;
     public static final int elevatorDown = 5;
     public static final int limeLight = 1;
-    public static final int limeAdjust = 11;
 
     // public static final int button 1 is shooterControlEnable and forward and back tics for speed management. hood pov
   }
@@ -80,9 +79,9 @@ public final class Constants {
   public static class SHOOTER {
 
     public static final double kFlywheelMaxVel = 5100.0;
-    public static final double kFlywheelKp = 0.0022;
+    public static final double kFlywheelKp = 0.0016;
     public static final double kFlywheelKi = 0.0;
-    public static final double kFlywheelKd = 0.008;
+    public static final double kFlywheelKd = 0.0094;
     public static final double kFlywheelKf = 1.0 / kFlywheelMaxVel;
 
     public static final double kHoodKp = 0.15;
@@ -91,8 +90,8 @@ public final class Constants {
   }
 
   public static class VISION {
-    public static final double kShootAngleTol = 5.0;
-    public static final double kShootVelTol = 0.4;
+    public static final double kShootAngleTol = 3.50;
+    public static final double kShootVelTol = 0.5;
 
     public static final double kMaxAutoAimOutput = 0.105;
     public static final double kP_turn = 0.01205;
@@ -111,7 +110,7 @@ public final class Constants {
     public static InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> kHoodMap = new InterpolatingTreeMap<>();
 
     public static double[][] kDistanceRpmValues = {
-        {88.78, 2925.0}, // {Distance(Inches), RPM},
+        {88.78, 2975.0}, // {Distance(Inches), RPM},
         {101.85, 3150.0},
         {106.9, 3180.0},
         {111.55, 3200.0},

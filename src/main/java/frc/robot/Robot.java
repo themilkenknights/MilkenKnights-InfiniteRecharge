@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Climber.ClimbState;
 import frc.robot.ElevatorStopper.StopperState;
 import frc.robot.Intake.IntakeState;
+import frc.robot.commands.BackAuto;
 import frc.robot.commands.CenterAuto;
 import frc.robot.commands.DriveStraight;
 import frc.robot.commands.LeftTrenchAuto;
@@ -69,6 +70,8 @@ public class Robot extends TimedRobot {
     positionChooser.setDefaultOption("Left Trench", AutoPosition.LEFT);
     positionChooser.addOption("Right", AutoPosition.RIGHT);
     positionChooser.addOption("Drive Straight", AutoPosition.DRIVE_STRAIGHT);
+    positionChooser.addOption("Back Auto", AutoPosition.BACK);
+
   }
 
   @Override
@@ -95,6 +98,8 @@ public class Robot extends TimedRobot {
       case DRIVE_STRAIGHT:
         m_autonomousCommand = new DriveStraight(60);
         break;
+      case BACK:
+      m_autonomousCommand = new BackAuto();
       case NOTHING:
         //TODO: This may break things. Test this.
         break;
@@ -127,18 +132,25 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (mDriverJoystick.getRawButton(Constants.INPUT.limeLight)) {
+    if (mDriverJoystick.getRawButton(1)) {
       mLimelight.autoAimShoot(false);
       shootTimer.start();
-    } else if (mOperatorJoystick.getRawButton(1)) {
+      if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
+        mElevator.setElevatorOutput(.420);
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
+        mElevator.setElevatorOutput(-.420);
+      }
+    }
+    else if (mDriverJoystick.getRawButton(2)) {
       mLimelight.autoAimShoot(true);
       shootTimer.start();
     } else {
       double forward, turn, rightOut, leftOut;
-      forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
-      //TODO: LOOK BELOW AARON. CHHESY DRIVE ALREADY DOES THIS.
-      turn = 0.9 * Math.pow(-mDriverJoystick.getRawAxis(0), 3); //TODO: VERY BAD. WE ARE ALREADY CUBING THE INPUTS. THIS IS DOING IT TWICE
-      //TODO: LOOK ABOVE AARON
+      if(mIsInAttackMode)
+        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip())/2;
+      else 
+        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
+      turn = .75 * -mDriverJoystick.getRawAxis(0);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
       leftOut = controlSig.getLeft();
       rightOut = controlSig.getRight();
@@ -148,36 +160,37 @@ public class Robot extends TimedRobot {
       } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
         mIsInAttackMode = false;
       }
-
-      if (mIsInAttackMode) {
-        mDrive.setOutput(new DriveSignal(leftOut / 2.7, rightOut / 2.7));
-        attackMode();
-      } else {
-        mDrive.setOutput(new DriveSignal(leftOut, rightOut));
-        defenseMode();
-      }
+      mDrive.setOutput(new DriveSignal(leftOut, rightOut));
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn)) {
         mClimber.setClimbState(ClimbState.CLIMB);
       } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
         mClimber.setClimbState(ClimbState.RETRACT);
       }
-
+      
       if (mOperatorJoystick.getButtonCount() > 0) {
         if (mOperatorJoystick.getPOV() == 0) {
-          mManualHoodPos -= .05;
+          mManualShooterSpeed += 1;
         } else if (mOperatorJoystick.getPOV() == 180) {
-          mManualHoodPos += .05;
+          mManualShooterSpeed -= 1;
         }
       }
-
+      /*
       if (mOperatorJoystick.getRawButtonPressed(6)) {
         mManualShooterSpeed += 100;
       } else if (mOperatorJoystick.getRawButtonPressed(4)) {
         mManualShooterSpeed -= 100;
       }
+      */
 
-      if (mOperatorJoystick.getRawButton(3)) {
+      //System.out.println(mManualShooterSpeed);
+
+      if(mIsInAttackMode)
+        attackMode();
+      else if(!mIsInAttackMode)
+        defenseMode();
+
+      if (mOperatorJoystick.getRawButton(1)) {
         mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
         mShooter.setShooterRPM(mManualShooterSpeed);
         shootTimer.start();
@@ -187,10 +200,10 @@ public class Robot extends TimedRobot {
         mShooter.setShooterOutput(0);
       }
 
-      if (mOperatorJoystick.getRawButtonPressed(2)) {
-        mElevatorStopper.setStopper(StopperState.GO);
+      if (mOperatorJoystick.getRawButton(4)) {
+        mElevatorStopper.setStopper(ElevatorStopper.StopperState.GO);
       } else {
-        mElevatorStopper.setStopper(StopperState.STOP);
+        mElevatorStopper.setStopper(ElevatorStopper.StopperState.STOP);
       }
 
       if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
@@ -243,6 +256,6 @@ public class Robot extends TimedRobot {
   }
 
   public enum AutoPosition {
-    LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT
+    LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT, BACK
   }
 }
