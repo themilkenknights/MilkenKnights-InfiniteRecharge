@@ -119,8 +119,8 @@ public class Drive {
     leftSlave.follow(leftMaster);
     rightSlave.follow(rightMaster);
 
-    zeroSensors();
     m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+    zeroSensors();
   }
 
   public static Drive getInstance() {
@@ -266,9 +266,10 @@ public class Drive {
   }
 
   public void zeroSensors() {
+    navX.zeroYaw();
     leftMaster.setSelectedSensorPosition(0);
     rightMaster.setSelectedSensorPosition(0);
-    navX.zeroYaw();
+    m_odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(getHeading()));
   }
 
   public double getAvgVel() {
@@ -331,14 +332,6 @@ public class Drive {
    */
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
     return new DifferentialDriveWheelSpeeds(mPeriodicIO.left_vel_meters_per_sec, mPeriodicIO.right_vel_meters_per_sec);
-  }
-
-  /**
-   * Resets the odometry to the specified pose.
-   */
-  public void resetOdometry() {
-    zeroSensors();
-    m_odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(getHeading()));
   }
 
   /**
