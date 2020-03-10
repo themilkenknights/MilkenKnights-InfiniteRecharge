@@ -255,6 +255,16 @@ public class Robot extends TimedRobot {
     }
   }
 
+  @Override
+  public void testInit() {
+    //TODO: Michael Do Things Here
+  }
+
+  @Override
+  public void testPeriodic() {
+    //TODO: Michael Do Things Here
+  }
+
   public enum AutoPosition {
     LEFT, NOTHING, RIGHT, CENTER, DRIVE_STRAIGHT, BACK
   }
