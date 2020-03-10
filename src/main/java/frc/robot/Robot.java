@@ -150,7 +150,14 @@ public class Robot extends TimedRobot {
       }
     }
     else if (mDriverJoystick.getRawButton(2)) {
-      mLimelight.autoAimShoot(true, 0);
+      double forward;
+      if (mIsInAttackMode) {
+        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
+      }
+      else {
+        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
+      }
+      mLimelight.autoAimShoot(true, forward);
       shootTimer.start();
     }
     else {
