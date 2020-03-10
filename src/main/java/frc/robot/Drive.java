@@ -109,6 +109,7 @@ public class Drive {
     return InstanceHolder.mInstance;
   }
 
+
   public void updateSensors() {
     leftSlave.follow(leftMaster);
     rightSlave.follow(rightMaster);
@@ -217,6 +218,21 @@ public class Drive {
     SmartDashboard.putNumber("Left Master Drive Stator Current", leftMaster.getStatorCurrent());
     SmartDashboard.putNumber("Right Master Drive Stator Current", leftMaster.getStatorCurrent());
   }
+
+  public void configTurnRamping(){
+    leftMaster.configOpenloopRamp(Constants.DRIVE.kTurnRampRate);
+    rightMaster.configOpenloopRamp(Constants.DRIVE.kTurnRampRate);
+    leftSlave.configOpenloopRamp(Constants.DRIVE.kTurnRampRate);
+    rightSlave.configOpenloopRamp(Constants.DRIVE.kTurnRampRate);
+  }
+  
+  public void configStraightRamping(){
+    leftMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    rightMaster.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    leftSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
+    rightSlave.configOpenloopRamp(Constants.DRIVE.kRampRate);
+  }
+
 
   public void configCoastMode() {
     leftMaster.setNeutralMode(NeutralMode.Coast);

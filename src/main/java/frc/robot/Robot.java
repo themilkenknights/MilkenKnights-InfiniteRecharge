@@ -151,6 +151,15 @@ public class Robot extends TimedRobot {
       }
       turn = .75 * -mDriverJoystick.getRawAxis(0);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
+
+      // Reconfigure motor ramping settings
+      if(Math.abs(turn) >  .1 && Math.abs(forward) < .05){
+        Drive.getInstance().configTurnRamping();
+      }
+      else{
+        Drive.getInstance().configStraightRamping();
+      }
+
       mDrive.setOutput(new DriveSignal(controlSig.getLeft(), controlSig.getRight()));
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
