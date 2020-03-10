@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.InterpolatingTreeMap;
+import frc.robot.lib.MkUtil;
 import java.util.List;
 
 public final class Constants {
@@ -162,10 +163,8 @@ public final class Constants {
     public static final double kTrackwidthMeters = 0.69;
     public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
 
-    // Example value only - as above, this must be tuned for your drive!
-    public static final double kPDriveVel = 5.88;
-    public static final double kMaxSpeedMetersPerSecond = 2.54;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 2.54;
+    public static final double kMaxSpeedMetersPerSecond = MkUtil.inchesToMeters(2.54);
+    public static final double kMaxAccelerationMetersPerSecondSquared = MkUtil.inchesToMeters(2.54);
 
     // Create config for trajectory
     public static final TrajectoryConfig config =
