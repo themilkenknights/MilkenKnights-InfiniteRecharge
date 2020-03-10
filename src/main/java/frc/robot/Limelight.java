@@ -40,15 +40,15 @@ public class Limelight {
     visionYaw = tx.getDouble(0.0);
     visionPitch = ty.getDouble(0.0);
     distance = getDistance(visionPitch);
-    hasTarget = tv.getDouble(0.0) != 0.0f; //If tv returns 0, no valid target
+    hasTarget = tv.getDouble(0.0) != 0.0; //If tv returns 0, no valid target
   }
 
   public boolean inRange() {
     return hasTarget && Math.abs(visionYaw) < VISION.kShootAngleTol;
   }
 
-  public void autoAimShoot(boolean ignoreAim) {
-    updateAutoAimOutput();
+  public void autoAimShoot(boolean ignoreAim, double forward) {
+    updateAutoAimOutput(forward);
     double curDist = getDistance();
     double RPM = VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
@@ -69,7 +69,7 @@ public class Limelight {
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
   }
 
-  public void updateAutoAimOutput() {
+  public void updateAutoAimOutput(double forward) {
     double horizontal_angle = tx.getDouble(0.0);
     double turn_output = 0;
     if (Math.abs(horizontal_angle) > VISION.kAimAngleDeadband) {
@@ -78,7 +78,7 @@ public class Limelight {
       double feedforward = ((1.0) / (VISION.kMaxAimAngularVel)) * trap.calculate(Constants.kDt).velocity;
       turn_output = MkUtil.limitAbsolute(turn_controllout_out + feedforward, Constants.VISION.kMaxAutoAimOutput);
     }
-    Drive.getInstance().setOutput(new DriveSignal(turn_output, -turn_output));
+    Drive.getInstance().setOutput(new DriveSignal(turn_output + forward, -turn_output + forward));
   }
 
   public double getDistance() {
