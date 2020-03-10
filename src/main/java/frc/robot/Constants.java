@@ -46,7 +46,7 @@ public final class Constants {
 
   public static class DRIVE {
     public static final double kRampRate = 0.75;
-    public static final double kTurnRampRate = 0.9;
+    public static final double kTurnRampRate = 0.5;
 
     public static final double kWheelDiameterInches = 5.9575;
     public static final double kWheelCircumference = kWheelDiameterInches * kPi;
