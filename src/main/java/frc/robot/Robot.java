@@ -39,6 +39,7 @@ public class Robot extends TimedRobot {
   private double mManualHoodPos = -0.1;
   private double mManualShooterSpeed = 2600;
   private boolean mIsInAttackMode;
+  private boolean mIsInDriverAssistMode;
   private Timer brakeTimer = new Timer();
   private Timer shootTimer = new Timer();
 
@@ -138,8 +139,8 @@ public class Robot extends TimedRobot {
       forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
     }
 
-    if (mDriverJoystick.getRawButton(1) || mDriverJoystick.getRawButton(2)) {
-      mLimelight.autoAimShoot(mDriverJoystick.getRawButton(2), forward);
+    if (mDriverJoystick.getRawButton(1)) {
+      mLimelight.autoAimShoot();
       shootTimer.start();
       if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
@@ -151,12 +152,21 @@ public class Robot extends TimedRobot {
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
 
       if (Math.abs(turn) > .1 && Math.abs(forward) < .05) { //Configure Open Loop Ramp Rate Dynamically Based On Joystick Input
-        Drive.getInstance().configTurnRamping();
+        mDrive.configTurnRamping();
       } else {
-        Drive.getInstance().configStraightRamping();
+        mDrive.configStraightRamping();
       }
 
-      mDrive.setOutput(new DriveSignal(controlSig.getLeft(), controlSig.getRight()));
+      if (mDriverJoystick.getRawButtonPressed(2)) { //Toggle In and Out of Driver Vision Assist
+        mIsInDriverAssistMode = !mIsInDriverAssistMode;
+      }
+
+      double turn_mod = 0;
+      if (mIsInDriverAssistMode) {
+        turn_mod = mLimelight.updateAutoAimOutput();
+      }
+
+      mDrive.setOutput(new DriveSignal(controlSig.getLeft() + turn_mod, controlSig.getRight() - turn_mod));
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
         mIsInAttackMode = true;
@@ -187,17 +197,19 @@ public class Robot extends TimedRobot {
       if (mOperatorJoystick.getRawButton(1)) {
         mShooter.setHoodPos(MkUtil.limit(mManualHoodPos, -3.25, 0));
         mShooter.setShooterRPM(mManualShooterSpeed);
-        shootTimer.start();
         mShooter.setShootingMode(Shooter.ShootingMode.MANUAL_RPM);
+        shootTimer.start();
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.spinUp)) {
+        mLimelight.autoShoot(Constants.VISION.kShootDriverAssistTol);
+        shootTimer.start();
+      } else if (mIsInDriverAssistMode) {
+        mShooter.setShooterRPM(2000);
+        mShooter.setShootingMode(Shooter.ShootingMode.DRIVER_ASSIST_AIM);
+        shootTimer.start();
       } else if (shootTimer.hasElapsed(0.25)) {
         mShooter.setHoodPos(0);
         mShooter.setShooterOutput(0);
-      }
-
-      if (mOperatorJoystick.getRawButton(Constants.INPUT.spinUp)) {
-        mShooter.setShooterRPM(2500);
-      } else {
-        mShooter.setShooterRPM(0);
+        mShooter.setShootingMode(Shooter.ShootingMode.NOTHING);
       }
 
       if (mOperatorJoystick.getRawButton(4)) {
