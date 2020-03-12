@@ -131,42 +131,26 @@ public class Robot extends TimedRobot {
   }
 
   public void input() {
-    if (mDriverJoystick.getRawButton(1)) {
-      double forward;
-      if (mIsInAttackMode) {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
-      } else {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
-      }
+    double forward;
+    if (mIsInAttackMode) {
+      forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
+    } else {
+      forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
+    }
 
-      mLimelight.autoAimShoot(false, forward);
+    if (mDriverJoystick.getRawButton(1) || mDriverJoystick.getRawButton(2)) {
+      mLimelight.autoAimShoot(mDriverJoystick.getRawButton(2), forward);
       shootTimer.start();
       if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
       } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
       }
-    } else if (mDriverJoystick.getRawButton(2)) {
-      double forward;
-      if (mIsInAttackMode) {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
-      } else {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
-      }
-      mLimelight.autoAimShoot(true, forward);
-      shootTimer.start();
     } else {
-      double forward, turn;
-      if (mIsInAttackMode) {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
-      } else {
-        forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
-      }
-      turn = .75 * -mDriverJoystick.getRawAxis(0);
+      double turn = .75 * -mDriverJoystick.getRawAxis(0);
       DriveSignal controlSig = MkUtil.cheesyDrive(forward, turn, true);
 
-      // Reconfigure motor ramping settings
-      if (Math.abs(turn) > .1 && Math.abs(forward) < .05) {
+      if (Math.abs(turn) > .1 && Math.abs(forward) < .05) { //Configure Open Loop Ramp Rate Dynamically Based On Joystick Input
         Drive.getInstance().configTurnRamping();
       } else {
         Drive.getInstance().configStraightRamping();
@@ -196,7 +180,7 @@ public class Robot extends TimedRobot {
 
       if (mIsInAttackMode) {
         attackMode();
-      } else if (!mIsInAttackMode) {
+      } else {
         defenseMode();
       }
 
