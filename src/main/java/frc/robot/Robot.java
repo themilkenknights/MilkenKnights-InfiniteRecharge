@@ -85,23 +85,23 @@ public class Robot extends TimedRobot {
     mDrive.zeroSensors();
     mDrive.configBrakeMode();
     switch (positionChooser.getSelected()) {
-    case LEFT:
-      m_autonomousCommand = new LeftTrenchAuto();
-      break;
-    case CENTER:
-      m_autonomousCommand = new CenterAuto();
-      break;
-    case RIGHT:
-      m_autonomousCommand = new RightAuto();
-      break;
-    case DRIVE_STRAIGHT:
-      m_autonomousCommand = new DriveStraight(60);
-      break;
-    case BACK:
-      m_autonomousCommand = new BackAuto();
-    case NOTHING:
-      // TODO: This may break things. Test this.
-      break;
+      case LEFT:
+        m_autonomousCommand = new LeftTrenchAuto();
+        break;
+      case CENTER:
+        m_autonomousCommand = new CenterAuto();
+        break;
+      case RIGHT:
+        m_autonomousCommand = new RightAuto();
+        break;
+      case DRIVE_STRAIGHT:
+        m_autonomousCommand = new DriveStraight(60);
+        break;
+      case BACK:
+        m_autonomousCommand = new BackAuto();
+      case NOTHING:
+        // TODO: This may break things. Test this.
+        break;
     }
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -135,8 +135,7 @@ public class Robot extends TimedRobot {
       double forward;
       if (mIsInAttackMode) {
         forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
-      }
-      else {
+      } else {
         forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
       }
 
@@ -144,28 +143,23 @@ public class Robot extends TimedRobot {
       shootTimer.start();
       if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
-      }
-      else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
       }
-    }
-    else if (mDriverJoystick.getRawButton(2)) {
+    } else if (mDriverJoystick.getRawButton(2)) {
       double forward;
       if (mIsInAttackMode) {
         forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
-      }
-      else {
+      } else {
         forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
       }
       mLimelight.autoAimShoot(true, forward);
       shootTimer.start();
-    }
-    else {
+    } else {
       double forward, turn;
       if (mIsInAttackMode) {
         forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip()) / 2;
-      }
-      else {
+      } else {
         forward = (-mDriverJoystick.getRawAxis(2) + mDriverJoystick.getRawAxis(3) + mDrive.antiTip());
       }
       turn = .75 * -mDriverJoystick.getRawAxis(0);
@@ -174,8 +168,7 @@ public class Robot extends TimedRobot {
       // Reconfigure motor ramping settings
       if (Math.abs(turn) > .1 && Math.abs(forward) < .05) {
         Drive.getInstance().configTurnRamping();
-      }
-      else {
+      } else {
         Drive.getInstance().configStraightRamping();
       }
 
@@ -183,31 +176,27 @@ public class Robot extends TimedRobot {
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.attackMode)) {
         mIsInAttackMode = true;
-      }
-      else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.defenseMode)) {
         mIsInAttackMode = false;
       }
 
       if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOn)) {
         mClimber.setClimbState(ClimbState.CLIMB);
-      }
-      else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
+      } else if (mOperatorJoystick.getRawButtonPressed(Constants.INPUT.climbOff)) {
         mClimber.setClimbState(ClimbState.RETRACT);
       }
 
       if (mOperatorJoystick.getButtonCount() > 0) {
         if (mOperatorJoystick.getPOV() == 0) {
           mManualShooterSpeed += 1;
-        }
-        else if (mOperatorJoystick.getPOV() == 180) {
+        } else if (mOperatorJoystick.getPOV() == 180) {
           mManualShooterSpeed -= 1;
         }
       }
 
       if (mIsInAttackMode) {
         attackMode();
-      }
-      else if (!mIsInAttackMode) {
+      } else if (!mIsInAttackMode) {
         defenseMode();
       }
 
@@ -216,33 +205,28 @@ public class Robot extends TimedRobot {
         mShooter.setShooterRPM(mManualShooterSpeed);
         shootTimer.start();
         mShooter.setShootingMode(Shooter.ShootingMode.MANUAL_RPM);
-      }
-      else if (shootTimer.hasElapsed(0.25)) {
+      } else if (shootTimer.hasElapsed(0.25)) {
         mShooter.setHoodPos(0);
         mShooter.setShooterOutput(0);
       }
 
-      if(mOperatorJoystick.getRawButton(Constants.INPUT.spinUp)){
+      if (mOperatorJoystick.getRawButton(Constants.INPUT.spinUp)) {
         mShooter.setShooterRPM(2500);
-      }
-      else{
+      } else {
         mShooter.setShooterRPM(0);
       }
 
       if (mOperatorJoystick.getRawButton(4)) {
         mElevatorStopper.setStopper(ElevatorStopper.StopperState.GO);
-      }
-      else {
+      } else {
         mElevatorStopper.setStopper(ElevatorStopper.StopperState.STOP);
       }
 
       if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorUp)) {
         mElevator.setElevatorOutput(.420);
-      }
-      else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
+      } else if (mOperatorJoystick.getRawButton(Constants.INPUT.elevatorDown)) {
         mElevator.setElevatorOutput(-.420);
-      }
-      else if (!mIsInAttackMode) {
+      } else if (!mIsInAttackMode) {
         mElevator.setElevatorOutput(0);
       }
 
