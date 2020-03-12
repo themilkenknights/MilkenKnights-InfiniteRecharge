@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.Limelight;
 import frc.robot.Shooter;
 
@@ -18,7 +19,7 @@ public class LimelightShoot extends CommandBase {
 
   @Override
   public void execute() {
-    Limelight.getInstance().autoAimShoot(false);
+    Limelight.getInstance().autoAimShoot();
   }
 
   // Make this return true when this Command no longer needs to run execute()
