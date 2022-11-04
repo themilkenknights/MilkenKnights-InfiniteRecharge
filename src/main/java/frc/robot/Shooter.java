@@ -100,7 +100,7 @@ public class Shooter {
   }
 
   public enum ShootingMode {
-    NOTHING, MANUAL_RPM, AUTO_AIMIMG, AUTO_SHOOTING_AIMED, AUTO_SHOOTING_IGNORING_AIM
+    NOTHING, MANUAL_RPM, AUTO_AIMIMG, DRIVER_ASSIST_AIM, AUTO_SHOOTING
   }
 
   private static class InstanceHolder {

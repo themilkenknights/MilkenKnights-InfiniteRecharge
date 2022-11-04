@@ -93,6 +93,7 @@ public final class Constants {
 
   public static class VISION {
     public static final double kShootAngleTol = 3.50;
+    public static final double kShootDriverAssistTol = 5.0;
 
     public static final double kMaxAutoAimOutput = 0.105;
     public static final double kP_turn = 0.01205;

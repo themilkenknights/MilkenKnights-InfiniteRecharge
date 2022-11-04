@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 import frc.robot.Constants.VISION;
 import frc.robot.lib.InterpolatingDouble;
 import frc.robot.lib.MkUtil;
-import frc.robot.lib.MkUtil.DriveSignal;
 
 import static frc.robot.lib.MkUtil.limit;
 
@@ -43,12 +42,17 @@ public class Limelight {
     hasTarget = tv.getDouble(0.0) != 0.0; //If tv returns 0, no valid target
   }
 
-  public boolean inRange() {
-    return hasTarget && Math.abs(visionYaw) < VISION.kShootAngleTol;
+  public boolean inRange(double tol) {
+    return hasTarget && Math.abs(visionYaw) < tol;
   }
 
-  public void autoAimShoot(boolean ignoreAim, double forward) {
-    updateAutoAimOutput(forward);
+  public void autoAimShoot() {
+    double turn_out = updateAutoAimOutput();
+    Drive.getInstance().setOutput(new MkUtil.DriveSignal(turn_out, -turn_out));
+    autoShoot(VISION.kShootAngleTol);
+  }
+
+  public void autoShoot(double tol) {
     double curDist = getDistance();
     double RPM = VISION.kRPMMap.getInterpolated(new InterpolatingDouble(curDist)).value;
     double hoodDist = VISION.kHoodMap.getInterpolated(new InterpolatingDouble(curDist)).value;
@@ -58,18 +62,15 @@ public class Limelight {
     double distance_mod = Constants.VISION.kElevatorDistanceConst * Limelight.getInstance().getDistance();
     double rpm_mod = VISION.kElevatorRpmConst * (RPM - Shooter.getInstance().getShooterRPM());
     Elevator.getInstance().setElevatorOutput(limit(0.60 - distance_mod, 0.2, 1.0));
-    if ((ignoreAim || inRange()) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30) {
+    if (inRange(tol) && Math.abs(Shooter.getInstance().getShooterRPM() - RPM) < 30) {
       ElevatorStopper.getInstance().setStopper(ElevatorStopper.StopperState.GO);
-      Shooter.getInstance().setShootingMode(ignoreAim ? Shooter.ShootingMode.AUTO_SHOOTING_IGNORING_AIM : Shooter.ShootingMode.AUTO_SHOOTING_AIMED);
-    } else {
-      Shooter.getInstance().setShootingMode(Shooter.ShootingMode.AUTO_AIMIMG);
+      Shooter.getInstance().setShootingMode(Shooter.ShootingMode.AUTO_SHOOTING);
     }
-
     Intake.getInstance().setIntakeRoller(0.0);
     Intake.getInstance().setIntakeState(Intake.IntakeState.STOW);
   }
 
-  public void updateAutoAimOutput(double forward) {
+  public double updateAutoAimOutput() {
     double horizontal_angle = tx.getDouble(0.0);
     double turn_output = 0;
     if (Math.abs(horizontal_angle) > VISION.kAimAngleDeadband) {
@@ -78,7 +79,7 @@ public class Limelight {
       double feedforward = ((1.0) / (VISION.kMaxAimAngularVel)) * trap.calculate(Constants.kDt).velocity;
       turn_output = MkUtil.limitAbsolute(turn_controllout_out + feedforward, Constants.VISION.kMaxAutoAimOutput);
     }
-    Drive.getInstance().setOutput(new DriveSignal(turn_output + forward, -turn_output + forward));
+    return turn_output;
   }
 
   public double getDistance() {
@@ -103,7 +104,7 @@ public class Limelight {
     SmartDashboard.putNumber("Horizontal Angle", visionYaw);
     SmartDashboard.putNumber("Vertical Angle", visionPitch);
     SmartDashboard.putNumber("Target Distance", distance);
-    SmartDashboard.putBoolean("In Range", inRange());
+    SmartDashboard.putBoolean("In Range", inRange(VISION.kShootAngleTol));
   }
 
   private static class InstanceHolder {
